@@ -1,0 +1,30 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using it.Areas.Admin.Models
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+
+@inject UserManager<UserModel> userManager;
+@{
+    Layout = "_Admin";
+}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col">
+            <a class="subapp" href="https://esign.pymepharco.com/">
+                <div class="subapp-logo">
+                    <img src="/images/esign.png">
+                </div>
+                <div class="subapp-name ellipsis" title="Chữ ký điện tử">Chữ ký điện tử</div>
+            </a>
+        </div>
+        <div class="col">
+            <a class="subapp" menu-id="undefined" href="#" code="Platform">
+                <div class="subapp-logo">
+                    <img src="/images/project.png">
+                </div>
+                <div class="subapp-name ellipsis" title="Hệ thống">Công việc</div>
+            </a>
+        </div>
+    </div>
+</div>
