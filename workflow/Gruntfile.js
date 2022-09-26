@@ -55,6 +55,7 @@ module.exports = function (grunt) {
                     'wwwroot/assets/js/waves.min.js',
                     'wwwroot/assets/js/jquery.slimscroll.min.js',
 
+                    'wwwroot/lib/deepmerge/jquery-extendext.js',
                     'wwwroot/lib/datatables/datatables.min.js',
                     'wwwroot/lib/moment/js/moment.js',
                     'wwwroot/lib/mustache/mustache.min.js',
