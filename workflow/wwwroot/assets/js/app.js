@@ -45,10 +45,6 @@
         }
     }
 
-    function initTooltipPlugin() {
-        $.fn.tooltip && $('[data-toggle="tooltip"]').tooltip()
-    }
-
 
 
     function initActiveMenu() {
@@ -211,6 +207,10 @@ function number_format(number, decimals, decPoint, thousandsSep) {
 }
 
 
+function initTooltipPlugin() {
+    $.fn.tooltip && $('[data-toggle="tooltip"]').tooltip()
+}
+
 function fillForm(form, data) {
     $("input, select, textarea", form).not("[type=file]").each(function () {
         var type = $(this).attr("type");
@@ -256,3 +256,45 @@ function fillForm(form, data) {
         }
     });
 };
+function getOffsetRect(element) {
+    let box = element.getBoundingClientRect()
+
+    let scrollTop = window.pageYOffset
+    let scrollLeft = window.pageXOffset
+
+    let top = box.top + scrollTop
+    let left = box.left + scrollLeft
+
+    return { top: Math.round(top), left: Math.round(left) }
+}
+function getMousePosition(element, event) {
+    let mouseX = event.pageX || event.clientX + document.documentElement.scrollLeft
+    let mouseY = event.pageY || event.clientY + document.documentElement.scrollTop
+
+    let offset = getOffsetRect(element)
+    let x = mouseX - offset.left
+    let y = mouseY - offset.top
+
+    return {
+        x: x,
+        y: y
+    }
+}
+function rand(length) {
+    // https://stackoverflow.com/a/47496558/810360
+    //[...Array(length)].map(() => Math.random().toString(36)[2])
+
+    // https://stackoverflow.com/a/46536578/810360
+    var char;
+    var arr = [];
+    var length = length || 32;
+    var alphaNumeric = [48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122]
+    do {
+        char = ~~(Math.random() * 128);
+        if (alphaNumeric.indexOf(char) !== -1) {
+            arr.push(String.fromCharCode(char))
+        }
+    } while (arr.length < length);
+
+    return arr.join('')
+}

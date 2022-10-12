@@ -1,0 +1,61 @@
+﻿
+<template id="template_employee">
+    <multipleselect width="100%" v-model="value" :multiple="multiple">
+        <option v-for="(option,index) in options" :key="option.id" :value="option.id">
+            {{option.fullName}}({{option.email}})
+        </option>
+    </multipleselect>
+</template>
+<script>
+    var template_employee = $("#template_employee").html();
+    Vue.component('employee', {
+         template:template_employee,
+         props: {
+             default_value: [Array, String,Number],
+             multiple: {
+                 type: Boolean,
+                 default: false
+             },
+         },
+         data:function(){
+             return {
+                 options: []
+             }
+         },
+         computed:{
+             //scene(){
+             //    return store.getters.myScene;
+             //}
+             value:{
+                  get() {
+                    return this.default_value
+                  },
+                  set(value) {
+                      console.log(value);
+                    this.$emit('update', value)
+                  }
+            }
+         },
+         mounted() {
+            var that = this;
+            $.ajax({
+                url:"/admin/api/employee",
+                success:function(data){
+                    that.options = data;
+                }
+            })
+         },
+         beforeDestroy(){
+         },
+         methods:{
+
+         },
+         watch:{
+             value:{
+                handler(newValue, oldValue) {
+                    console.log(newValue);
+                }
+             }
+         }
+     })
+</script>

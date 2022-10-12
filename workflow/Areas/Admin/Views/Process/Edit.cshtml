@@ -1,48 +1,301 @@
-﻿@{
+﻿@using workflow
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@addTagHelper *, workflow
+@{
     ViewData["Title"] = "Edit";
     Layout = "~/Views/Shared/_Admin.cshtml";
 }
-<div class="row clearfix">
-    <div class="col-12">
-        <form method="POST" id="form" autocomplete="on">
-            <section class="card card-fluid">
-                <div class="card-header">
-                    <div class="d-inline-block w-100">
-                        <button type="submit" name="dangtin" class="btn btn-sm btn-primary float-right">Cập nhật</button>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="form-group row">
-                        <div class="col-lg-3 mt-2">
-                            <b class="col-form-label">Nhóm quy trình:</b>
-                            <div class="pt-1">
-                                <input class="form-control form-control-sm" type='text' name="name" required="" placeholder="" autocomplete="off" />
-                            </div>
-                        </div>
-                        <div class="col-lg-3 mt-2">
-                            <b class="col-form-label">Màu sắc:</b>
-                            <div class="pt-1">
-                                <input class="form-control form-control-sm" type='color' name="color" autocomplete="off" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </form>
-    </div>
-</div>
+<environment names="Development">
+    <!-- bản phát triển (development), bao gồm những cảnh báo hữu ích trong console -->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+</environment>
+<environment names="Staging,Production">
+    <!-- bản production, được tối ưu về dung lượng và tốc độ -->
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+</environment>
+<script src="https://unpkg.com/vuex@4.0.0/dist/vuex.global.js"></script>
 
+<!-- CDNJS :: Sortable (https://cdnjs.com/) -->
+<script src="//cdn.jsdelivr.net/npm/sortablejs@1.8.4/Sortable.min.js"></script>
+<!-- CDNJS :: Vue.Draggable (https://cdnjs.com/) -->
+<script src="//cdnjs.cloudflare.com/ajax/libs/Vue.Draggable/2.20.0/vuedraggable.umd.min.js"></script>
+
+<form id="app" autocomplete="on" class="row">
+    <div class="col-12">
+        <div class="d-inline-block w-100">
+            <span class="page-title">Tạo quy trình</span>
+            <button class="btn btn-primary btn-sm float-right" type="submit" v-on:click="save_data($event)"><span class="px-4">Lưu</span></button>
+        </div>
+    </div>
+    <div class="col-12 pt-4">
+        <div class="row">
+            <div class="col-md-3">
+                <section class="card card-fluid">
+                    <div class="card-body">
+                        <div class="form-group row">
+                            <div class="col-lg-12 mt-2">
+                                <b class="col-form-label">Tên quy trình:<span class="text-danger">*</span></b>
+                                <div class="pt-1">
+                                    <input class="form-control form-control-sm" type='text' name="name" required="" v-model="item.name" />
+                                </div>
+                            </div>
+                            <div class="col-lg-12 mt-2">
+                                <b class="col-form-label">Nhóm quy trình:<span class="text-danger">*</span></b>
+                                <div class="pt-1">
+                                    <group></group>
+                                </div>
+                            </div>
+                            <step v-on:select="selectblock"></step>
+
+                            <div class="col-lg-12 mt-2">
+                                <b class="col-form-label">Ghi chú:</b>
+                                <div class="pt-1">
+                                    <textarea id="description" class="form-control form-control-sm" v-model="item.description"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            <div class="col-md-9">
+                <div class="" id="detail" v-if="selectedBlock != null">
+                    <detail :block="selectedBlock"></detail>
+                </div>
+            </div>
+            <div class="col-lg-12 mt-2">
+                <flowchart v-on:select="selectblock"></flowchart>
+            </div>
+        </div>
+    </div>
+
+</form>
 
 @section Scripts {
     @{
     await Html.RenderPartialAsync("_ValidationScriptsPartial");
 }
-<script type="text/javascript">
-    var data = @Html.Raw(Json.Serialize(Model));
-    $(document).ready(function(){
+<link rel="stylesheet" href="/lib/vue-multiselect/multiple-select.min.css">
+<script src="https://unpkg.com/multiple-select@1.5.2/dist/multiple-select.min.js"></script>
+<script src="https://unpkg.com/multiple-select@1.5.2/dist/multiple-select-vue.min.js"></script>
+<script>
+    Vue.component('multipleselect', MultipleSelect)
+    var blocks = [];
+    var links = [];
+    var EventBus = new Vue()
+    var store = new Vuex.Store({
+      state: {
+        scene: {
+            blocks: blocks,
+            links: links,
+        },
+        fields:[]
+      },
+      getters:{
+          myScene(state){
+              return state.scene;
+          }
+      },
+      actions:{
+        active_step: ({ commit,state  },index) =>{
+            var scene = state.scene;
+            scene.blocks.forEach(function(item){
+                item.selected = false;
+            })
+            scene.blocks[index].selected = true
+            commit("SET_SCENE",scene);
+        },
+        remove_field:({commit,state,getters},id) =>{
+            var fields = state.fields
+            var index = fields.findIndex(function(item){
+                return item.id == id;
+            });
+            if(index != -1){
+                fields.splice(index, 1);
+            }
+            commit("SET_FIELDS",fields);
+        },
+        save_field:({commit,state,getters},object) =>{
+            var field = object.field;
+            var fields = $.extendext(true,'replace',{}, state.fields);
+            var index = fields.findIndex(function(item){
+                return item.id == field.id;
+            });
+            if(index == -1){
+                fields.push(field);
+            }else{
+                fields.splice(index, 1, field);
+            }
+            commit("SET_FIELDS",fields);
+        },
+        save_fields:({commit,state,getters},object) =>{
+            var block_id = object.block_id;
+            var fields = object.fields;
+            var other_fields = state.fields.filter(function(item){
+                return item.process_block_id != block_id;
+            });
+            var new_fields = [...other_fields, ...fields];
+            commit("SET_FIELDS",new_fields);
+        },
+      },
+      mutations: {
+        SET_SCENE:(state,scene) =>{
+            state.scene = scene;
+        },
+        SET_FIELDS:(state,fields) =>{
+            state.fields = fields;
+        }
+      }
+    });
+</script>
+@await Html.PartialAsync("~/Views/Shared/Components/_Employee.cshtml")
+@await Html.PartialAsync("~/Areas/Admin/Views/Process/Share/_Step.cshtml")
+@await Html.PartialAsync("~/Areas/Admin/Views/Process/Share/_Detail.cshtml")
+@await Html.PartialAsync("~/Areas/Admin/Views/Process/Share/_Block.cshtml")
+@await Html.PartialAsync("~/Areas/Admin/Views/Process/Share/_Link.cshtml")
+@await Html.PartialAsync("~/Areas/Admin/Views/Process/Share/_Blockcontainer.cshtml")
+@await Html.PartialAsync("~/Areas/Admin/Views/Process/Share/_Flowchart.cshtml")
+<script>
+    var id = '@ViewBag.id';
+    var app = new Vue({
+        el: '#app',
+        //store:store,
+        data: {
+            item: {},
+            selectedBlock: null
+        },
+        computed: {
+            scene() {
+                return store.state.scene;
+            }
+        },
+        mounted() {
+            var that = this;
+            $.ajax({
+                url:"/admin/process/get",
+                data:{id:id},
+                success:function(data){
+                    that.item = data;
+                    var scene = store.state.scene;
+                    var fields = data.fields.map(function(item){
+                        delete item.block;
+                        return item;
+                    });
+                    var blocks = data.blocks.map(function(item){
+                        delete item.fields;
+                        return item;
+                    });
+                    blocks.sort(function(a, b){
+                        if(a.stt > b.stt)
+                            return 1;
+                        else
+                            return -1;
+                    });
+                    fields.sort(function(a, b){
+                        if(a.stt > b.stt)
+                            return 1;
+                        else
+                            return -1;
+                    });
+                    //var fields = $.extendext(true,'replace',default1, fields);
+                    scene.blocks = blocks;
+                    scene.links = data.links;
+                    store.commit("SET_SCENE",scene);
+                    store.commit("SET_FIELDS",fields);
+                    scene.blocks[0].selected = true;
+                    that.selectedBlock = scene.blocks[0];
+                }
+            })
 
-        fillForm($("#form"),data);
+
+        },
+        deactivated(){
+            //$(".tooltip").remove();
+        },
+        methods: {
+            selectblock (block) {
+                this.selectedBlock = block;
+            },
+            initTooltipPlugin:function(){
+                 $.fn.tooltip && $('[data-toggle="tooltip"]').tooltip()
+            },
+            max_index_in_group:function(group){
+                return this.list.filter(function (item) {
+                    return item.group == group;
+                });
+            },
+            add_step_group:function(group){
+                var gr = this.get_group(group);
+                if(gr.length > 0){
+                    var item = gr[gr.length - 1];
+                    var index = this.get_index(item);
+                    var id = "add_" + Number.random(1e12);
+                    app.list.splice(index + 1, 0,  { id: id, name: "","is_approve": false, });
+                }
+            },
+            remove_step_group:function(group){
+                var gr = this.get_group(group);
+                for(var item of gr){
+                    var index = this.get_index(item);
+                    this.list.splice(index, 1);
+                }
+            },
+            add_step: function (index) {
+                var id = "add_" + Number.random(1e12);
+                var item = $.extendext(true,'replace',{}, app.list[index], { id: id, name: "" });
+                app.list.splice(index + 1, 0, item);
+            },
+            remove_step: function (index) {
+                app.list.splice(index, 1);
+            },
+            active_step: function (item, index) {
+                app.active = index;
+                app.step = item;
+            },
+            get_group: function (group) {
+                return this.list.filter(function (item) {
+                    return item.group == group;
+                });
+            },
+            get_index:function(item){
+                return this.list.findIndex(object => {
+                    return object === item;
+                });
+            },
+            count_item_group: function (group) {
+                return this.list.filter(function (item) {
+                    return item.group == group;
+                }).length;
+            },
+            save_data:function(e){
+                e.preventDefault();
+                if($("#app").valid()){
+                    var item = app._data.item;
+                    var scene = store.state.scene;
+                    var fields = store.state.fields;
+                    item = $.extendext(true,'replace',{}, item, scene);
+                    item.fields = fields;
+                    console.log(item);
+                    $.ajax({
+                        url:"/admin/process/edit",
+                        type:"POST",
+                        data:item,
+                        success(data){
+                            location.reload();
+                        }
+                    });
+                }
+
+            }
+        }
     })
+</script>
+<script>
 
+    $(document).ready(function(){
+        $(document).on('click', '.dropdown-menu', function (e) {
+            e.stopPropagation();
+        });
+
+    })
 </script>
 }

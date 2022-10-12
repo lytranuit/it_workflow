@@ -5,6 +5,21 @@
     ViewData["Title"] = "Create";
     Layout = "~/Views/Shared/_Admin.cshtml";
 }
+<environment names="Development">
+    <!-- bản phát triển (development), bao gồm những cảnh báo hữu ích trong console -->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+</environment>
+<environment names="Staging,Production">
+    <!-- bản production, được tối ưu về dung lượng và tốc độ -->
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+</environment>
+<script src="https://unpkg.com/vuex@4.0.0/dist/vuex.global.js"></script>
+
+<!-- CDNJS :: Sortable (https://cdnjs.com/) -->
+<script src="//cdn.jsdelivr.net/npm/sortablejs@1.8.4/Sortable.min.js"></script>
+<!-- CDNJS :: Vue.Draggable (https://cdnjs.com/) -->
+<script src="//cdnjs.cloudflare.com/ajax/libs/Vue.Draggable/2.20.0/vuedraggable.umd.min.js"></script>
+
 <form id="app" autocomplete="on" class="row">
     <div class="col-12">
         <div class="d-inline-block w-100">
@@ -21,7 +36,7 @@
                             <div class="col-lg-12 mt-2">
                                 <b class="col-form-label">Tên quy trình:<span class="text-danger">*</span></b>
                                 <div class="pt-1">
-                                    <input class="form-control form-control-sm" type='text' name="name" required="" v-model="name" />
+                                    <input class="form-control form-control-sm" type='text' name="name" required="" v-model="item.name" />
                                 </div>
                             </div>
                             <div class="col-lg-12 mt-2">
@@ -30,1695 +45,197 @@
                                     <group></group>
                                 </div>
                             </div>
-                            <div class="col-lg-12 mt-2 step-container">
-                                <b class="col-form-label">Các bước thực hiện:<span class="text-danger">*</span></b>
-                                <div class="pt-1">
-                                    <div class="list-group-step">
-                                        <div class="m-b-10 m-l-10 connect-step">
-                                            <div class="list-group-step-item" id="list">
-                                                <template v-for="(item,index) in list">
-                                                    <step :item="item" :stt="get_index(item)" :index="index" :active="active" :count="list.length" v-if="!item.group"></step>
-                                                    <div class="list-parallel-step-item" v-else-if="item.group == item.id">
-                                                        <template v-for="(item1,index1) in get_group(item.group)">
-                                                            <step :item="item1" :stt="get_index(item1)" :index="index1" :active="active" :group="item.group" :count="count_item_group(item.group)"></step>
-                                                        </template>
-                                                        <div class="flex items-center icon-add-step">
-                                                            <div class="container-icon">
-                                                                <div class="tooltip-container">
-                                                                    <div class="con-ms-tooltip remove_step" data-toggle="tooltip" data-placement="top" data-original-title="Xóa bước" v-on:click="remove_step_group(item.group)">
-                                                                        <i class="fas fa-minus-circle"></i>
-                                                                    </div>
-                                                                </div><div class="tooltip-container">
-                                                                    <div class="con-ms-tooltip add_step" data-toggle="tooltip" data-placement="top" data-original-title="Thêm bước" v-on:click="add_step_group(item.group)">
-                                                                        <i class="fas fa-plus-circle"></i>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </template>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <step v-on:select="selectblock"></step>
+
                             <div class="col-lg-12 mt-2">
                                 <b class="col-form-label">Ghi chú:</b>
                                 <div class="pt-1">
-                                    <textarea id="description" class="form-control form-control-sm" v-model="description"></textarea>
+                                    <textarea id="description" class="form-control form-control-sm" v-model="item.description"></textarea>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </section>
             </div>
-            <div class="col-md-9" id="detail">
-                <detail :item="step" :index="active"></detail>
+            <div class="col-md-9">
+                <div class="" id="detail" v-if="selectedBlock != null">
+                    <detail :block="selectedBlock"></detail>
+                </div>
+            </div>
+            <div class="col-lg-12 mt-2">
+                <flowchart v-on:select="selectblock"></flowchart>
             </div>
         </div>
     </div>
-    <div class="col-12 pt-4">
-        <flowchart></flowchart>
 
-    </div>
 </form>
-<template id="template_step">
-    <div class="item-step-data" :class="{ 'active-step': active == stt,'step-not-parallel': !group }">
-        <div class="before" v-show="index == 0"></div>
-        <div class="after" v-show="index == (count - 1)"></div>
-        <div class="d-flex align-items-center justify-content-center" style="min-height: 60px; position: relative;">
-            <div class="h-100 d-flex justify-content-center connect-step-item" style="width:40px;">
-                <div class="order-process">{{stt + 1}}</div>
-            </div>
-            <div class="input-custom">
-                <div class="input">
-                    <div class="flex items-center">
-                        <div class="ms-input flex items-center w-100">
-                            <input maxlength="255" placeholder="Nhập tên bước" class="form-control step_name" required v-model="item.name" v-on:focus="active_step(item,stt)" :name="'list_name_'+stt">
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="icon-add-step">
-                <div class="container-icon">
-                    <div class="tooltip-container" v-show="!group && stt > 1">
-                        <div class="con-ms-tooltip join_step" data-toggle="tooltip" data-placement="top" data-original-title="Bước song song" v-on:click="join_step(stt)">
-                            <i class="fas fa-reply"></i>
-                        </div>
-                    </div>
-                    <div class="tooltip-container" v-show="index != 0">
-                        <div class="con-ms-tooltip remove_step" data-toggle="tooltip" data-placement="top" data-original-title="Xóa bước" v-on:click="remove_step(stt)">
-                            <i class="fas fa-minus-circle"></i>
-                        </div>
-                    </div>
-                    <div class="tooltip-container">
-                        <div class="con-ms-tooltip add_step" data-toggle="tooltip" data-placement="top" data-original-title="Thêm bước" v-on:click="add_step(stt)">
-                            <i class="fas fa-plus-circle"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</template>
 
-<template id="template_detail">
-    <div class="row popup-setting-process-form">
-        <div class="col">
-            <section class="card card-fluid">
-                <div class="card-header">
-                    <div class="header-top">
-                        <div class="current-step">{{item.name}}</div><!---->
-                        <div class="create-by flex-m" v-show="index == 0"><span>ID:&nbsp;</span><div class="line-hozi"></div><span>Người tạo:&nbsp;</span><div class="line-hozi"></div><span>Ngày tạo:&nbsp;</span></div>
-                        <div class="py-2 flex-m" v-show="index != 0">
-                            <div class="dropdown">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                                    <i class="fas fa-user-circle" style="font-size:14px;"></i> Người thực hiện
-                                </a>
-                                <div class="dropdown-menu" style="width:400px">
-                                    <div class="p-3">
-                                        <div class="my-2">
-                                            <b>Người thực hiện:</b>
-                                            <select class="form-control" v-model="item.type_performer">
-                                                <option value="1">Người thực hiện bước trước</option>
-                                                <option value="2">Người thực hiện bước trước tự chọn</option>
-                                                <option value="3">Bộ phận</option>
-                                                <option value="4">Người dùng</option>
-                                            </select>
-                                        </div>
-                                        <div class="my-2" v-if="item.type_performer == 4">
-                                            <b>Người dùng:</b>
-                                            <select class="form-control" v-model="item.user_perfomer_id">
-                                                <option>Người thực hiện bước trước</option>
-                                                <option>Người thực hiện bước trước tự chọn</option>
-                                                <option>Bộ phận</option>
-                                                <option>Người dùng</option>
-                                            </select>
-                                        </div>
-                                        <div class="my-2" v-if="item.type_performer == 3">
-                                            <b>Bộ phận:</b>
-                                            <select class="form-control" v-model="item.department_perfomer_id">
-                                                <option>Người thực hiện bước trước</option>
-                                                <option>Người thực hiện bước trước tự chọn</option>
-                                                <option>Bộ phận</option>
-                                                <option>Người dùng</option>
-                                            </select>
-                                        </div>
-                                        <div class="my-2">
-                                            <b>
-                                                Hướng dẫn thực hiện:
-                                            </b>
-                                            <textarea class="form-control"></textarea>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="line-hozi"></div>
-                            <div class="dropdown">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="far fa-calendar-alt" style="font-size:14px;"></i> Thời hạn</a>
-                                <div class="dropdown-menu" style="width:400px">
-                                    <div class="p-3">
-                                        <div class="flex-m">
-                                            <div class="mx-2">
-                                                <b>Ngày</b>
-                                                <input class="form-control" v-model="item.days" />
-                                            </div>
-                                            <div class="mx-2">
-                                                <b>Giờ</b>
-                                                <input class="form-control" v-model="item.hours" />
-                                            </div>
-                                            <div class="mx-2">
-                                                <b>Phút</b>
-                                                <input class="form-control" v-model="item.minutes" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div style="margin-left: auto;">
-                                <div class="custom-control custom-switch switch-primary d-inline-block">
-                                    <input type="checkbox" class="custom-control-input" id="is_approve" v-model="item.is_approve">
-                                    <label class="custom-control-label" for="is_approve">Bước duyệt</label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-body" style="min-height:70vh">
-                    <div class="form-group row">
-                    </div>
-                </div>
-            </section>
-        </div>
-        <div class="col-md-3 setting-layout-sidebar-content" v-show="!item.is_approve">
-            <section class="card card-fluid">
-                <div class="card-body" style="min-height:80vh">
-                    <div class="">
-                        <div class="font-15 font-weight-bold my-2 ml-3"> Biểu mẫu nhập liệu </div>
-                        <div class="control-items flex">
-                            <div class="sortable-cards dx-sortable">
-                                <div class="item-control">
-                                    <i class="fas fa-window-minimize"></i>
-                                    <div class="name-control"> Một dòng </div>
-                                </div>
-                                <div class="item-control">
-                                    <i class="fas fa-grip-lines"></i>
-                                    <div class="name-control"> Nhiều dòng </div>
-                                </div><div class="item-control">
-                                    <i class="far fa-check-square"></i>
-                                    <div class="name-control"> Chọn giá trị </div>
-                                </div>
-                                <div class="item-control">
-                                    <i class="fas fa-clock"></i>
-                                    <div class="name-control"> Thời gian </div>
-                                </div>
-                                <div class="item-control">
-                                    <i class="fas fa-star"></i>
-                                    <div class="name-control"> Số </div>
-                                </div>
-                                <div class="item-control">
-                                    <i class="fas fa-table"></i>
-                                    <div class="name-control"> Bảng </div>
-                                </div>
-                                <div class="item-control">
-                                    <i class="fas fa-envelope"></i>
-                                    <div class="name-control"> Email </div>
-                                </div>
-                                <div class="item-control">
-                                    <i class="far fa-user-circle"></i>
-                                    <div class="name-control"> Nhân viên </div>
-                                </div>
-                                <div class="item-control">
-                                    <i class="fas fa-network-wired"></i>
-                                    <div class="name-control"> Bộ phận </div>
-                                </div>
-                                <div class="item-control">
-                                    <i class="fas fa-upload"></i>
-                                    <div class="name-control"> Tải tệp </div>
-                                </div>
-                                <div class="item-control">
-                                    <i class="fas fa-tasks"></i>
-                                    <div class="name-control"> Công việc con </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </div>
-    </div>
-</template>
-<template id="template_flowchart">
-    <div style="position:relative;">
-        <vue-block-container v-on:contextmenu.native="showcontextmenu"
-                             v-on:click.native="closecontextmenu"
-                             ref="container"
-                             :blockscontent="blocks"
-                             :scene.sync="scene"
-                             v-on:blockselect="selectblock"
-                             v-on:blockdeselect="deselectblock"
-                             class=""></vue-block-container>
-
-        <ul id="contextmenu" ref="contextmenu" tabindex="-1" v-show="contextmenu.isShow"
-            v-on:blur="closecontextmenu"
-            :style="{top: contextmenu.top + 'px', left: contextmenu.left + 'px'}">
-            <template v-for="type in selectblocksType">
-                <li class="label">{{type}}</li>
-                <li v-for="block in filteredBlocks(type)"
-                    v-on:click="addBlockcontextmenu(block.name)">
-                    {{block.title || block.name}}
-                </li>
-            </template>
-        </ul>
-    </div>
-</template>
-<template id="vue_block_container">
-    <div class="vue-container border">
-        <vue-link :lines="lines"></vue-link>
-
-        <vue-block v-for="block in blocks" :key="block.id" v-bind.sync="block"
-                   :options="optionsforchild"
-                   v-on:update="updateScene"
-                   v-on:linkingstart="linkingstart(block, $event)"
-                   v-on:linkingstop="linkingstop(block, $event)"
-                   v-on:linkingbreak="linkingbreak(block, $event)"
-                   v-on:select="blockselect(block)"
-                   v-on:delete="blockdelete(block)">
-        </vue-block>
-    </div>
-</template>
-<template id="vue_block">
-    <div class="vue-block" :class="{selected: selected}" :style="style">
-        <header :style="headerStyle">
-            {{title}}
-            <a class="delete" v-on:click="deleteBlock">x</a>
-        </header>
-        <div class="inputs">
-            <div class="input" v-for="(slot, index) in inputs">
-                <div class="circle inputSlot" :class="{active: slot.active}"
-                     v-on:mouseup="slotMouseUp($event, index)"
-                     v-on:mousedown="slotBreak($event, index)"></div>
-                {{slot.label}}
-            </div>
-        </div>
-        <div class="outputs">
-            <div class="output" v-for="(slot, index) in outputs">
-                <div class="circle" :class="{active: slot.active}"
-                     v-on:mousedown="slotMouseDown($event, index)"></div>
-                {{slot.label}}
-            </div>
-        </div>
-    </div>
-</template>
-<template id="vue_link">
-    <svg width="100%" height="100%">
-        <g v-for="p in renderedPathes">
-            <path v-if="outline" :d="p.data" :style="p.outlineStyle"></path>
-            <path :d="p.data" :style="p.style"></path>
-        </g>
-        <g>
-            <path v-for="a in renderedArrows"
-                  d="M -1 -1 L 0 1 L 1 -1 z"
-                  :style="a.style"
-                  :transform="a.transform"></path>
-        </g>
-    </svg>
-</template>
 @section Scripts {
     @{
     await Html.RenderPartialAsync("_ValidationScriptsPartial");
 }
-<environment names="Development">
-    <!-- bản phát triển (development), bao gồm những cảnh báo hữu ích trong console -->
-    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-</environment>
-<environment names="Staging,Production">
-    <!-- bản production, được tối ưu về dung lượng và tốc độ -->
-    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
-</environment>
-<script src="https://unpkg.com/vuex@4.0.0/dist/vuex.global.js"></script>
-
-
 <script>
-    function getOffsetRect (element) {
-        let box = element.getBoundingClientRect()
-
-        let scrollTop = window.pageYOffset
-        let scrollLeft = window.pageXOffset
-
-        let top = box.top + scrollTop
-        let left = box.left + scrollLeft
-
-        return {top: Math.round(top), left: Math.round(left)}
-    }
-    function getMousePosition (element, event) {
-       let mouseX = event.pageX || event.clientX + document.documentElement.scrollLeft
-       let mouseY = event.pageY || event.clientY + document.documentElement.scrollTop
-
-       let offset = getOffsetRect(element)
-       let x = mouseX - offset.left
-       let y = mouseY - offset.top
-
-       return {
-         x: x,
-         y: y
-       }
-     }
-     var template_detail = $("#template_detail").html();
-     var template_step = $("#template_step").html();
-     var template_flowchart = $("#template_flowchart").html();
-     var template_vueblockscontainer = $("#vue_block_container").html();
-     var template_vue_block = $("#vue_block").html();
-     var template_vue_link = $("#vue_link").html();
-     Vue.component('detail', {
-         template:template_detail,
-         props: {
-             item: {
-                 type: Object,
-                 default: ()=>{}
-             },
-             index:""
-         },
-     })
-     Vue.component('step', {
-         template:template_step,
-         props: {
-             item: {
-                 type: Object,
-                 default: ()=>{time:{}}
-             },
-             index:0,
-             stt:0,
-             active:0,
-             group:null,
-             count:0
-         },
-         beforeCreate(){
-             //console.log(this.$options.propsData);
-             //if(!this.$options.propsData.item.time){
-             //    this.$options.propsData.item.time = {};
-             //}
-         },
-         mounted() {
-              this.initTooltipPlugin();
-         },
-         beforeDestroy(){
-             $(".tooltip").remove();
-             console.log(1)
-         },
-         methods:{
-             initTooltipPlugin:function(){
-                  $.fn.tooltip && $('[data-toggle="tooltip"]').tooltip();
-                  $(".tooltip").remove();
-             },
-             add_step: function (index) {
-                 var id = "add_" + Number.random(1e12);
-                 var group = this.group;
-                 var item = $.extendext(true,'replace',{}, app.list[index], { id: id, name: "",group:group });
-                 app.list.splice(index + 1, 0, item);
-             },
-             remove_step: function (index) {
-                 app.list.splice(index, 1);
-             },
-             active_step: function (item, index) {
-                 app.active = index;
-                 app.step = item;
-             },
-             join_step:function(index){
-                 var item_prev = app.list[index - 1];
-                 if(item_prev.group){
-                     app.list[index].group = item_prev.group;
-                 }else{
-                     app.list[index - 1].group = item_prev.id;
-                     app.list[index].group = item_prev.id;
-                 }
-             }
-         }
-     })
-     Vue.component('VueBlock', {
-         template:template_vue_block,
-         props: {
-           x: {
-             type: Number,
-             default: 0,
-             validator: function (val) {
-               return typeof val === 'number'
-             }
-           },
-           y: {
-             type: Number,
-             default: 0,
-             validator: function (val) {
-               return typeof val === 'number'
-             }
-           },
-           selected: Boolean,
-           title: {
-             type: String,
-             default: 'Title'
-           },
-           inputs: Array,
-           outputs: Array,
-
-           options: {
-             type: Object
-           }
-         },
-         created () {
-           this.mouseX = 0
-           this.mouseY = 0
-
-           this.lastMouseX = 0
-           this.lastMouseY = 0
-
-           this.linking = false
-           this.dragging = false
-         },
-         mounted () {
-           document.documentElement.addEventListener('mousemove', this.handleMove, true)
-           document.documentElement.addEventListener('mousedown', this.handleDown, true)
-           document.documentElement.addEventListener('mouseup', this.handleUp, true)
-         },
-         beforeDestroy () {
-           document.documentElement.removeEventListener('mousemove', this.handleMove, true)
-           document.documentElement.removeEventListener('mousedown', this.handleDown, true)
-           document.documentElement.removeEventListener('mouseup', this.handleUp, true)
-         },
-         data () {
-           return {
-             width: this.options.width,
-             hasDragged: false
-           }
-         },
-         methods: {
-           handleMove (e) {
-             this.mouseX = e.pageX || e.clientX + document.documentElement.scrollLeft
-             this.mouseY = e.pageY || e.clientY + document.documentElement.scrollTop
-
-             if (this.dragging && !this.linking) {
-               let diffX = this.mouseX - this.lastMouseX
-               let diffY = this.mouseY - this.lastMouseY
-
-               this.lastMouseX = this.mouseX
-               this.lastMouseY = this.mouseY
-
-               this.moveWithDiff(diffX, diffY)
-
-               this.hasDragged = true
-             }
-           },
-           handleDown (e) {
-             this.mouseX = e.pageX || e.clientX + document.documentElement.scrollLeft
-             this.mouseY = e.pageY || e.clientY + document.documentElement.scrollTop
-
-             this.lastMouseX = this.mouseX
-             this.lastMouseY = this.mouseY
-
-             const target = e.target || e.srcElement
-             if (this.$el.contains(target) && e.which === 1) {
-               this.dragging = true
-
-               this.$emit('select')
-
-               if (e.preventDefault) e.preventDefault()
-             }
-           },
-           handleUp () {
-             if (this.dragging) {
-               this.dragging = false
-
-               if (this.hasDragged) {
-                 this.save()
-                 this.hasDragged = false
-               }
-             }
-
-             if (this.linking) {
-               this.linking = false
-             }
-           },
-           // Slots
-           slotMouseDown (e, index) {
-             this.linking = true
-
-             this.$emit('linkingstart', index)
-             if (e.preventDefault) e.preventDefault()
-           },
-           slotMouseUp (e, index) {
-             this.$emit('linkingstop', index)
-             if (e.preventDefault) e.preventDefault()
-           },
-           slotBreak (e, index) {
-             this.linking = true
-
-             this.$emit('linkingbreak', index)
-             if (e.preventDefault) e.preventDefault()
-           },
-           save () {
-             this.$emit('update')
-           },
-           deleteBlock () {
-             this.$emit('delete')
-           },
-           moveWithDiff (diffX, diffY) {
-             let left = this.x + diffX / this.options.scale
-             let top = this.y + diffY / this.options.scale
-
-             this.$emit('update:x', left)
-             this.$emit('update:y', top)
-           }
-         },
-         computed: {
-           style () {
-             return {
-               top: this.options.center.y + this.y * this.options.scale + 'px',
-               left: this.options.center.x + this.x * this.options.scale + 'px',
-               width: this.width + 'px',
-               transform: 'scale(' + (this.options.scale + '') + ')',
-               transformOrigin: 'top left'
-             }
-           },
-           headerStyle () {
-             return {
-               height: this.options.titleHeight + 'px'
-             }
-           }
-         }
-     })
-     Vue.component('VueLink', {
-         template:template_vue_link,
-         props: {
-           lines: {
-             type: Array,
-             default () {
-               return []
-             }
-           },
-           outline: {
-             type: Boolean,
-             default: false
-           }
-         },
-         methods: {
-           distance (x1, y1, x2, y2) {
-             return Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1))
-           },
-           computeConnectionPoint (x1, y1, x2, y2, t) {
-             let dist = this.distance(x1, y1, x2, y2)
-             let p0 = {x: x1, y: y1}
-             let p1 = {x: x1 + dist * 0.25, y: y1}
-             let p2 = {x: x2 - dist * 0.25, y: y2}
-             let p3 = {x: x2, y: y2}
-
-             let c1 = (1 - t) * (1 - t) * (1 - t)
-             let c2 = 3 * ((1 - t) * (1 - t)) * t
-             let c3 = 3 * (1 - t) * (t * t)
-             let c4 = t * t * t
-
-             let x = c1 * p0.x + c2 * p1.x + c3 * p2.x + c4 * p3.x
-             let y = c1 * p0.y + c2 * p1.y + c3 * p2.y + c4 * p3.y
-             return {x: x, y: y}
-           }
-         },
-         computed: {
-           renderedPathes () {
-             if (!this.lines) {
-               return []
-             }
-
-             let pathes = []
-             this.lines.forEach(l => {
-               let dist = this.distance(l.x1, l.y1, l.x2, l.y2) * 0.25
-               pathes.push({
-                 data: `M ${l.x1}, ${l.y1} C ${(l.x1 + dist)}, ${l.y1}, ${(l.x2 - dist)}, ${l.y2}, ${l.x2}, ${l.y2}`,
-                 style: l.style,
-                 outlineStyle: l.outlineStyle
-               })
-             })
-
-             return pathes
-           },
-           renderedArrows () {
-             if (!this.lines) {
-               return []
-             }
-
-             let arrows = []
-             this.lines.forEach(l => {
-               // l.x1, l.y1, l.x2, l.y2
-               let pos = this.computeConnectionPoint(l.x1, l.y1, l.x2, l.y2, 0.5)
-               let pos2 = this.computeConnectionPoint(l.x1, l.y1, l.x2, l.y2, 0.51)
-
-               let angle = -Math.atan2(pos2.x - pos.x, pos2.y - pos.y)
-               let degrees = (angle >= 0 ? angle : (2 * Math.PI + angle)) * 180 / Math.PI
-
-               arrows.push({
-                 transform: `translate(${pos.x}, ${pos.y}) rotate(${degrees})`,
-                 style: {
-                   stroke: l.style.stroke,
-                   strokeWidth: l.style.strokeWidth * 2,
-                   fill: l.style.stroke
-                 }
-               })
-             })
-
-             return arrows
-           }
-         }
-     })
-
-     Vue.component('VueBlockContainer', {
-         template:template_vueblockscontainer,
-         props: {
-           blockscontent: {
-             type: Array,
-             default () {
-               return []
-             }
-           },
-           scene: {
-             type: Object,
-             default: {blocks: [], links: [], container: {}}
-           },
-           options: {
-             type: Object
-           }
-         },
-         mounted () {
-           document.documentElement.addEventListener('mousemove', this.handleMove, true)
-           document.documentElement.addEventListener('mousedown', this.handleDown, true)
-           document.documentElement.addEventListener('mouseup', this.handleUp, true)
-           //document.documentElement.addEventListener('wheel', this.handleWheel, true)
-
-           this.centerX = this.$el.clientWidth / 2
-           this.centerY = this.$el.clientHeight / 2
-
-           this.importBlocksContent()
-           this.importScene()
-         },
-         beforeDestroy () {
-           document.documentElement.removeEventListener('mousemove', this.handleMove, true)
-           document.documentElement.removeEventListener('mousedown', this.handleDown, true)
-           document.documentElement.removeEventListener('mouseup', this.handleUp, true)
-           //document.documentElement.removeEventListener('wheel', this.handleWheel, true)
-         },
-         created () {
-           this.mouseX = 0
-           this.mouseY = 0
-
-           this.lastMouseX = 0
-           this.lastMouseY = 0
-
-           this.minScale = 0.2
-           this.maxScale = 5
-
-           this.linking = false
-           this.linkstartdata = null
-
-           this.inputSlotClassName = 'inputSlot'
-
-           this.defaultScene = {
-             blocks: [],
-             links: [],
-             container: {}
-           }
-         },
-         data () {
-           return {
-             dragging: false,
-             //
-             centerX: 0,
-             centerY: 0,
-             scale: 1,
-             //
-             nodes: [],
-             blocks: [],
-             links: [],
-             //
-             tempLink: null,
-             selectedBlock: null,
-             hasDragged: false
-           }
-         },
-         computed: {
-           optionsforchild () {
-             return {
-               width: 200,
-               titleHeight: 20,
-               scale: this.scale,
-               inputSlotClassName: this.inputSlotClassName,
-               center: {
-                 x: this.centerX,
-                 y: this.centerY
-               }
-             }
-           },
-           container () {
-             return {
-               centerX: this.centerX,
-               centerY: this.centerY,
-               scale: this.scale
-             }
-           },
-           // Links calculate
-           lines () {
-             let lines = []
-
-             for (let link of this.links) {
-               let originBlock = this.blocks.find(block => {
-                 return block.id === link.originID
-               })
-
-               let targetBlock = this.blocks.find(block => {
-                 return block.id === link.targetID
-               })
-
-               if (!originBlock || !targetBlock) {
-                 //console.log('Remove invalid link', link)
-                 this.removeLink(link.id)
-                 continue
-               }
-
-               if (originBlock.id === targetBlock.id) {
-                 //console.log('Loop detected, remove link', link)
-                 this.removeLink(link.id)
-                 continue
-               }
-
-               let originLinkPos = this.getConnectionPos(originBlock, link.originSlot, false)
-               let targetLinkPos = this.getConnectionPos(targetBlock, link.targetSlot, true)
-
-               if (!originLinkPos || !targetLinkPos) {
-                 //console.log('Remove invalid link (slot not exist)', link)
-                 this.removeLink(link.id)
-                 continue
-               }
-
-               let x1 = originLinkPos.x
-               let y1 = originLinkPos.y
-
-               let x2 = targetLinkPos.x
-               let y2 = targetLinkPos.y
-
-               lines.push({
-                 x1: x1,
-                 y1: y1,
-                 x2: x2,
-                 y2: y2,
-                 style: {
-                   stroke: '#F85',
-                   strokeWidth: 4 * this.scale,
-                   fill: 'none'
-                 },
-                 outlineStyle: {
-                   stroke: '#666',
-                   strokeWidth: 6 * this.scale,
-                   strokeOpacity: 0.6,
-                   fill: 'none'
-                 }
-               })
-             }
-
-             if (this.tempLink) {
-               this.tempLink.style = {
-                 stroke: '#8f8f8f',
-                 strokeWidth: 4 * this.scale,
-                 fill: 'none'
-               }
-
-               lines.push(this.tempLink)
-             }
-
-             return lines
-           }
-         },
-         methods: {
-           // Events
-           handleMove (e) {
-             let mouse = getMousePosition(this.$el, e)
-             this.mouseX = mouse.x
-             this.mouseY = mouse.y
-
-             if (this.dragging) {
-               let diffX = this.mouseX - this.lastMouseX
-               let diffY = this.mouseY - this.lastMouseY
-
-               this.lastMouseX = this.mouseX
-               this.lastMouseY = this.mouseY
-
-               this.centerX += diffX
-               this.centerY += diffY
-
-               this.hasDragged = true
-             }
-
-             if (this.linking && this.linkstartdata) {
-               let linkStartPos = this.getConnectionPos(this.linkstartdata.block, this.linkstartdata.slotNumber, false)
-               this.tempLink = {
-                 x1: linkStartPos.x,
-                 y1: linkStartPos.y,
-                 x2: this.mouseX,
-                 y2: this.mouseY
-               }
-             }
-           },
-           handleDown (e) {
-               //console.log("down");
-             const target = e.target || e.srcElement
-             if ((target === this.$el || target.matches('svg, svg *')) && e.which === 1) {
-               this.dragging = true
-
-               let mouse = getMousePosition(this.$el, e)
-               this.mouseX = mouse.x
-               this.mouseY = mouse.y
-
-               this.lastMouseX = this.mouseX
-               this.lastMouseY = this.mouseY
-
-               this.deselectAll()
-               if (e.preventDefault) e.preventDefault()
-             }
-           },
-           handleUp (e) {
-               //console.log("up");
-             const target = e.target || e.srcElement
-
-             if (this.dragging) {
-               this.dragging = false
-
-               if (this.hasDragged) {
-                 this.updateScene()
-                 this.hasDragged = false
-               }
-             }
-
-             if (this.$el.contains(target) && (typeof target.className !== 'string' || target.className.indexOf(this.inputSlotClassName) === -1)) {
-               this.linking = false
-               this.tempLink = null
-               this.linkstartdata = null
-             }
-           },
-           handleWheel (e) {
-             const target = e.target || e.srcElement
-             if (this.$el.contains(target)) {
-               if (e.preventDefault) e.preventDefault()
-
-               let deltaScale = Math.pow(1.1, e.deltaY * -0.01)
-               this.scale *= deltaScale
-
-               if (this.scale < this.minScale) {
-                 this.scale = this.minScale
-                 return
-               } else if (this.scale > this.maxScale) {
-                 this.scale = this.maxScale
-                 return
-               }
-
-               let zoomingCenter = {
-                 x: this.mouseX,
-                 y: this.mouseY
-               }
-
-               let deltaOffsetX = (zoomingCenter.x - this.centerX) * (deltaScale - 1)
-               let deltaOffsetY = (zoomingCenter.y - this.centerY) * (deltaScale - 1)
-
-               this.centerX -= deltaOffsetX
-               this.centerY -= deltaOffsetY
-
-               this.updateScene()
-             }
-           },
-           // Processing
-           getConnectionPos (block, slotNumber, isInput) {
-             if (!block || slotNumber === -1) {
-               return undefined
-             }
-
-             let x = 0
-             let y = 0
-
-             x += block.x
-             y += block.y
-
-             y += this.optionsforchild.titleHeight
-                //console.log(block);
-             if (isInput && block.inputs.length > slotNumber) {
-             } else if (!isInput && block.outputs.length > slotNumber) {
-               x += this.optionsforchild.width
-             } else {
-               console.error('slot ' + slotNumber + ' not found, is input: ' + isInput, block)
-               return undefined
-             }
-
-             // (height / 2 + blockBorder + padding)
-             y += (16 / 2 + 1 + 2)
-             //  + (height * slotNumber)
-             y += (16 * slotNumber)
-
-             x *= this.scale
-             y *= this.scale
-
-             x += this.centerX
-             y += this.centerY
-
-             return {x: x, y: y}
-           },
-           // Linking
-           linkingstart (block, slotNumber) {
-               //console.log("linkstart");
-               //console.log(block);
-             this.linkstartdata = {block: block, slotNumber: slotNumber}
-             let linkStartPos = this.getConnectionPos(this.linkstartdata.block, this.linkstartdata.slotNumber, false)
-             this.tempLink = {
-               x1: linkStartPos.x,
-               y1: linkStartPos.y,
-               x2: this.mouseX,
-               y2: this.mouseY
-             }
-
-             this.linking = true
-           },
-           linkingstop (targetBlock, slotNumber) {
-             if (this.linkstartdata && targetBlock && slotNumber > -1) {
-               this.links = this.links.filter(value => {
-                 return !(value.targetID === targetBlock.id && value.targetSlot === slotNumber && value.originID == this.linkstartdata.block.id && value.originSlot == this.linkstartdata.slotNumber)
-               })
-               //console.log(this.links);
-               let maxID = Math.max(0, ...this.links.map(function (o) {
-                 return o.id
-               }))
-
-               // skip if looping
-               if (this.linkstartdata.block.id !== targetBlock.id) {
-                 this.links.push({
-                   id: maxID + 1,
-                   originID: this.linkstartdata.block.id,
-                   originSlot: this.linkstartdata.slotNumber,
-                   targetID: targetBlock.id,
-                   targetSlot: slotNumber
-                 })
-                 this.updateScene()
-               }
-             }
-
-             this.linking = false
-             this.tempLink = null
-             this.linkstartdata = null
-           },
-           linkingbreak (targetBlock, slotNumber) {
-             if (targetBlock && slotNumber > -1) {
-               let findLink = this.links.find(value => {
-                 return value.targetID === targetBlock.id && value.targetSlot === slotNumber
-               })
-
-               if (findLink) {
-                 let findBlock = this.blocks.find(value => {
-                   return value.id === findLink.originID
-                 })
-
-                 this.links = this.links.filter(value => {
-                   return !(value.targetID === targetBlock.id && value.targetSlot === slotNumber)
-                 })
-                 //console.log(this.blocks);
-                 //console.log("break");
-                 this.linkingstart(findBlock, findLink.originSlot)
-
-                 this.updateScene()
-               }
-             }
-           },
-           removeLink (linkID) {
-             this.links = this.links.filter(value => {
-               return !(value.id === linkID)
-             })
-           },
-           // Blocks
-           addNewBlock (nodeName, x, y) {
-             let maxID = Math.max(0, ...this.blocks.map(function (o) {
-               return o.id
-             }))
-
-             let node = this.nodes.find(n => {
-               return n.name === nodeName
-             })
-
-             if (!node) {
-               return
-             }
-             let block = this.createBlock(node, maxID + 1)
-
-             // if x or y not set, place block to center
-             if (x === undefined || y === undefined) {
-               x = (this.$el.clientWidth / 2 - this.centerX) / this.scale
-               y = (this.$el.clientHeight / 2 - this.centerY) / this.scale
-             } else {
-               x = (x - this.centerX) / this.scale
-               y = (y - this.centerY) / this.scale
-             }
-
-             block.x = x
-             block.y = y
-             this.blocks.push(block)
-
-             this.updateScene()
-           },
-           createBlock (node, id) {
-             let inputs = []
-             let outputs = []
-             let values = {}
-
-             node.fields.forEach(field => {
-               if (field.attr === 'input') {
-                 inputs.push({
-                   name: field.name,
-                   label: field.label || field.name
-                 })
-               } else if (field.attr === 'output') {
-                 outputs.push({
-                   name: field.name,
-                   label: field.label || field.name
-                 })
-               } else {
-                 if (!values[field.attr]) {
-                   values[field.attr] = {}
-                 }
-
-                 let newField = $.extendext(true,'replace',{}, field);
-
-                 delete newField['name']
-                 delete newField['attr']
-
-                 if (!values[field.attr][field.name]) {
-                   values[field.attr][field.name] = {}
-                 }
-
-                 values[field.attr][field.name] = newField
-               }
-             })
-
-             return {
-               id: id,
-               x: 0,
-               y: 0,
-               selected: false,
-               name: node.name,
-               title: node.title || node.name,
-               inputs: inputs,
-               outputs: outputs,
-               values: values
-             }
-           },
-           deselectAll (withoutID = null) {
-             this.blocks.forEach((value) => {
-               if (value.id !== withoutID && value.selected) {
-                 this.blockdeselect(value)
-               }
-             })
-           },
-           // Events
-           blockselect (block) {
-             block.selected = true
-             this.selectedBlock = block
-             this.deselectAll(block.id)
-             this.$emit('blockselect', block)
-           },
-           blockdeselect (block) {
-             block.selected = false
-
-             if (block &&
-               this.selectedBlock &&
-               this.selectedBlock.id === block.id
-             ) {
-               this.selectedBlock = null
-             }
-
-             this.$emit('blockdeselect', block)
-           },
-           blockdelete (block) {
-             if (block.selected) {
-               this.blockdeselect(block)
-             }
-             this.links.forEach(l => {
-               if (l.originID === block.id || l.targetID === block.id) {
-                 this.removeLink(l.id)
-               }
-             })
-             this.blocks = this.blocks.filter(b => {
-               return b.id !== block.id
-             })
-             this.updateScene()
-           },
-           //
-           prepareBlocks (blocks) {
-             return blocks.map(block => {
-               let node = this.nodes.find(n => {
-                 return n.name === block.name
-               })
-
-               if (!node) {
-                 return null
-               }
-
-               let newBlock = this.createBlock(node, block.id)
-
-               newBlock = $.extendext(true,'replace',newBlock, block, {
-                 arrayMerge: (d, s) => {
-                   return s.length === 0 ? d : s
-                 }
-               })
-
-               return newBlock
-             }).filter(b => {
-               return !!b
-             })
-           },
-           prepareBlocksLinking (blocks, links) {
-             if (!blocks) {
-               return []
-             }
-
-             let newBlocks = []
-
-             blocks.forEach(block => {
-               let inputs = links.filter(link => {
-                 return link.targetID === block.id
-               })
-
-               let outputs = links.filter(link => {
-                 return link.originID === block.id
-               })
-
-               block.inputs.forEach((s, index) => {
-                 // is linked
-                 block.inputs[index].active = inputs.some(i => i.targetSlot === index)
-               })
-
-               block.outputs.forEach((s, index) => {
-                 // is linked
-                 block.outputs[index].active = outputs.some(i => i.originSlot === index)
-               })
-
-               newBlocks.push(block)
-             })
-
-             return newBlocks
-           },
-           importBlocksContent () {
-             if (this.blockscontent) {
-               this.nodes = $.extendext(true,'replace',[], this.blockscontent)
-             }
-           },
-           importScene () {
-             let scene = $.extendext(true,'replace',this.defaultScene, this.scene)
-
-             let blocks = this.prepareBlocks(scene.blocks)
-             blocks = this.prepareBlocksLinking(blocks, scene.links)
-
-             // set last selected after update blocks from props
-             if (this.selectedBlock) {
-               let block = blocks.find(b => this.selectedBlock.id === b.id)
-               if (block) {
-                 block.selected = true
-               }
-             }
-
-             this.blocks = blocks
-             this.links = $.extendext(true,'replace',[], scene.links)
-
-             let container = scene.container
-             if (container.centerX) {
-               this.centerX = container.centerX
-             }
-             if (container.centerY) {
-               this.centerY = container.centerY
-             }
-             if (container.scale) {
-               this.scale = container.scale
-             }
-           },
-           exportScene () {
-             let clonedBlocks = $.extendext(true,'replace',[], this.blocks)
-             //console.log("clone" ,clonedBlocks);
-             //console.log("clone2" ,this.blocks[0].outputs);
-             let blocks = clonedBlocks.map(value => {
-               delete value['inputs']
-               delete value['outputs']
-               delete value['selected']
-
-               return value
-             })
-
-             return {
-               blocks: blocks,
-               links: this.links,
-               container: this.container
-             }
-           },
-           updateScene () {
-             this.$emit('update:scene', this.exportScene())
-           }
-         },
-         watch: {
-           blockscontent () {
-             this.importBlocksContent()
-           },
-           scene () {
-             this.importScene()
-           }
-         }
-     })
-
-     Vue.component('flowchart', {
-         template:template_flowchart,
-         data: function () {
-           return {
-             blocks: [
-               {
-                 name: 'text',
-                 title: 'Text',
-                 family: 'Animations',
-                 description: 'Show text',
-                 fields: [
-                   {
-                     name: 'text',
-                     label: 'Text',
-                     type: 'string',
-                     attr: 'property'
-                   },
-                   {
-                     name: 'delay',
-                     label: 'Delay (s)',
-                     type: 'number',
-                     attr: 'property'
-                   },
-                   {
-                     name: 'Show',
-                     type: 'event',
-                     attr: 'input'
-                   },
-                   {
-                     name: 'Hide',
-                     type: 'event',
-                     attr: 'input'
-                   },
-                   {
-                     name: 'onShow',
-                     type: 'event',
-                     attr: 'output'
-                   },
-                   {
-                     name: 'onHide',
-                     type: 'event',
-                     attr: 'output'
-                   }
-                 ]
-               },
-               {
-                 name: 'animation',
-                 title: 'Animation',
-                 family: 'Animations',
-                 description: 'Show animation',
-                 fields: [
-                   {
-                     name: 'animation',
-                     label: 'Animation',
-                     type: 'animation',
-                     attr: 'property'
-                   },
-                   {
-                     name: 'Play',
-                     type: 'event',
-                     attr: 'input'
-                   },
-                   {
-                     name: 'Stop',
-                     type: 'event',
-                     attr: 'input'
-                   },
-                   {
-                     name: 'onEnd',
-                     type: 'event',
-                     attr: 'output'
-                   }
-                 ]
-               },
-               {
-                 name: 'Chat message',
-                 family: 'Events',
-                 description: '',
-                 fields: [
-                   {
-                     name: 'message',
-                     label: 'Activation message',
-                     type: 'string',
-                     attr: 'property'
-                   },
-                   {
-                     name: 'onMessage',
-                     type: 'event',
-                     attr: 'output'
-                   }
-                 ]
-               },
-               {
-                 name: 'delay',
-                 title: 'Delay',
-                 family: 'Time',
-                 description: '',
-                 fields: [
-                   {
-                     name: 'delay',
-                     label: 'Delay (s)',
-                     type: 'number',
-                     attr: 'property',
-                     value: 1.0
-                   },
-                   {
-                     name: 'input',
-                     type: 'event',
-                     attr: 'input'
-                   },
-                   {
-                     name: 'output',
-                     type: 'event',
-                     attr: 'output'
-                   }
-                 ]
-               },
-               {
-                 name: 'shortcuts',
-                 title: 'Shortcuts',
-                 family: 'Events',
-                 description: 'Press shortcut for call event',
-                 fields: [
-                   {
-                     name: 'keys',
-                     label: 'Activation keys',
-                     type: 'keys',
-                     attr: 'property'
-                   },
-                   {
-                     name: 'onPress',
-                     type: 'event',
-                     attr: 'output'
-                   }
-                 ]
-               },
-               {
-                 name: 'splitter',
-                 title: 'Splitter',
-                 family: 'Helpers',
-                 description: 'Press shortcut for call event',
-                 fields: [
-                   {
-                     name: 'input',
-                     type: 'event',
-                     attr: 'input'
-                   },
-                   {
-                     name: 'output',
-                     type: 'event',
-                     attr: 'output'
-                   },
-                   {
-                     name: 'output',
-                     type: 'event',
-                     attr: 'output'
-                   },
-                   {
-                     name: 'output',
-                     type: 'event',
-                     attr: 'output'
-                   },
-                   {
-                     name: 'output',
-                     type: 'event',
-                     attr: 'output'
-                   }
-                 ]
-               }
-             ],
-             scene: {
-               blocks: [
-                 {
-                   id: 2,
-                   x: -700,
-                   y: -69,
-                   name: 'Chat message',
-                   title: 'Chat message',
-                   values: {
-                     property: [
-                       {
-                         name: 'message',
-                         type: 'string'
-                       }
-                     ]
-                   }
-                 },
-                 {
-                   id: 4,
-                   x: -157,
-                   y: -68.5,
-                   name: 'text',
-                   title: 'Text',
-                   values: {
-                     property: {
-                       text: {
-                         label: 'Text',
-                         type: 'string'
-                       }
-                     }
-                   }
-                 },
-               ],
-               links: [
-                 {
-                   id: 3,
-                   originID: 2,
-                   originSlot: 0,
-                   targetID: 4,
-                   targetSlot: 0
-                 },
-               ],
-               container: {
-                 centerX: 1042,
-                 centerY: 140,
-                 scale: 1
-               }
-             },
-             selectedBlock: null,
-             selectedType: 'delay',
-             usecontextmenu: true,
-             contextmenu: {
-               isShow: false,
-               mouseX: 0,
-               mouseY: 0,
-               top: 0,
-               left: 0
-             }
-           }
-         },
-         computed: {
-           selectedBlockProperty () {
-             if (!this.selectedBlock || !this.selectedBlock.values || !this.selectedBlock.values.property) {
-               return null
-             }
-
-             return this.selectedBlock.values.property
-           },
-           selectblocksType () {
-             return this.blocks.map(b => {
-               return b.family
-             }).filter((value, index, array) => {
-               return array.indexOf(value) === index
-             })
-           }
-         },
-         methods: {
-           selectblock (block) {
-             console.log('select', block)
-             this.selectedBlock = block
-           },
-           deselectblock (block) {
-             console.log('deselect', block)
-             this.selectedBlock = null
-           },
-           filteredBlocks (type) {
-             return this.blocks.filter(value => {
-               return value.family === type
-             })
-           },
-           addBlock () {
-             console.log(this.selectedType)
-             this.$refs.container.addNewBlock(this.selectedType)
-           },
-           saveProperty (val) {
-             let scene = this.scene
-             let block = scene.blocks.find(b => {
-               return b.id === this.selectedBlock.id
-             })
-             block.values.property = val
-             this.scene = $.extendext(true,'replace',{}, scene);
-           },
-           showcontextmenu (e) {
-             if (!this.usecontextmenu) return
-             if (e.preventDefault) e.preventDefault()
-
-             this.contextmenu.isShow = true
-             this.contextmenu.mouseX = e.offsetX
-             this.contextmenu.mouseY = e.offsetY
-
-             this.$nextTick(function () {
-                this.setMenu(e.offsetY, e.offsetX)
-                this.$refs.contextmenu.focus()
-             })
-           },
-           setMenu (top, left) {
-             let border = 5
-             let contextmenuEl =this.$refs.contextmenu
-             let containerElRect = this.$refs.container.$el.getBoundingClientRect()
-             let largestWidth = containerElRect.right - contextmenuEl.offsetWidth - border
-             let largestHeight = containerElRect.bottom - contextmenuEl.offsetHeight - border
-
-             //console.log(this.$refs.container)
-             //console.log(containerElRect)
-             
-             //console.log(top)
-             
-             //console.log(containerElRect)
-
-             if (left > largestWidth) left = largestWidth
-             if (top > largestHeight) top = largestHeight
-
-             this.contextmenu.top = top
-             this.contextmenu.left = left
-           },
-           addBlockcontextmenu (name) {
-             let offset = getOffsetRect(this.$refs.container.$el)
-             //console.log(
-             let x = this.contextmenu.mouseX
-             let y = this.contextmenu.mouseY
-             console.log(x);
-             console.log(y);
-             console.log(this.$refs.container.centerY);
-             this.$refs.container.addNewBlock(name, x, y)
-             this.closecontextmenu()
-           },
-           closecontextmenu () {
-             this.contextmenu.isShow = false
-           }
-         },
-         watch: {
-           blocks (newValue) {
-             console.log('blocks', newValue)
-           },
-           scene (newValue) {
-             console.log('scene', newValue)
-           }
-         }
-     })
-     var app = new Vue({
-         el: '#app',
-         data: {
-             "name": "",
-             "group_id": "2",
-             "description": "",
-             "list": [{
-                 "name": "",
-                 "is_approve": false,
-                 "id": "add_100",
-             }, {
-                 "name": "",
-                 "id": "add_200",
-                 "is_approve": true,
-                 "group": "add_200"
-             }, {
-                 "name": "",
-                 "id": "add_300",
-                 "is_approve": true,
-                 "group": "add_200"
-             }],
-             "active": 0,
-             "step": {}
-         },
-         computed: {
-             //count() {
-             //    return this.$store.state.count;
-             //}
-         },
-         mounted() {
-            this.initTooltipPlugin();
-
-         },
-         deactivated(){
-             $(".tooltip").remove();
-         },
-         methods: {
-             initTooltipPlugin:function(){
-                  $.fn.tooltip && $('[data-toggle="tooltip"]').tooltip()
-             },
-             max_index_in_group:function(group){
-                 return this.list.filter(function (item) {
-                     return item.group == group;
-                 });
-             },
-             add_step_group:function(group){
-                 var gr = this.get_group(group);
-                 if(gr.length > 0){
-                     var item = gr[gr.length - 1];
-                     var index = this.get_index(item);
-                     var id = "add_" + Number.random(1e12);
-                     app.list.splice(index + 1, 0,  { id: id, name: "","is_approve": false, });
-                 }
-             },
-             remove_step_group:function(group){
-                 var gr = this.get_group(group);
-                 for(var item of gr){
-                     var index = this.get_index(item);
-                     this.list.splice(index, 1);
-                 }
-             },
-             add_step: function (index) {
-                 var id = "add_" + Number.random(1e12);
-                 var item = $.extendext(true,'replace',{}, app.list[index], { id: id, name: "" });
-                 app.list.splice(index + 1, 0, item);
-             },
-             remove_step: function (index) {
-                 app.list.splice(index, 1);
-             },
-             active_step: function (item, index) {
-                 app.active = index;
-                 app.step = item;
-             },
-             get_group: function (group) {
-                 return this.list.filter(function (item) {
-                     return item.group == group;
-                 });
-             },
-             get_index:function(item){
-                 return this.list.findIndex(object => {
-                     return object === item;
-                 });
-             },
-             count_item_group: function (group) {
-                 return this.list.filter(function (item) {
-                     return item.group == group;
-                 }).length;
-             },
-             save_data:function(e){
-                 e.preventDefault();
-                 if($("#app").valid()){
-                     var data = app._data;
-                     $.ajax({
-                         url:"/admin/process/create",
-                         type:"POST",
-                         data:data
-                     })
-                 }
-
-             }
-         }
-     })
+    var blocks = [
+        {
+            id: rand(),
+            x: -700,
+            y: -69,
+            name: 'start',
+            title: 'Bắt đầu',
+            selected:true
+        },
+        {
+            id: rand(),
+            x: -157,
+            y: -68.5,
+            name: 'done',
+            title: 'Thành công',
+        },
+    ];
+
+    var links = [
+                //{
+                //    id: 3,
+                //    originID: 2,
+                //    originSlot: 0,
+                //    targetID: 4,
+                //    targetSlot: 0
+                //},
+            ];
+    var EventBus = new Vue()
+    var store = new Vuex.Store({
+      state: {
+        scene: {
+            blocks: blocks,
+            links: links
+        }
+      },
+      getters:{
+          myScene(state){
+              return state.scene;
+          }
+      },
+      actions:{
+        active_step: ({ commit,state  },index) =>{
+            var scene = state.scene;
+            scene.blocks.forEach(function(item){
+                item.selected = false;
+            })
+            scene.blocks[index].selected = true
+            commit("SET_SCENE",scene);
+        },
+      },
+      mutations: {
+        SET_SCENE:(state,scene) =>{
+            state.scene = scene;
+        },
+      }
+    });
+</script>
+@await Html.PartialAsync("~/Areas/Admin/Views/Process/Share/_Step.cshtml");
+@await Html.PartialAsync("~/Areas/Admin/Views/Process/Share/_Detail.cshtml");
+@await Html.PartialAsync("~/Areas/Admin/Views/Process/Share/_Block.cshtml");
+@await Html.PartialAsync("~/Areas/Admin/Views/Process/Share/_Link.cshtml");
+@await Html.PartialAsync("~/Areas/Admin/Views/Process/Share/_Blockcontainer.cshtml");
+@await Html.PartialAsync("~/Areas/Admin/Views/Process/Share/_Flowchart.cshtml");
+<script>
+    var id = rand();
+    var app = new Vue({
+        el: '#app',
+        //store:store,
+        data: {
+            item: {
+                id:rand(),
+                group_id:1
+            },
+            selectedBlock: null
+        },
+        computed: {
+            scene() {
+                return store.state.scene;
+            }
+        },
+        mounted() {
+            this.selectedBlock = this.scene.blocks[0];
+        },
+        deactivated(){
+            //$(".tooltip").remove();
+        },
+        methods: {
+            selectblock (block) {
+                this.selectedBlock = block;
+            },
+            initTooltipPlugin:function(){
+                 $.fn.tooltip && $('[data-toggle="tooltip"]').tooltip()
+            },
+            max_index_in_group:function(group){
+                return this.list.filter(function (item) {
+                    return item.group == group;
+                });
+            },
+            add_step_group:function(group){
+                var gr = this.get_group(group);
+                if(gr.length > 0){
+                    var item = gr[gr.length - 1];
+                    var index = this.get_index(item);
+                    var id = "add_" + Number.random(1e12);
+                    app.list.splice(index + 1, 0,  { id: id, name: "","is_approve": false, });
+                }
+            },
+            remove_step_group:function(group){
+                var gr = this.get_group(group);
+                for(var item of gr){
+                    var index = this.get_index(item);
+                    this.list.splice(index, 1);
+                }
+            },
+            add_step: function (index) {
+                var id = "add_" + Number.random(1e12);
+                var item = $.extendext(true,'replace',{}, app.list[index], { id: id, name: "" });
+                app.list.splice(index + 1, 0, item);
+            },
+            remove_step: function (index) {
+                app.list.splice(index, 1);
+            },
+            active_step: function (item, index) {
+                app.active = index;
+                app.step = item;
+            },
+            get_group: function (group) {
+                return this.list.filter(function (item) {
+                    return item.group == group;
+                });
+            },
+            get_index:function(item){
+                return this.list.findIndex(object => {
+                    return object === item;
+                });
+            },
+            count_item_group: function (group) {
+                return this.list.filter(function (item) {
+                    return item.group == group;
+                }).length;
+            },
+            save_data:function(e){
+                e.preventDefault();
+                if($("#app").valid()){
+                    var item = app._data.item;
+                    var scene = store.state.scene;
+                    item = $.extendext(true,'replace',{}, item, scene);
+                    //console.log(data);
+                    $.ajax({
+                        url:"/admin/process/create",
+                        type:"POST",
+                        data:item,
+                        success(data){
+                            location.reload();
+                        }
+                    });
+                }
+
+            }
+        }
+    })
 </script>
 <script>
 

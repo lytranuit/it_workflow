@@ -1,0 +1,220 @@
+﻿
+<template id="template_flowchart">
+    <div style="position:relative;">
+        <vue-block-container v-on:contextmenu.native="showcontextmenu"
+                             v-on:click.native="closecontextmenu"
+                             ref="container"
+                             :blockscontent="blocks"
+                             v-on:blockselect="selectblock"
+                             v-on:blockdeselect="deselectblock"
+                             class=""></vue-block-container>
+
+        <ul id="contextmenu" ref="contextmenu" tabindex="-1" v-show="contextmenu.isShow"
+            v-on:blur="closecontextmenu"
+            :style="{top: contextmenu.top + 'px', left: contextmenu.left + 'px'}">
+            <template v-for="type in selectblocksType">
+                <li class="label">{{type}}</li>
+                <li v-for="block in filteredBlocks(type)"
+                    v-on:click="addBlockcontextmenu(block.name)">
+                    {{block.title || block.name}}
+                </li>
+            </template>
+        </ul>
+    </div>
+</template>
+
+<script>
+    var template_flowchart = $("#template_flowchart").html();
+    Vue.component('flowchart', {
+        template:template_flowchart,
+        props:{
+            //scene: {
+            //    type: Object,
+            //    default: {blocks: [], links: [], container: {}}
+            //}
+        },
+        data: function () {
+          return {
+            blocks: [
+              {
+                name: 'start',
+                title: 'Bắt đầu',
+                family: 'None',
+                description: 'Form bắt đầu không input',
+                fields: [
+                  {
+                    name: 'Gửi đi',
+                    type: 'event',
+                    attr: 'output'
+                  },
+                ]
+              },
+              {
+                name: 'done',
+                title: 'Thành công',
+                family: 'Events',
+                description: 'Hoàn thành quy trình',
+                fields: [
+                  {
+                    name: 'Input',
+                    type: 'event',
+                    attr: 'input'
+                  },
+                ]
+              },
+              {
+                name: 'fail',
+                title: 'Thất bại',
+                family: 'Events',
+                description: 'Quy trình thất bại',
+                fields: [
+                  {
+                    name: 'Input',
+                    type: 'event',
+                    attr: 'input'
+                  },
+                ]
+              },
+              {
+                name: 'form',
+                title: 'Biểu mẫu',
+                family: 'Form',
+                description: '',
+                fields: [
+                  {
+                    name: 'Input',
+                    type: 'event',
+                    attr: 'input'
+                  },
+                  {
+                    name: 'Hoàn thành',
+                    type: 'event',
+                    attr: 'output'
+                  },
+                  {
+                    name: 'Trả về',
+                    type: 'event',
+                    attr: 'output'
+                  }
+                ]
+              },
+              {
+                name: 'approve',
+                title: 'Phê duyệt',
+                family: 'Form',
+                description: 'Phê duyệt',
+                fields: [
+                  {
+                    name: 'Input',
+                    type: 'event',
+                    attr: 'input'
+                  },
+                  {
+                    name: 'Phê duyệt',
+                    type: 'event',
+                    attr: 'output'
+                  },
+                  {
+                    name: 'Trả về',
+                    type: 'event',
+                    attr: 'output'
+                  }
+                ]
+              }
+            ],
+            //selectedBlock: null,
+            selectedType: 'delay',
+            usecontextmenu: true,
+            contextmenu: {
+              isShow: false,
+              mouseX: 0,
+              mouseY: 0,
+              top: 0,
+              left: 0
+            }
+          }
+        },
+        computed: {
+          selectblocksType () {
+            return this.blocks.map(b => {
+              return b.family
+            }).filter((value, index, array) => {
+              return array.indexOf(value) === index && value != "None"
+            })
+          },
+        },
+        methods: {
+          selectblock (block) {
+            this.$emit("select",block);
+          },
+          deselectblock (block) {
+            //this.selectedBlock = null
+          },
+          filteredBlocks (type) {
+            return this.blocks.filter(value => {
+              return value.family === type
+            })
+          },
+          addBlock () {
+            this.$refs.container.addNewBlock(this.selectedType)
+          },
+          //saveProperty (val) {
+          //  let scene = this.scene
+          //  let block = scene.blocks.find(b => {
+          //    return b.id === this.selectedBlock.id
+          //  })
+          //  block.values.property = val
+          //  this.scene = $.extendext(true,'replace',{}, scene);
+          //},
+          showcontextmenu (e) {
+            if (!this.usecontextmenu) return
+            if (e.preventDefault) e.preventDefault()
+
+            this.contextmenu.isShow = true
+            this.contextmenu.mouseX = e.offsetX
+            this.contextmenu.mouseY = e.offsetY
+
+            this.$nextTick(function () {
+               this.setMenu(e.offsetY, e.offsetX)
+               this.$refs.contextmenu.focus()
+            })
+          },
+          setMenu (top, left) {
+            let border = 5
+            let contextmenuEl =this.$refs.contextmenu
+            let containerElRect = this.$refs.container.$el.getBoundingClientRect()
+            let largestWidth = containerElRect.right - contextmenuEl.offsetWidth - border
+            let largestHeight = containerElRect.bottom - contextmenuEl.offsetHeight - border
+
+            //console.log(this.$refs.container)
+            //console.log(containerElRect)
+
+            //console.log(top)
+
+            //console.log(containerElRect)
+
+            if (left > largestWidth) left = largestWidth
+            if (top > largestHeight) top = largestHeight
+
+            this.contextmenu.top = top
+            this.contextmenu.left = left
+          },
+          addBlockcontextmenu (name) {
+            let offset = getOffsetRect(this.$refs.container.$el)
+            //console.log(
+            let x = this.contextmenu.mouseX
+            let y = this.contextmenu.mouseY
+            this.$refs.container.addNewBlock(name, x, y)
+            this.closecontextmenu()
+          },
+          closecontextmenu () {
+            this.contextmenu.isShow = false
+          }
+        },
+        watch:{
+            //scene(){
+            //    console.log(1);
+            //}
+        }
+    })
+</script>

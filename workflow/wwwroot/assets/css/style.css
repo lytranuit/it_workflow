@@ -384,6 +384,8 @@ code {
 .list-group-item {
     border: 1px solid #f1eff5;
     background-color: #ffffff;
+    border-radius: 5px;
+    padding: 10px;
 }
 
 /* Navs & Tabs */
@@ -3370,11 +3372,6 @@ div.table-responsive > div.dataTables_wrapper > div.row > div[class^="col-"]:fir
         justify-content: center;
     }
 
-label {
-    font-weight: 400;
-    color: #656d9a;
-    font-size: 13px;
-}
 
 .custom-control-label {
     padding-top: 2px;
@@ -4604,46 +4601,11 @@ dt {
     padding: 8px 10px 8px 40px;
 }
 
-.modal-demo {
-    background-color: #ffffff;
-    width: 600px;
-    border-radius: 4px;
-    display: none;
-    position: relative;
-}
 
-    .modal-demo .close {
-        position: absolute;
-        top: 15px;
-        right: 25px;
-        color: #eff2f9;
-    }
-
-.modal-content {
+.modal-content .modal-header, .modal-content .modal-footer {
+    border-color: #dbe0ec;
     background-color: #f3f6f7;
-    border-radius: 0;
 }
-
-    .modal-content .modal-header, .modal-content .modal-footer {
-        border-color: #dbe0ec;
-        background-color: #f3f6f7;
-    }
-
-        .modal-content .modal-header .modal-title, .modal-content .modal-footer .modal-title {
-            color: #435177;
-        }
-
-        .modal-content .modal-header .close, .modal-content .modal-footer .close {
-            color: #435177;
-        }
-
-    .modal-content .modal-body p, .modal-content h4 {
-        color: #8997bd;
-    }
-
-    .modal-content .modal-title.custom-title {
-        color: white;
-    }
 
 #custom-modal .close {
     color: #435177;
@@ -9939,9 +9901,6 @@ body.dark-sidenav .left-sidenav {
     padding: 8px !important
 }
 
-.icon-move {
-    cursor: all-scroll
-}
 
 .show-subswitch .html-editor .dx-html-editor-custom .dx-htmleditor-content {
     padding: 6px 15px !important;
@@ -11066,10 +11025,8 @@ body.dark-sidenav .left-sidenav {
     width: max-content
 }
 
-.popup-setting-process-form .active {
+.popup-setting-process-form .list-group .active {
     background-color: #efefef;
-    font-weight: 700;
-    color: #13b2d8
 }
 
 .popup-setting-process-form .dx-sortable-clone.dx-sortable-dragging .item-control {
@@ -11182,32 +11139,40 @@ body.dark-sidenav .left-sidenav {
     border-radius: 8px
 }
 
-    .control-preview-item.active {
-        background-color: #fff;
-        border: 1px dashed #0c9cdd;
-        border-left: 1.7px dashed #0c9cdd
+    .control-preview-item .custom-title-inline {
+        width: 300px;
     }
 
-        .control-preview-item.active .group-icon-right, .control-preview-item.active .icon-move {
-            visibility: initial !important
-        }
-
-    .control-preview-item .icon-move {
-        position: absolute;
-        left: -24px;
-        cursor: move;
-        visibility: hidden;
-        background-color: #0c9cdd !important
-    }
 
     .control-preview-item .group-icon-right {
-        top: 12px;
-        position: absolute;
-        right: 8px;
         display: flex;
         align-items: center;
         visibility: hidden
     }
+
+        .control-preview-item .group-icon-right .ms-con-dropdown {
+            position: relative;
+            border: 0;
+            cursor: pointer;
+            padding: 0 !important;
+            background: white;
+        }
+
+.item-control .icon-move {
+    cursor: move;
+    visibility: hidden;
+}
+
+.item-control:hover .control-preview-item {
+    background-color: #fff;
+    border: 1px dashed #0c9cdd;
+    border-left: 1.7px dashed #0c9cdd
+}
+
+.item-control:hover .group-icon-right, .item-control:hover .icon-move {
+    visibility: initial !important;
+    color: #0c9cdd;
+}
 
 .request-form-preview[data-v-28a47ccf] {
     height: 100%;
@@ -11760,6 +11725,21 @@ label.medium.m-b-8 {
     left: 18px
 }
 
+.field-content {
+}
+
+    .field-content .list-group {
+        min-height: 50px;
+        width: 100%;
+    }
+
+        .field-content .list-group.active {
+            border: 3px;
+            border-style: dotted;
+            border-color: #0c9cdd;
+            border-radius: 5px;
+        }
+
 .flex-m {
     display: flex;
     -ms-align-items: center;
@@ -11769,19 +11749,24 @@ label.medium.m-b-8 {
 #contextmenu {
     position: absolute;
     z-index: 1000;
-    background: white;
-    border: 1px solid black;
-    padding: 5px;
+    background: #fff;
+    border: 1px solid #b3b2b2;
     margin: 0;
+    padding: 12px 18px;
+    border-radius: 5px;
 }
 
     #contextmenu li {
         list-style: none;
+        cursor: pointer;
+        margin-left: 5px;
     }
 
         #contextmenu li.label {
-            color: gray;
-            font-size: 90%;
+            color: black;
+            font-weight: bold;
+            margin-left: 0px;
+            cursor: default;
         }
 
         #contextmenu li:focus {
@@ -11792,7 +11777,7 @@ label.medium.m-b-8 {
     position: relative;
     overflow: hidden;
     box-sizing: border-box;
-    height: 100vh;
+    height: 285px;
 }
 
 

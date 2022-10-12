@@ -35,7 +35,7 @@ namespace workflow.TagHelpers
             //    }
             //}
             var ProcessGroupModel = _context.ProcessGroupModel.Where(d => d.deleted_at == null).ToList();
-            var html = "<select id='group_id' class='form-control' name='group_id' v-model='group_id'>";
+            var html = "<select id='group_id' class='form-control' name='group_id' v-model='item.group_id'>";
             foreach (var group in ProcessGroupModel)
             {
                 html += "<option value='" + group.id + "'>" + group.name + "</option>";

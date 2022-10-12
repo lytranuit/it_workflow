@@ -17,6 +17,7 @@ module.exports = function (grunt) {
                         'wwwroot/lib/chosen/chosen.css',
                         'wwwroot/lib/datatables/datatables.min.css',
                         'wwwroot/lib/multiselect/dist/css/bootstrap-multiselect.min.css',
+                        'wwwroot/lib/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css',
                         'wwwroot/assets/css/style.css',
                     ],
                     'wwwroot/lib/elfinder/css/admin.min.css': [
@@ -63,6 +64,7 @@ module.exports = function (grunt) {
                     'wwwroot/lib/elfinder/js/elfinder.min.js',
                     'wwwroot/lib/image_feature/jquery.image_v2.js',
                     'wwwroot/lib/multiselect/dist/js/bootstrap-multiselect.min.js',
+                    'wwwroot/lib/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js',
                     'wwwroot/assets/js/app.js'
                 ],
                 dest: 'wwwroot/admin/js/combined.js'

@@ -24,6 +24,9 @@ namespace it.Data
         public DbSet<AuditTrailsModel> AuditTrailsModel { get; set; }
         public DbSet<ProcessGroupModel> ProcessGroupModel { get; set; }
         public DbSet<ProcessModel> ProcessModel { get; set; }
+        public DbSet<ProcessBlockModel> ProcessBlockModel { get; set; }
+        public DbSet<ProcessLinkModel> ProcessLinkModel { get; set; }
+        public DbSet<ProcessFieldModel> ProcessFieldModel { get; set; }
         //public override int SaveChanges()
         //{
         //    var audit = new Audit();
