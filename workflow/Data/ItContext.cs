@@ -27,6 +27,7 @@ namespace it.Data
         public DbSet<ProcessBlockModel> ProcessBlockModel { get; set; }
         public DbSet<ProcessLinkModel> ProcessLinkModel { get; set; }
         public DbSet<ProcessFieldModel> ProcessFieldModel { get; set; }
+        public DbSet<DepartmentModel> DepartmentModel { get; set; }
         //public override int SaveChanges()
         //{
         //    var audit = new Audit();

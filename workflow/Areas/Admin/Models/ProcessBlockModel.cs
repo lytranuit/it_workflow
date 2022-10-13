@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Newtonsoft.Json;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 namespace it.Areas.Admin.Models
 {
@@ -11,15 +12,25 @@ namespace it.Areas.Admin.Models
         public string title { get; set; }
         public string name { get; set; }
         public int type_performer { get; set; }
-        public bool? is_approve { get; set; }
-        public bool? has_remind { get; set; }
-        public bool? has_exprie { get; set; }
 
         [ForeignKey("process_id")]
         public virtual ProcessModel process { get; set; }
 
         public virtual List<ProcessFieldModel> fields { get; set; }
-
+        public string? settings { get; set; }
+        [NotMapped]
+        public virtual BlockSettings? data_setting
+        {
+            get
+            {
+                //Console.WriteLine(settings);
+                return JsonConvert.DeserializeObject<BlockSettings>(string.IsNullOrEmpty(settings) ? "{}" : settings);
+            }
+            set
+            {
+                settings = JsonConvert.SerializeObject(value);
+            }
+        }
         public double? x { get; set; }
 
         public double? y { get; set; }
@@ -31,5 +42,7 @@ namespace it.Areas.Admin.Models
 
         public DateTime? deleted_at { get; set; }
     }
-
+    public class BlockSettings
+    {
+    }
 }

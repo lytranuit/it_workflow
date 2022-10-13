@@ -24,7 +24,10 @@ builder.Services.AddDefaultIdentity<UserModel>(options => options.SignIn.Require
     .AddEntityFrameworkStores<IdentityContext>().AddDefaultTokenProviders();
 // Add services to the container.
 builder.Services.AddControllersWithViews().AddJsonOptions(x =>
-   x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+{
+    x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    x.JsonSerializerOptions.IgnoreNullValues = true;
+});
 builder.Services.AddDbContext<ItContext>(options =>
   options.UseSqlServer(connectionString)
   );

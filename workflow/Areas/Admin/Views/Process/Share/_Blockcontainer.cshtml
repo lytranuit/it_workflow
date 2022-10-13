@@ -35,16 +35,30 @@
           }
         },
         mounted () {
-          document.documentElement.addEventListener('mousemove', this.handleMove, true)
-          document.documentElement.addEventListener('mousedown', this.handleDown, true)
-          document.documentElement.addEventListener('mouseup', this.handleUp, true)
-          //document.documentElement.addEventListener('wheel', this.handleWheel, true)
+            document.documentElement.addEventListener('mousemove', this.handleMove, true)
+            document.documentElement.addEventListener('mousedown', this.handleDown, true)
+            document.documentElement.addEventListener('mouseup', this.handleUp, true)
+            //document.documentElement.addEventListener('wheel', this.handleWheel, true)
 
-          this.centerX = this.$el.clientWidth / 2
-          this.centerY = this.$el.clientHeight / 2
+            this.centerX = this.$el.clientWidth / 2
+            this.centerY = this.$el.clientHeight / 2
 
-          this.importBlocksContent()
-          this.importScene()
+            this.importBlocksContent()
+            this.importScene()
+            let container = {
+                centerX: 1042,
+                centerY: 140,
+                scale: 1
+            }
+            if (container.centerX) {
+                this.centerX = container.centerX
+            }
+            if (container.centerY) {
+                this.centerY = container.centerY
+            }
+            if (container.scale) {
+                this.scale = container.scale
+            }
         },
         beforeDestroy () {
           document.documentElement.removeEventListener('mousemove', this.handleMove, true)
@@ -331,8 +345,6 @@
           },
           // Linking
           linkingstart (block, slotNumber) {
-              //console.log("linkstart");
-              //console.log(block);
             this.linkstartdata = {block: block, slotNumber: slotNumber}
             let linkStartPos = this.getConnectionPos(this.linkstartdata.block, this.linkstartdata.slotNumber, false)
             this.tempLink = {
@@ -467,7 +479,10 @@
               title: node.title || node.name,
               inputs: inputs,
               outputs: outputs,
-              values: values
+              values: values,
+              data_settings:{
+                  time:{}
+              }
             }
           },
           deselectAll (withoutID = null) {
@@ -573,7 +588,7 @@
           },
           importScene () {
             let scene = $.extendext(true,'replace',this.defaultScene, this.scene)
-
+            //console.log(scene);
             let blocks = this.prepareBlocks(scene.blocks)
             blocks = this.prepareBlocksLinking(blocks, scene.links)
 
@@ -588,17 +603,16 @@
             this.blocks = blocks
             this.links = $.extendext(true,'replace',[], scene.links)
 
-            let container = scene.container
-            //console.log(container)
-            if (container.centerX) {
-              this.centerX = container.centerX
-            }
-            if (container.centerY) {
-              this.centerY = container.centerY
-            }
-            if (container.scale) {
-              this.scale = container.scale
-            }
+            //let container = scene.container
+            //if (container.centerX) {
+            //  this.centerX = container.centerX
+            //}
+            //if (container.centerY) {
+            //  this.centerY = container.centerY
+            //}
+            //if (container.scale) {
+            //  this.scale = container.scale
+            //}
           },
           exportScene () {
             let clonedBlocks = $.extendext(true,'replace',[], this.blocks)
@@ -612,20 +626,22 @@
 
             return {
               blocks: blocks,
-              links: this.links
+              links: this.links,
+              //container:this.container
             }
           },
           updateScene () {
               store.commit("SET_SCENE",this.exportScene())
             //this.$emit('update:scene', this.exportScene())
           },
-        },  
+        },
         watch: {
           blockscontent () {
             this.importBlocksContent()
           },
           scene:{
             handler(newValue, oldValue) {
+                 //console.log(newValue)
                  this.importScene()
             },
             deep:true,

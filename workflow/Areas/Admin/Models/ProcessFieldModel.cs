@@ -28,12 +28,12 @@ namespace it.Areas.Admin.Models
 
         public string? settings { get; set; }
         [NotMapped]
-        public virtual Settings? data_setting
+        public virtual FieldSettings? data_setting
         {
             get
             {
                 //Console.WriteLine(settings);
-                return JsonConvert.DeserializeObject<Settings>(string.IsNullOrEmpty(settings) ? "{}" : settings);
+                return JsonConvert.DeserializeObject<FieldSettings>(string.IsNullOrEmpty(settings) ? "{}" : settings);
             }
             set
             {
@@ -46,7 +46,7 @@ namespace it.Areas.Admin.Models
 
         //public DateTime? deleted_at { get; set; }
     }
-    public class Settings
+    public class FieldSettings
     {
         public string? default_value { get; set; }
         public List<string>? default_value_array { get; set; }

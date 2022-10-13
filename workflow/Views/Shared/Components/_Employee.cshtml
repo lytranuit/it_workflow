@@ -1,10 +1,7 @@
 ﻿
 <template id="template_employee">
-    <multipleselect width="100%" v-model="value" :multiple="multiple">
-        <option v-for="(option,index) in options" :key="option.id" :value="option.id">
-            {{option.fullName}}({{option.email}})
-        </option>
-    </multipleselect>
+    <treeselect v-model="value" :options="get_options(options)" :multiple="multiple">
+    </treeselect>
 </template>
 <script>
     var template_employee = $("#template_employee").html();
@@ -48,7 +45,12 @@
          beforeDestroy(){
          },
          methods:{
-
+            get_options(options){
+                return options.map(function(item){
+                    item.label = item.fullName + "("+item.email+")";
+                    return item;
+                });
+            },
          },
          watch:{
              value:{

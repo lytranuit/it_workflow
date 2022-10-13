@@ -20,6 +20,8 @@
 <!-- CDNJS :: Vue.Draggable (https://cdnjs.com/) -->
 <script src="//cdnjs.cloudflare.com/ajax/libs/Vue.Draggable/2.20.0/vuedraggable.umd.min.js"></script>
 
+<script src="~/lib/vue-treeview/vue-treeselect.umd.min.js"></script>
+<link rel="stylesheet" href="~/lib/vue-treeview/vue-treeselect.min.css">
 <form id="app" autocomplete="on" class="row">
     <div class="col-12">
         <div class="d-inline-block w-100">
@@ -74,11 +76,9 @@
     @{
     await Html.RenderPartialAsync("_ValidationScriptsPartial");
 }
-<link rel="stylesheet" href="/lib/vue-multiselect/multiple-select.min.css">
-<script src="https://unpkg.com/multiple-select@1.5.2/dist/multiple-select.min.js"></script>
-<script src="https://unpkg.com/multiple-select@1.5.2/dist/multiple-select-vue.min.js"></script>
 <script>
-    Vue.component('multipleselect', MultipleSelect)
+    Vue.component('treeselect', VueTreeselect.Treeselect)
+
     var blocks = [];
     var links = [];
     var EventBus = new Vue()
@@ -98,8 +98,9 @@
       actions:{
         active_step: ({ commit,state  },index) =>{
             var scene = state.scene;
-            scene.blocks.forEach(function(item){
+            scene.blocks = scene.blocks.map(function(item){
                 item.selected = false;
+                return item;
             })
             scene.blocks[index].selected = true
             commit("SET_SCENE",scene);
@@ -148,6 +149,7 @@
     });
 </script>
 @await Html.PartialAsync("~/Views/Shared/Components/_Employee.cshtml")
+@await Html.PartialAsync("~/Views/Shared/Components/_Department.cshtml")
 @await Html.PartialAsync("~/Areas/Admin/Views/Process/Share/_Step.cshtml")
 @await Html.PartialAsync("~/Areas/Admin/Views/Process/Share/_Detail.cshtml")
 @await Html.PartialAsync("~/Areas/Admin/Views/Process/Share/_Block.cshtml")
@@ -164,9 +166,9 @@
             selectedBlock: null
         },
         computed: {
-            scene() {
-                return store.state.scene;
-            }
+            //scene() {
+            //    return store.state.scene;
+            //}
         },
         mounted() {
             var that = this;
@@ -181,6 +183,7 @@
                         return item;
                     });
                     var blocks = data.blocks.map(function(item){
+                        item.selected = false;
                         delete item.fields;
                         return item;
                     });

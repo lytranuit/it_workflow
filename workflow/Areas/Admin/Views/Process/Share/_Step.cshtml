@@ -50,7 +50,7 @@
          },
          computed:{
              scene(){
-                 return store.getters.myScene;
+                 return store.state.scene;
              }
          },
          mounted() {
@@ -58,9 +58,16 @@
          beforeDestroy(){
          },
          methods:{
-             active_step: function (item, index) {
+             active_step: function (item,index) {
+                //var scene = this.scene;
+                //scene.blocks = scene.blocks.map(function(item){
+                //    item.selected = false;
+                //    return item;
+                //})
+                //scene.blocks[index].selected = true
+                //store.commit("SET_SCENE",scene);
                  store.dispatch("active_step",index);
-                 this.$emit("select",item);
+                this.$emit("select",item);
              },
          },
          //watch:{
