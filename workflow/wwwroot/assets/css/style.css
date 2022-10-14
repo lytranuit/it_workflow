@@ -11672,6 +11672,38 @@ label.medium.m-b-8 {
             border-radius: 5px;
         }
 
+.icon-pr-empty-approve {
+    width: 254px !important;
+    height: 100px !important;
+    display: inline-block;
+    background: url(../../images/EmptyRC1.b451fa24.svg) -314px 0 no-repeat !important;
+}
+
+.scrollbar::-webkit-scrollbar {
+    width: 6px;
+    background-color: #F5F5F5;
+    border-radius: 5px;
+}
+
+.scrollbar::-webkit-scrollbar-thumb {
+    background-color: #000000;
+    border-radius: 5px;
+}
+
+.scrollbar::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+    background-color: #F5F5F5;
+    border-radius: 5px;
+}
+
+.ms-button-filled {
+    width: 130px !important;
+    height: 36px !important;
+    border-radius: 4px;
+    padding: 0px 16px;
+    min-width: 80px !important;
+}
+
 .flex-m {
     display: flex;
     -ms-align-items: center;
@@ -11813,3 +11845,18 @@ label.medium.m-b-8 {
             .vue-block .output .circle:hover {
                 background: #00FF00;
             }
+
+.item-approve .h-field-title {
+    background: aliceblue;
+    font-weight: bold;
+    font-size: 14px;
+    padding: 10px;
+    cursor:pointer;
+    margin: 10px 0px;
+}
+
+.item-approve .gray {
+    background: #e3e3e3;
+    padding: 20px 40px;
+    border: 1px solid #ebebeb;
+}

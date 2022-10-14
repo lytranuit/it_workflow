@@ -5,21 +5,6 @@
     ViewData["Title"] = "Create";
     Layout = "~/Views/Shared/_Admin.cshtml";
 }
-<environment names="Development">
-    <!-- bản phát triển (development), bao gồm những cảnh báo hữu ích trong console -->
-    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-</environment>
-<environment names="Staging,Production">
-    <!-- bản production, được tối ưu về dung lượng và tốc độ -->
-    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
-</environment>
-<script src="https://unpkg.com/vuex@4.0.0/dist/vuex.global.js"></script>
-
-<!-- CDNJS :: Sortable (https://cdnjs.com/) -->
-<script src="//cdn.jsdelivr.net/npm/sortablejs@1.8.4/Sortable.min.js"></script>
-<!-- CDNJS :: Vue.Draggable (https://cdnjs.com/) -->
-<script src="//cdnjs.cloudflare.com/ajax/libs/Vue.Draggable/2.20.0/vuedraggable.umd.min.js"></script>
-
 <form id="app" autocomplete="on" class="row">
     <div class="col-12">
         <div class="d-inline-block w-100">
@@ -75,6 +60,8 @@
     await Html.RenderPartialAsync("_ValidationScriptsPartial");
 }
 <script>
+    Vue.component('treeselect', VueTreeselect.Treeselect)
+
     var blocks = [
         {
             id: rand(),
@@ -82,7 +69,8 @@
             y: -69,
             name: 'start',
             title: 'Bắt đầu',
-            selected:true
+            selected:true,
+            data_setting:{}
         },
         {
             id: rand(),
@@ -90,54 +78,85 @@
             y: -68.5,
             name: 'done',
             title: 'Thành công',
+            data_setting:{}
         },
     ];
 
-    var links = [
-                //{
-                //    id: 3,
-                //    originID: 2,
-                //    originSlot: 0,
-                //    targetID: 4,
-                //    targetSlot: 0
-                //},
-            ];
-    var EventBus = new Vue()
+    var links = [];
     var store = new Vuex.Store({
-      state: {
+        state: {
         scene: {
             blocks: blocks,
-            links: links
-        }
-      },
-      getters:{
-          myScene(state){
-              return state.scene;
-          }
-      },
-      actions:{
+            links: links,
+        },
+        fields:[]
+        },
+        getters:{
+            myScene(state){
+                return state.scene;
+            }
+        },
+        actions:{
         active_step: ({ commit,state  },index) =>{
             var scene = state.scene;
-            scene.blocks.forEach(function(item){
+            scene.blocks = scene.blocks.map(function(item){
                 item.selected = false;
+                return item;
             })
             scene.blocks[index].selected = true
             commit("SET_SCENE",scene);
         },
-      },
-      mutations: {
+        remove_field:({commit,state,getters},id) =>{
+            var fields = state.fields
+            var index = fields.findIndex(function(item){
+                return item.id == id;
+            });
+            if(index != -1){
+                fields.splice(index, 1);
+            }
+            commit("SET_FIELDS",fields);
+        },
+        save_field:({commit,state,getters},object) =>{
+            var field = object.field;
+            var fields = $.extendext(true,'replace',{}, state.fields);
+            var index = fields.findIndex(function(item){
+                return item.id == field.id;
+            });
+            if(index == -1){
+                fields.push(field);
+            }else{
+                fields.splice(index, 1, field);
+            }
+            commit("SET_FIELDS",fields);
+        },
+        save_fields:({commit,state,getters},object) =>{
+            var block_id = object.block_id;
+            var fields = object.fields;
+            var other_fields = state.fields.filter(function(item){
+                return item.process_block_id != block_id;
+            });
+            var new_fields = [...other_fields, ...fields];
+            commit("SET_FIELDS",new_fields);
+        },
+        },
+        mutations: {
         SET_SCENE:(state,scene) =>{
             state.scene = scene;
         },
-      }
+        SET_FIELDS:(state,fields) =>{
+            state.fields = fields;
+        }
+        }
     });
 </script>
-@await Html.PartialAsync("~/Areas/Admin/Views/Process/Share/_Step.cshtml");
-@await Html.PartialAsync("~/Areas/Admin/Views/Process/Share/_Detail.cshtml");
-@await Html.PartialAsync("~/Areas/Admin/Views/Process/Share/_Block.cshtml");
-@await Html.PartialAsync("~/Areas/Admin/Views/Process/Share/_Link.cshtml");
-@await Html.PartialAsync("~/Areas/Admin/Views/Process/Share/_Blockcontainer.cshtml");
-@await Html.PartialAsync("~/Areas/Admin/Views/Process/Share/_Flowchart.cshtml");
+@await Html.PartialAsync("~/Views/Shared/Components/_Employee.cshtml")
+@await Html.PartialAsync("~/Views/Shared/Components/_Department.cshtml")
+@await Html.PartialAsync("~/Areas/Admin/Views/Process/Share/_Step.cshtml")
+@await Html.PartialAsync("~/Areas/Admin/Views/Process/Share/_Detail.cshtml")
+@await Html.PartialAsync("~/Areas/Admin/Views/Process/Share/_Block.cshtml")
+@await Html.PartialAsync("~/Areas/Admin/Views/Process/Share/_Link.cshtml")
+@await Html.PartialAsync("~/Areas/Admin/Views/Process/Share/_Blockcontainer.cshtml")
+@await Html.PartialAsync("~/Areas/Admin/Views/Process/Share/_Flowchart.cshtml")
 <script>
     var id = rand();
     var app = new Vue({
@@ -145,18 +164,18 @@
         //store:store,
         data: {
             item: {
-                id:rand(),
-                group_id:1
+                id:id,
+                group_id:1,
+                name:""
             },
-            selectedBlock: null
+            selectedBlock: blocks[0]
         },
         computed: {
-            scene() {
-                return store.state.scene;
-            }
+            //scene() {
+            //    return store.state.scene;
+            //}
         },
         mounted() {
-            this.selectedBlock = this.scene.blocks[0];
         },
         deactivated(){
             //$(".tooltip").remove();
@@ -221,14 +240,16 @@
                 if($("#app").valid()){
                     var item = app._data.item;
                     var scene = store.state.scene;
+                    var fields = store.state.fields;
                     item = $.extendext(true,'replace',{}, item, scene);
-                    //console.log(data);
+                    item.fields = fields;
+                    console.log(item);
                     $.ajax({
                         url:"/admin/process/create",
                         type:"POST",
                         data:item,
                         success(data){
-                            location.reload();
+                          location.href = "/admin/process/edit/" + item.id;
                         }
                     });
                 }

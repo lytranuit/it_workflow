@@ -18,9 +18,9 @@ namespace it.Areas.Admin.Models
         [ForeignKey("group_id")]
         public ProcessGroupModel group { get; set; }
 
-        public List<ProcessBlockModel> blocks { get; set; }
-        public List<ProcessLinkModel> links { get; set; }
-        public List<ProcessFieldModel> fields { get; set; }
+        public virtual List<ProcessBlockModel>? blocks { get; set; }
+        public virtual List<ProcessLinkModel>? links { get; set; }
+        public virtual List<ProcessFieldModel>? fields { get; set; }
         public DateTime? created_at { get; set; }
 
         public DateTime? updated_at { get; set; }

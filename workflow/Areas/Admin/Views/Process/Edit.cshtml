@@ -5,23 +5,6 @@
     ViewData["Title"] = "Edit";
     Layout = "~/Views/Shared/_Admin.cshtml";
 }
-<environment names="Development">
-    <!-- bản phát triển (development), bao gồm những cảnh báo hữu ích trong console -->
-    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-</environment>
-<environment names="Staging,Production">
-    <!-- bản production, được tối ưu về dung lượng và tốc độ -->
-    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
-</environment>
-<script src="https://unpkg.com/vuex@4.0.0/dist/vuex.global.js"></script>
-
-<!-- CDNJS :: Sortable (https://cdnjs.com/) -->
-<script src="//cdn.jsdelivr.net/npm/sortablejs@1.8.4/Sortable.min.js"></script>
-<!-- CDNJS :: Vue.Draggable (https://cdnjs.com/) -->
-<script src="//cdnjs.cloudflare.com/ajax/libs/Vue.Draggable/2.20.0/vuedraggable.umd.min.js"></script>
-
-<script src="~/lib/vue-treeview/vue-treeselect.umd.min.js"></script>
-<link rel="stylesheet" href="~/lib/vue-treeview/vue-treeselect.min.css">
 <form id="app" autocomplete="on" class="row">
     <div class="col-12">
         <div class="d-inline-block w-100">
@@ -81,7 +64,6 @@
 
     var blocks = [];
     var links = [];
-    var EventBus = new Vue()
     var store = new Vuex.Store({
       state: {
         scene: {
@@ -162,7 +144,9 @@
         el: '#app',
         //store:store,
         data: {
-            item: {},
+            item: {
+                
+            },
             selectedBlock: null
         },
         computed: {
@@ -183,8 +167,22 @@
                         return item;
                     });
                     var blocks = data.blocks.map(function(item){
-                        item.selected = false;
+                        var default_setting = {data_setting:{}};
+                        item = $.extendext(true,'replace',default_setting, item);
                         delete item.fields;
+                        item.selected = false;
+                        if(item.name == 'approve'){
+                            var blocks_approve_id = item.data_setting.blocks_approve_id || [];
+                            item.blocks_approve = data.blocks.filter(function(item1){
+                                return blocks_approve_id.indexOf(item1.id) != -1;
+                            })
+                            item.blocks_approve.sort(function(a, b){
+                                if(a.stt > b.stt)
+                                    return 1;
+                                else
+                                    return -1;
+                            });
+                        }
                         return item;
                     });
                     blocks.sort(function(a, b){

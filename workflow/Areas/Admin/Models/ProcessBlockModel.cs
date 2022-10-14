@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using it.Data;
+using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 namespace it.Areas.Admin.Models
@@ -12,6 +13,8 @@ namespace it.Areas.Admin.Models
         public string title { get; set; }
         public string name { get; set; }
         public int type_performer { get; set; }
+        public bool? has_deadline { get; set; }
+        public string? guide { get; set; }
 
         [ForeignKey("process_id")]
         public virtual ProcessModel process { get; set; }
@@ -44,5 +47,23 @@ namespace it.Areas.Admin.Models
     }
     public class BlockSettings
     {
+        public int days { get; set; }
+        public int hours { get; set; }
+        public int minutes { get; set; }
+        public List<string> listuser { get; set; }
+
+        public string block_id { get; set; }
+
+        public List<string> blocks_approve_id { get; set; }
+
+        public virtual List<ProcessBlockModel> blocks_approve
+        {
+            get;
+            set;
+        }
+
+        public List<int> listdepartment { get; set; }
+
+
     }
 }

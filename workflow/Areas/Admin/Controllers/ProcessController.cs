@@ -42,25 +42,31 @@ namespace it.Areas.Admin.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        public async Task<JsonResult> Create(ProcessModel ProcessModel, List<ProcessBlockModel> blocks, List<ProcessLinkModel> links)
+        public async Task<JsonResult> Create(ProcessModel ProcessModel, List<ProcessBlockModel> blocks, List<ProcessLinkModel> links, List<ProcessFieldModel> fields)
         {
             System.Security.Claims.ClaimsPrincipal currentUser = this.User;
             string user_id = UserManager.GetUserId(currentUser); // Get user id:
             ProcessModel.user_id = user_id;
             ProcessModel.created_at = DateTime.Now;
             ProcessModel.status_id = (int)ProcessStatus.Draft;
+            ProcessModel.blocks = null;
+            ProcessModel.fields = null;
+            ProcessModel.links = null;
             _context.Add(ProcessModel);
             _context.SaveChanges();
             if (blocks.Count() > 0)
             {
+                var index = 0;
                 foreach (ProcessBlockModel block in blocks)
                 {
+                    block.fields = null;
+                    block.stt = index++;
                     //var existing = _context.ProcessBlockModel.Where(d => d.id == block.id).FirstOrDefault();
                     //if (existing == null)
                     //{
                     block.process_id = ProcessModel.id;
                     block.created_at = DateTime.Now;
-                    //_context.Add(block);
+                    _context.Add(block);
                     //}
                     //else
                     //    _context.ProcessBlockModel.Update(block);
@@ -74,10 +80,21 @@ namespace it.Areas.Admin.Controllers
                     //if (existing == null)
                     //{
                     link.process_id = ProcessModel.id;
-                    //_context.Add(link);
+                    _context.Add(link);
                     //}
                     //else
                     //    _context.ProcessLinkModel.Update(link);
+                }
+            }
+            if (fields.Count() > 0)
+            {
+                int index = 0;
+                foreach (ProcessFieldModel field in fields)
+                {
+                    field.block = null;
+                    field.stt = index++;
+                    field.settings = JsonConvert.SerializeObject(field.data_setting);
+                    _context.Add(field);
                 }
             }
             _context.SaveChanges();
@@ -293,6 +310,25 @@ namespace it.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // GET: Admin/Process/Delete/5
+        public async Task<IActionResult> Release(string id)
+        {
+
+            if (_context.ProcessModel == null)
+            {
+                return Problem("Entity set 'ItContext.ProcessModel'  is null.");
+            }
+            var ProcessModel = _context.ProcessModel.Where(d => d.id == id).FirstOrDefault();
+            if (ProcessModel != null)
+            {
+                ProcessModel.updated_at = DateTime.Now;
+                ProcessModel.status_id = (int)ProcessStatus.Release;
+                _context.ProcessModel.Update(ProcessModel);
+            }
+
+            _context.SaveChanges();
+            return RedirectToAction(nameof(Index));
+        }
         [HttpPost]
         public async Task<JsonResult> Table()
         {
@@ -319,20 +355,28 @@ namespace it.Areas.Admin.Controllers
                 var group = record.group;
                 var html_group = "<button class='btn btn-sm text-white' style='background:" + group.color + "'>" + group.name + "</button>";
                 var html_status = "";
+                var html_action = "<div class='btn-group'>";
                 if (record.status_id == (int)ProcessStatus.Draft)
                 {
                     html_status = "<button class='btn btn-sm text-white btn-info'>" + ProcessStatus.Draft + "</button>";
+                    html_action += "<a href='/admin/" + _type + "/release/" + record.id + "' class='btn btn-success btn-sm' title='Phát hành?' data-type='confirm'>"
+                        + "<i class='fas fa-arrow-up'></i>"
+                        + "</i>"
+                        + "</a>";
                 }
                 else if (record.status_id == (int)ProcessStatus.Release)
                 {
                     html_status = "<button class='btn btn-sm text-white btn-success'>" + ProcessStatus.Release + "</button>";
                 }
-                var data1 = new
-                {
-                    action = "<div class='btn-group'><a href='/admin/" + _type + "/delete/" + record.id + "' class='btn btn-danger btn-sm' title='Xóa?' data-type='confirm'>'"
+
+                html_action += "<a href='/admin/" + _type + "/delete/" + record.id + "' class='btn btn-danger btn-sm' title='Xóa?' data-type='confirm'>'"
                         + "<i class='fas fa-trash-alt'>"
                         + "</i>"
-                        + "</a></div>",
+                        + "</a>";
+                html_action += "</div>";
+                var data1 = new
+                {
+                    action = html_action,
                     id = "<a href='/admin/" + _type + "/edit/" + record.id + "'><i class='fas fa-pencil-alt mr-2'></i> " + record.id + "</a>",
                     name = record.name,
                     status = html_status,

@@ -480,9 +480,7 @@
               inputs: inputs,
               outputs: outputs,
               values: values,
-              data_settings:{
-                  time:{}
-              }
+              data_setting:{}
             }
           },
           deselectAll (withoutID = null) {
@@ -538,13 +536,14 @@
               }
 
               let newBlock = this.createBlock(node, block.id)
-
+              //console.log(newBlock);
               newBlock = $.extendext(true,'replace',newBlock, block, {
                 //arrayMerge: (d, s) => {
                 //  return s.length === 0 ? d : s
                 //}
               })
 
+              //console.log(newBlock);
               return newBlock
             }).filter(b => {
               return !!b
