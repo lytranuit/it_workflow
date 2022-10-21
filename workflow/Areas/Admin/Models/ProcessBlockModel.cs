@@ -10,8 +10,8 @@ namespace it.Areas.Admin.Models
         [Key]
         public string id { get; set; }
         public string process_id { get; set; }
-        public string title { get; set; }
-        public string name { get; set; }
+        public string label { get; set; }
+        public string clazz { get; set; }
         public int type_performer { get; set; }
         public bool? has_deadline { get; set; }
         public string? guide { get; set; }
@@ -37,7 +37,6 @@ namespace it.Areas.Admin.Models
         public double? x { get; set; }
 
         public double? y { get; set; }
-        public int? stt { get; set; }
 
         public DateTime? created_at { get; set; }
 

@@ -14,6 +14,8 @@
     <link rel="shortcut icon" href="/images/favicon.png">
     <!--- FONTS -->
     <link rel="stylesheet" id="font-css" href="https://fonts.googleapis.com/css?family=Arimo%3A400%2C500%2C600%2C400i%2C700&amp;display=swap&amp;ver=5.7.6" type="text/css" media="all">
+
+
     <!-- App css -->
 
     <link href="/assets/css/icons.css" rel="stylesheet" type="text/css" />
@@ -127,8 +129,8 @@
                     </button>
                 </li>
                 <li>
-                    <button class="btn btn-secondary text-white" style="padding:10px 30px;margin:13px 20px;border-radius:5px;" >
-                       <i class="far fa-paper-plane mr-1"></i>
+                    <button class="btn btn-secondary text-white" style="padding:10px 30px;margin:13px 20px;border-radius:5px;" data-toggle="modal" data-target="#myModal2">
+                        <i class="far fa-paper-plane mr-1"></i>
                         Chạy quy trình
                     </button>
                 </li>
@@ -165,24 +167,6 @@
     <environment names="Staging,Production">
         <script src="/admin/js/admin.min.js"></script>
     </environment>
-
-    <environment names="Development">
-        <!-- bản phát triển (development), bao gồm những cảnh báo hữu ích trong console -->
-        <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-    </environment>
-    <environment names="Staging,Production">
-        <!-- bản production, được tối ưu về dung lượng và tốc độ -->
-        <script src="https://cdn.jsdelivr.net/npm/vue"></script>
-    </environment>
-    <script src="https://unpkg.com/vuex@4.0.0/dist/vuex.global.js"></script>
-
-    <!-- CDNJS :: Sortable (https://cdnjs.com/) -->
-    <script src="//cdn.jsdelivr.net/npm/sortablejs@1.8.4/Sortable.min.js"></script>
-    <!-- CDNJS :: Vue.Draggable (https://cdnjs.com/) -->
-    <script src="//cdnjs.cloudflare.com/ajax/libs/Vue.Draggable/2.20.0/vuedraggable.umd.min.js"></script>
-
-    <script src="~/lib/vue-treeview/vue-treeselect.umd.min.js"></script>
-
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

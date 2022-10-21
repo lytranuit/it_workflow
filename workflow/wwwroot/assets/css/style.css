@@ -1084,6 +1084,9 @@ body.left-sidenav-dark .topbar .topbar-left {
         color: #8997bd;
     }
 
+
+
+
 @media (max-width: 1024px) {
     .topbar .topbar-left {
         width: 70px;
@@ -3393,6 +3396,10 @@ div.table-responsive > div.dataTables_wrapper > div.row > div[class^="col-"]:fir
         box-shadow: none;
         -webkit-transition-duration: .3s;
         transition-duration: .3s;
+    }
+
+    .form-control input {
+        border: none;
     }
 
 .input-group-text {
@@ -11851,7 +11858,7 @@ label.medium.m-b-8 {
     font-weight: bold;
     font-size: 14px;
     padding: 10px;
-    cursor:pointer;
+    cursor: pointer;
     margin: 10px 0px;
 }
 

@@ -246,10 +246,10 @@
                                 <div v-else class="text-left">
                                     <div class="accordion" id="accordionExample">
                                         <div class="item-approve" v-for="(block,index) in block.blocks_approve" :key="block.id">
-                                            <div class="h-field-title" data-toggle="collapse" :data-target="'#block_'+block.id" aria-expanded="true">
+                                            <div class="h-field-title h-acc" data-toggle="collapse" :data-target="'#block_'+block.id" aria-expanded="false">
                                                 {{block.title}}
                                             </div>
-                                            <div :id="'block_' + block.id" class="collapse show" data-parent="#accordionExample" style="">
+                                            <div :id="'block_' + block.id" class="collapse show mx-5" style="">
                                                 <div class="b control-preview-item gray" v-if="get_fields(block.id).length > 0">
                                                     <div class="form-input-data-preview my-2 w-100" v-for="(element,index1) in get_fields(block.id)" :key="element.id">
                                                         <div class="form-input-control flex-m">
@@ -381,8 +381,6 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div>
                                     </div>
                                 </div>
                                 <div class="cont-empty my-3"> Chọn bước cần phê duyệt </div>

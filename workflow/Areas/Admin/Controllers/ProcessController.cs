@@ -38,72 +38,6 @@ namespace it.Areas.Admin.Controllers
             return View();
         }
 
-        // POST: Admin/Process/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        public async Task<JsonResult> Create(ProcessModel ProcessModel, List<ProcessBlockModel> blocks, List<ProcessLinkModel> links, List<ProcessFieldModel> fields)
-        {
-            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
-            string user_id = UserManager.GetUserId(currentUser); // Get user id:
-            ProcessModel.user_id = user_id;
-            ProcessModel.created_at = DateTime.Now;
-            ProcessModel.status_id = (int)ProcessStatus.Draft;
-            ProcessModel.blocks = null;
-            ProcessModel.fields = null;
-            ProcessModel.links = null;
-            _context.Add(ProcessModel);
-            _context.SaveChanges();
-            if (blocks.Count() > 0)
-            {
-                var index = 0;
-                foreach (ProcessBlockModel block in blocks)
-                {
-                    block.fields = null;
-                    block.stt = index++;
-                    //var existing = _context.ProcessBlockModel.Where(d => d.id == block.id).FirstOrDefault();
-                    //if (existing == null)
-                    //{
-                    block.process_id = ProcessModel.id;
-                    block.created_at = DateTime.Now;
-                    _context.Add(block);
-                    //}
-                    //else
-                    //    _context.ProcessBlockModel.Update(block);
-                }
-            }
-            if (links.Count() > 0)
-            {
-                foreach (ProcessLinkModel link in links)
-                {
-                    //var existing = _context.ProcessLinkModel.Find(link.id);
-                    //if (existing == null)
-                    //{
-                    link.process_id = ProcessModel.id;
-                    _context.Add(link);
-                    //}
-                    //else
-                    //    _context.ProcessLinkModel.Update(link);
-                }
-            }
-            if (fields.Count() > 0)
-            {
-                int index = 0;
-                foreach (ProcessFieldModel field in fields)
-                {
-                    field.block = null;
-                    field.stt = index++;
-                    field.settings = JsonConvert.SerializeObject(field.data_setting);
-                    _context.Add(field);
-                }
-            }
-            _context.SaveChanges();
-            //return RedirectToAction(nameof(Index));
-            return Json(new { success = 1 });
-
-            //return Json(ModelState);
-        }
-
         // GET: Admin/Process/Edit/5
         public IActionResult Edit(string? id)
         {
@@ -116,75 +50,40 @@ namespace it.Areas.Admin.Controllers
             return View();
         }
 
-        // POST: Admin/Process/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        public async Task<JsonResult> Edit(string id, ProcessModel ProcessModel, List<ProcessBlockModel> blocks, List<ProcessLinkModel> links, List<ProcessFieldModel> fields)
+        public async Task<JsonResult> Save(string id, ProcessModel ProcessModel, List<ProcessBlockModel> blocks, List<ProcessLinkModel> links)
         {
-
+            var fields = new List<ProcessFieldModel>();
             if (id != ProcessModel.id)
             {
                 return Json(new { success = 0 });
             }
-
             try
             {
                 var ProcessModel_old = await _context.ProcessModel.FindAsync(id);
-                ProcessModel_old.updated_at = DateTime.Now;
-
-                foreach (string key in HttpContext.Request.Form.Keys)
+                if (ProcessModel_old == null)
                 {
-                    var prop = ProcessModel_old.GetType().GetProperty(key);
-                    var prop_new = ProcessModel.GetType().GetProperty(key);
-                    //if (key == "keyword")
-                    //{
-                    //    var type1 = "";
-                    //}
-                    if (prop != null)
-                    {
-                        string temp = Request.Form[key].FirstOrDefault();
-                        var value = prop.GetValue(ProcessModel_old, null);
-                        var value_new = prop.GetValue(ProcessModel, null);
-                        if (value == null && value_new == null)
-                            continue;
-
-                        var type = value != null ? value.GetType() : value_new.GetType();
-
-
-                        if (type == typeof(int))
-                        {
-                            int val = Int32.Parse(temp);
-                            prop.SetValue(ProcessModel_old, val);
-                        }
-                        else if (type == typeof(string))
-                        {
-                            prop.SetValue(ProcessModel_old, temp);
-                        }
-                        else if (type == typeof(decimal))
-                        {
-                            decimal val = decimal.Parse(temp);
-                            prop.SetValue(ProcessModel_old, temp);
-                        }
-                        else if (type == typeof(DateTime))
-                        {
-                            if (string.IsNullOrEmpty(temp))
-                            {
-                                prop.SetValue(ProcessModel_old, null);
-                            }
-                            else
-                            {
-                                DateTime.TryParse(temp, out DateTime val);
-                                prop.SetValue(ProcessModel_old, val);
-                            }
-                        }
-                    }
+                    System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+                    string user_id = UserManager.GetUserId(currentUser); // Get user id:
+                    ProcessModel.created_at = DateTime.Now;
+                    ProcessModel.user_id = user_id;
+                    ProcessModel.status_id = (int)ProcessStatus.Draft;
+                    ProcessModel.blocks = null;
+                    ProcessModel.fields = null;
+                    ProcessModel.links = null;
+                    _context.Add(ProcessModel);
                 }
-                _context.Update(ProcessModel_old);
+                else
+                {
+                    CopyValues<ProcessModel>(ProcessModel_old, ProcessModel);
+                    ProcessModel_old.updated_at = DateTime.Now;
+                    _context.Update(ProcessModel_old);
+                }
                 _context.SaveChanges();
 
                 ///Block
                 ///
+
                 var blocks_old = _context.ProcessBlockModel.Where(d => d.process_id == ProcessModel.id).Select(a => a.id).ToList();
                 var list_blocks = blocks.Select(block => block.id).ToList();
                 IEnumerable<string> list_delete_block = blocks_old.Except(list_blocks);
@@ -195,22 +94,20 @@ namespace it.Areas.Admin.Controllers
                 }
                 if (blocks.Count() > 0)
                 {
-                    int index = 0;
                     foreach (ProcessBlockModel block in blocks)
                     {
+                        if (block.fields != null)
+                            fields.AddRange(block.fields);
                         block.fields = null;
-                        block.stt = index++;
+                        block.process_id = ProcessModel.id;
                         var existing = _context.ProcessBlockModel.Where(d => d.id == block.id).FirstOrDefault();
                         if (existing == null)
                         {
-                            block.process_id = ProcessModel.id;
                             block.created_at = DateTime.Now;
-
-                            _context.ProcessBlockModel.Add(block);
+                            _context.Add(block);
                         }
                         else
                         {
-
                             CopyValues<ProcessBlockModel>(existing, block);
                             _context.Update(existing);
                         }
@@ -250,9 +147,7 @@ namespace it.Areas.Admin.Controllers
                 }
 
 
-
                 ///Fields
-                ///
                 var fields_old = _context.ProcessFieldModel.Where(d => d.process_id == ProcessModel.id).Select(a => a.id).ToList();
                 var list_fields = fields.Select(d => d.id).ToList();
                 IEnumerable<string> list_delete_fields = fields_old.Except(list_fields);
@@ -272,6 +167,7 @@ namespace it.Areas.Admin.Controllers
                         var existing = _context.ProcessFieldModel.Find(field.id);
                         if (existing == null)
                         {
+                            field.process_id = ProcessModel.id;
                             _context.ProcessFieldModel.Add(field);
                         }
                         else
@@ -391,7 +287,7 @@ namespace it.Areas.Admin.Controllers
 
         public async Task<JsonResult> Get(string id)
         {
-            var ProcessModel = _context.ProcessModel.Where(x => x.id == id).Include(x => x.blocks).Include(x => x.links).Include(x => x.fields).FirstOrDefault();
+            var ProcessModel = _context.ProcessModel.Where(x => x.id == id).Include(x => x.blocks).Include(x => x.links).FirstOrDefault();
             //var jsonData = new { data = ProcessModel };
             return Json(ProcessModel);
         }
