@@ -1,7 +1,8 @@
 ﻿using it.Data;
-using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 namespace it.Areas.Admin.Models
 {
     [Table("process_block")]
@@ -9,17 +10,17 @@ namespace it.Areas.Admin.Models
     {
         [Key]
         public string id { get; set; }
-        public string process_id { get; set; }
-        public string label { get; set; }
+        public string? process_id { get; set; }
+        public string? label { get; set; }
         public string clazz { get; set; }
-        public int type_performer { get; set; }
+        public int? type_performer { get; set; }
         public bool? has_deadline { get; set; }
         public string? guide { get; set; }
 
         [ForeignKey("process_id")]
-        public virtual ProcessModel process { get; set; }
+        public ProcessModel process { get; set; }
 
-        public virtual List<ProcessFieldModel> fields { get; set; }
+        public virtual List<ProcessFieldModel>? fields { get; set; }
         public string? settings { get; set; }
         [NotMapped]
         public virtual BlockSettings? data_setting
@@ -27,11 +28,11 @@ namespace it.Areas.Admin.Models
             get
             {
                 //Console.WriteLine(settings);
-                return JsonConvert.DeserializeObject<BlockSettings>(string.IsNullOrEmpty(settings) ? "{}" : settings);
+                return Newtonsoft.Json.JsonConvert.DeserializeObject<BlockSettings>(string.IsNullOrEmpty(settings) ? "{}" : settings);
             }
             set
             {
-                settings = JsonConvert.SerializeObject(value);
+                settings = Newtonsoft.Json.JsonConvert.SerializeObject(value);
             }
         }
         public double? x { get; set; }

@@ -1,5 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
+using System.Text.Json;
+using Newtonsoft.Json.Linq;
+using System.Reflection;
+using System.ComponentModel;
+
 namespace it.Areas.Admin.Models
 {
     [Table("execution")]
@@ -8,20 +14,34 @@ namespace it.Areas.Admin.Models
         [Key]
         public int id { get; set; }
 
-        public string name { get; set; }
+        public string title { get; set; }
         public string user_id { get; set; }
-        public int status_id { get; set; }
-
-        public string process_id { get; set; }
-
-        [ForeignKey("process_id")]
-        public ProcessModel process { get; set; }
+        public int? status_id { get; set; }
+        public string? status
+        {
+            get
+            {
+                if (status_id == null)
+                    return "";
+                ExecutionStatus ExecutionStatus = (ExecutionStatus)status_id;
+                var DisplayName = ExecutionStatus.GetType()
+                        .GetMember(ExecutionStatus.ToString())
+                        .First()
+                        .GetCustomAttributes<DisplayAttribute>().First();
+                //Console.WriteLine(settings);
+                return DisplayName.Name;
+            }
+        }
+        public string process_version_id { get; set; }
 
         public DateTime? created_at { get; set; }
 
         public DateTime? updated_at { get; set; }
 
         public DateTime? deleted_at { get; set; }
+
+        [ForeignKey("user_id")]
+        public UserModel user { get; set; }
     }
 
     enum ExecutionStatus

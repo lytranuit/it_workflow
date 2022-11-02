@@ -10,18 +10,20 @@ using Newtonsoft.Json;
 namespace it.Areas.Admin.Models
 {
 
-	[Table("AspNetUsers")]
-	public class UserModel : IdentityUser
-	{
-		public string FullName { get; set; }
-		public string? image_url { get; set; }
+    [Table("AspNetUsers")]
+    public class UserModel : IdentityUser
+    {
+        public string FullName { get; set; }
+        public string? image_url { get; set; }
 
-		public DateTime? created_at { get; set; }
+        public List<UserDepartmentModel> departments { get; set; }
 
-		public DateTime? updated_at { get; set; }
+        public DateTime? created_at { get; set; }
 
-		public DateTime? deleted_at { get; set; }
+        public DateTime? updated_at { get; set; }
+
+        public DateTime? deleted_at { get; set; }
 
 
-	}
+    }
 }

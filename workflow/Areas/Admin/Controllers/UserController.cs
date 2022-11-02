@@ -30,17 +30,13 @@ namespace it.Areas.Admin.Controllers
         public ActionResult Create()
         {
 
-            ViewData["groups"] = RoleManager.Roles.Select(a => new SelectListItem()
-            {
-                Value = a.Name,
-                Text = a.Name
-            }).ToList();
+
             return View();
         }
 
         // POST: UserController/Create
         [HttpPost]
-        public async Task<IActionResult> Create(UserModel User, List<string> groups, List<int> equipments)
+        public async Task<IActionResult> Create(UserModel User, List<string> groups, List<int> departments)
         {
 
             string password = "!PMP_it123456";
@@ -60,7 +56,16 @@ namespace it.Areas.Admin.Controllers
                 {
                     await UserManager.AddToRoleAsync(user, group);
                 }
-              
+                foreach (int department in departments)
+                {
+                    var UserDepartmentModel = new UserDepartmentModel()
+                    {
+                        user_id = user.Id,
+                        department_id = department,
+                    };
+                    _context.Add(UserDepartmentModel);
+                }
+                _context.SaveChanges();
                 return RedirectToAction("Index");
             }
             else
@@ -71,12 +76,7 @@ namespace it.Areas.Admin.Controllers
         // GET: UserController/Edit/5
         public async Task<IActionResult> Edit(string id)
         {
-            ViewData["groups"] = RoleManager.Roles.Select(a => new SelectListItem()
-            {
-                Value = a.Name,
-                Text = a.Name
-            }).ToList();
-            UserModel User = _context.UserModel.Where(d => d.Id == id).FirstOrDefault();
+            UserModel User = _context.UserModel.Where(d => d.Id == id).Include(d => d.departments).FirstOrDefault();
             var RolesForThisUser = await UserManager.GetRolesAsync(User);
             ViewData["RolesForThisUser"] = RolesForThisUser;
             return View(User);
@@ -84,7 +84,7 @@ namespace it.Areas.Admin.Controllers
 
         // POST: UserController/Edit/5
         [HttpPost]
-        public async Task<IActionResult> Edit(string id, UserModel User, List<string> groups, List<int> equipments)
+        public async Task<IActionResult> Edit(string id, UserModel User, List<string> groups, List<int> departments)
         {
             //return Ok(User);
             if (id != User.Id)
@@ -103,7 +103,19 @@ namespace it.Areas.Admin.Controllers
             {
                 await UserManager.AddToRoleAsync(User_old, group);
             }
-           
+            ///
+            var departments_old = _context.UserDepartmentModel.Where(d => d.user_id == User_old.Id).ToList();
+            _context.RemoveRange(departments_old);
+            foreach (int department in departments)
+            {
+                var UserDepartmentModel = new UserDepartmentModel()
+                {
+                    user_id = User_old.Id,
+                    department_id = department,
+                };
+                _context.Add(UserDepartmentModel);
+            }
+            _context.SaveChanges();
             IdentityResult result = await UserManager.UpdateAsync(User_old);
             if (result.Succeeded)
                 return RedirectToAction("Index");

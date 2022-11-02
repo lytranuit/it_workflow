@@ -32,33 +32,26 @@ namespace it.Areas.Admin.Controllers
 
 
         // GET: Admin/Execution/Create
-        public IActionResult Create()
+        public IActionResult Create(string? id)
         {
-
+            var ProcessVersionModel = _context.ProcessVersionModel.Where(d => d.id == id).FirstOrDefault();
+            if (ProcessVersionModel == null)
+                return NotFound();
+            ViewBag.id = id;
             return View();
         }
 
-        // POST: Admin/Execution/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        public async Task<JsonResult> Create(ExecutionModel ExecutionModel)
-        {
-            //return RedirectToAction(nameof(Index));
-            return Json(new { success = 1 });
-
-            //return Json(ModelState);
-        }
-
         // GET: Admin/Execution/Edit/5
-        public IActionResult Details(string? id)
+        public IActionResult Details(string? id, int? execution_id)
         {
-            if (id == null || _context.ExecutionModel == null)
-            {
+            var ExecutionModel = _context.ExecutionModel.Where(d => d.id == execution_id).FirstOrDefault();
+            if (ExecutionModel == null)
                 return NotFound();
-            }
-            ViewBag.id = id;
-
+            var process_version_id = ExecutionModel.process_version_id;
+            if (process_version_id != id)
+                return NotFound();
+            ViewBag.execution_id = execution_id;
+            ViewBag.process_version_id = process_version_id;
             return View();
         }
         [HttpPost]
@@ -75,7 +68,7 @@ namespace it.Areas.Admin.Controllers
             customerData = customerData.Where(m => m.deleted_at == null);
             if (!string.IsNullOrEmpty(searchValue))
             {
-                customerData = customerData.Where(m => m.name.Contains(searchValue));
+                customerData = customerData.Where(m => m.title.Contains(searchValue));
             }
             int recordsFiltered = customerData.Count();
             //customerData = customerData.Include(m => m.group);
@@ -110,7 +103,7 @@ namespace it.Areas.Admin.Controllers
                 {
                     action = html_action,
                     id = "<a href='/admin/" + _type + "/edit/" + record.id + "'><i class='fas fa-pencil-alt mr-2'></i> " + record.id + "</a>",
-                    name = record.name,
+                    name = record.title,
                     status = html_status,
                     group = html_group
                 };

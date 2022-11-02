@@ -1,5 +1,9 @@
-import Vue from 'vue'
-import App from './App.vue'
+﻿import Vue from 'vue';
+import App from './App.vue';
+import PopupExecution from './PopupExecution.vue';
+import Execution from './Execution.vue';
+import User from './User.vue';
+import store from "./store";
 ////ElementUI
 import ElementUI from 'element-ui'
 Vue.use(ElementUI);
@@ -18,6 +22,28 @@ Vue.component("datetime", Datetime);
 import draggable from 'vuedraggable'
 Vue.component('draggable', draggable);
 Vue.config.productionTip = false;
-new Vue({
-    render: h => h(App),
-}).$mount('#app');
+if ($("#app").length) {
+	new Vue({
+		store,
+		render: h => h(App)
+	}).$mount('#app');
+}
+if ($("#popup-execution").length) {
+	new Vue({
+		store,
+		render: h => h(PopupExecution)
+	}).$mount('#popup-execution');
+}
+if ($("#execution").length) {
+	new Vue({
+		store,
+		render: h => h(Execution)
+	}).$mount('#execution');
+}
+
+if ($("#user").length) {
+	new Vue({
+		store,
+		render: h => h(User)
+	}).$mount('#user');
+}

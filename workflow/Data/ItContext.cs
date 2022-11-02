@@ -29,6 +29,10 @@ namespace it.Data
         public DbSet<ProcessFieldModel> ProcessFieldModel { get; set; }
         public DbSet<DepartmentModel> DepartmentModel { get; set; }
         public DbSet<ExecutionModel> ExecutionModel { get; set; }
+        public DbSet<ActivityModel> ActivityModel { get; set; }
+        public DbSet<TransitionModel> TransitionModel { get; set; }
+        public DbSet<ProcessVersionModel> ProcessVersionModel { get; set; }
+        public DbSet<UserDepartmentModel> UserDepartmentModel { get; set; }
         //public override int SaveChanges()
         //{
         //    var audit = new Audit();

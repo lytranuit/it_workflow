@@ -4,18 +4,17 @@
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @addTagHelper *, workflow
 @{
-    ViewData["Title"] = "Edit";
-    Layout = "~/Views/Shared/_Admin.cshtml";
+	ViewData["Title"] = "Edit";
+	Layout = "~/Views/Shared/_Admin.cshtml";
 }
 
 
 <div id="app">
+
 </div>
 
 @section Scripts {
-<script setup>
-    var process_id = '@ViewBag.id';
-</script>
-<script src="~/bundle/js/chunk-vendors.js"></script>
-<script src="~/bundle/js/app.js"></script>
+	<script setup>
+		var process_id = '@ViewBag.id';
+	</script>
 }

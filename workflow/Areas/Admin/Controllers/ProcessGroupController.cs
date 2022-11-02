@@ -166,12 +166,6 @@ namespace it.Areas.Admin.Controllers
             return Json(jsonData);
         }
 
-        public async Task<JsonResult> GetAll()
-        {
-            var ProcessGroupModel = _context.ProcessGroupModel.Where(x => x.deleted_at == null).Include(x => x.list_process.Where(d => d.deleted_at == null && d.status_id == (int)ProcessStatus.Release)).ToList();
-            //var jsonData = new { data = ProcessModel };
-            return Json(ProcessGroupModel);
-        }
 
     }
 }

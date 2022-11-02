@@ -16,6 +16,7 @@ namespace it.Areas.Admin.Models
         public string? label { get; set; }
         public bool reverse { get; set; }
 
+        public string clazz { get; set; }
 
         [ForeignKey("process_id")]
         public virtual ProcessModel process { get; set; }

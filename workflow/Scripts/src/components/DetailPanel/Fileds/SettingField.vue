@@ -38,14 +38,14 @@
                                         <input class="form-control form-control-sm file" type='file' />
                                     </div>
                                     <div v-if="element.type == 'date'">
-                                        <datetime class="form-control form-control-sm" type="datetime" format="yyyy-MM-dd" :flow="['date']"></datetime>
+                                        <datetime type="datetime" format="yyyy-MM-dd" :flow="['date']" input-class="form-control form-control-sm"></datetime>
                                     </div>
                                     <div v-if="element.type == 'date_month'">
-                                        <datetime class="form-control form-control-sm" type="datetime" format="yyyy-MM" :flow="['year','month']"></datetime>
+                                        <datetime type="datetime" format="yyyy-MM" :flow="['year','month']" input-class="form-control form-control-sm"></datetime>
                                     </div>
 
                                     <div v-if="element.type == 'date_time'">
-                                        <datetime class="form-control form-control-sm" type="datetime" format="yyyy-MM-dd HH:mm:ss"></datetime>
+                                        <datetime type="datetime" format="yyyy-MM-dd HH:mm:ss" input-class="form-control form-control-sm"></datetime>
                                     </div>
 
                                     <div v-if="element.type == 'select'">

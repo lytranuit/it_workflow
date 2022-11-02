@@ -13,6 +13,8 @@ namespace it.Areas.Admin.Models
         public string name { get; set; }
 
         public List<ProcessModel> list_process { get; set; }
+
+        public List<ProcessVersionModel> list_process_version { get; set; }
         public DateTime? created_at { get; set; }
 
         public DateTime? updated_at { get; set; }
