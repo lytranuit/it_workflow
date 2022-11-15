@@ -87,8 +87,8 @@
                             </div>
                             <div v-if="element.type == 'table'">
 
-                                <table class="table table-bordered mb-0 table-centered">
-                                    <thead class="thead-light">
+                                <table class="table table-bordered mb-0 bg-white" style="outline: 1px solid #dee2e6 !important">
+                                    <thead class="">
                                         <tr>
                                             <th class="border-top-0" v-for="(column,index1) in element.data_setting.columns" :key="column.id">
                                                 {{column.name}}

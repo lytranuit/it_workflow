@@ -9,6 +9,9 @@
 <link href="~/lib/el-ui/index.css" rel="stylesheet" type="text/css" />
 <div id="execution"></div>
 @section Scripts {
+	@{
+		await Html.RenderPartialAsync("_ValidationScriptsPartial");
+	}
 	<script setup>
 		var execution_id = '@ViewBag.execution_id';
 		var process_version_id = '@ViewBag.process_version_id';

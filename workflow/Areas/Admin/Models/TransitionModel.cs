@@ -19,6 +19,8 @@ namespace it.Areas.Admin.Models
         public int? stt { get; set; }
 
 
+        public string? label { get; set; }
+
         public string? created_by { get; set; }
         public DateTime? created_at { get; set; }
 

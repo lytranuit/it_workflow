@@ -72,40 +72,31 @@ namespace it.Areas.Admin.Controllers
             }
             int recordsFiltered = customerData.Count();
             //customerData = customerData.Include(m => m.group);
-            var datapost = customerData.Skip(skip).Take(pageSize).ToList();
+            var datapost = customerData.Include(d => d.process_version).Include(d => d.user).Skip(skip).Take(pageSize).ToList();
             var data = new ArrayList();
 
             foreach (var record in datapost)
             {
                 //var group = record.group;
-                var html_group = "";
-                var html_status = "";
+                var html_process = record.process_version.process.name;
+                var html_status = $"<div class='status status_{record.status_id}'>{record.status}</div>";
                 var html_action = "<div class='btn-group'>";
-                if (record.status_id == (int)ExecutionStatus.Draft)
-                {
-                    html_status = "<button class='btn btn-sm text-white btn-info'>" + ExecutionStatus.Draft + "</button>";
-                    html_action += "<a href='/admin/" + _type + "/release/" + record.id + "' class='btn btn-success btn-sm' title='Phát hành?' data-type='confirm'>"
-                        + "<i class='fas fa-arrow-up'></i>"
-                        + "</i>"
-                        + "</a>";
-                }
-                //else if (record.status_id == (int)ExecutionStatus.Release)
-                //{
-                //    html_status = "<button class='btn btn-sm text-white btn-success'>" + ExecutionStatus.Release + "</button>";
-                //}
-
-                html_action += "<a href='/admin/" + _type + "/delete/" + record.id + "' class='btn btn-danger btn-sm' title='Xóa?' data-type='confirm'>'"
-                        + "<i class='fas fa-trash-alt'>"
+                var html_user = record.user.FullName;
+                var html_date = ((DateTime)record.created_at).ToString("dd/MM/yyyy");
+                html_action += "<a href='/admin/" + _type + "/delete/" + record.id + "' class='' title='Xóa?' data-type='confirm'>"
+                        + "<i class='fas text-danger font-16 fa-trash-alt'>"
                         + "</i>"
                         + "</a>";
                 html_action += "</div>";
                 var data1 = new
                 {
                     action = html_action,
-                    id = "<a href='/admin/" + _type + "/edit/" + record.id + "'><i class='fas fa-pencil-alt mr-2'></i> " + record.id + "</a>",
-                    name = record.title,
+                    id = "<a href='/admin/" + _type + "/details/" + record.process_version_id + "?execution_id=" + record.id + "'><i class='fas fa-pencil-alt mr-2'></i> " + record.id + "</a>",
+                    title = record.title,
                     status = html_status,
-                    group = html_group
+                    user_create = html_user,
+                    date_create = html_date,
+                    process = html_process
                 };
                 data.Add(data1);
             }
@@ -113,6 +104,22 @@ namespace it.Areas.Admin.Controllers
             return Json(jsonData);
         }
 
+        public async Task<IActionResult> Delete(int id)
+        {
+            if (_context.ExecutionModel == null)
+            {
+                return Problem("Entity set 'ItContext.ExecutionModel'  is null.");
+            }
+            var ExecutionModel = await _context.ExecutionModel.FindAsync(id);
+            if (ExecutionModel != null)
+            {
+                ExecutionModel.deleted_at = DateTime.Now;
+                _context.ExecutionModel.Update(ExecutionModel);
+            }
+
+            _context.SaveChanges();
+            return RedirectToAction(nameof(Index));
+        }
 
         public void CopyValues<T>(T target, T source)
         {

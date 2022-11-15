@@ -12,7 +12,7 @@
 						<i class="fas fa-pen" v-if="!edit"></i>
 						<i class="fas fa-check" v-else></i>
 					</span>
-					<div class="status processing">{{model.status}}</div>
+					<div class="status" :class="'status_' + model.status_id">{{model.status}}</div>
 				</div>
 				<div class="flex-m">
 					<span class="">
@@ -38,12 +38,29 @@
 			</div>-->
 		</div>
 		<wfd-vue-execution ref="wfd" :data="data" :data_transition="data_transition" :data_activity="data_activity" :departments="departments" :users="users" :height="600" :lang="lang" mode="executing" @save_data="save_data" />
+		<div class="row mt-2" v-if="model.id > 0">
+			<div class="col-md-9">
+				<comment :model="model"></comment>
+			</div>
+			<div class="col-md-3">
+				<div class="card no-shadow border">
+					<div class="card-header">
+						<b>Sự kiện</b>
+					</div>
+					<div class="card-body" style="max-height: 500px;overflow: auto;">
+						<div class="activity" id="event">
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 	</div>
 </template>
 
 <script>
 	import store from './store';
 	import WfdVueExecution from '../src/components/Wfd-Execution';
+	import Comment from '../src/components/Comment';
 	export default {
 		name: 'execution',
 		data() {
@@ -57,7 +74,8 @@
 			}
 		},
 		components: {
-			WfdVueExecution
+			WfdVueExecution,
+			Comment
 		},
 		computed: {
 			data() {
@@ -133,6 +151,7 @@
 					var data2 = that.$refs['wfd'].initShape();
 					graph.read(data2);
 					graph.fitView()
+					graph.executeCommand("currentFlow")
 				}, 100)
 			} else {
 				///fetch_info
@@ -163,7 +182,6 @@
 						label: start.get("model").label,
 						block_id: start.get("model").id,
 						stt: 1,
-						performer_id: user.id,
 						clazz: start.get("model").clazz,
 						is_new: true,
 						executed: true,
@@ -184,7 +202,7 @@
 						var transition = {
 							is_new: true,
 							label: item.get("model").label,
-							reverse: false,
+							reverse: item.get("model").reverse,
 							link_id: item.get("model").id,
 							execution_id: null,
 							from_block_id: source.get("model").id,
@@ -204,6 +222,7 @@
 						var data2 = that.$refs['wfd'].initShape();
 						graph.read(data2);
 						graph.fitView()
+						graph.executeCommand("currentFlow")
 					}, 100)
 				}, 100)
 
@@ -213,7 +232,6 @@
 		methods: {
 			update(e) {
 				var value = $(e.target).text();
-				console.log(e);
 				this.model.title = value;
 			},
 			initModel(execution) {
@@ -254,6 +272,9 @@
 			async save_data() {
 				var data_transition = this.data_transition;
 				var data_activity = this.data_activity;
+				//console.log(data_transition);
+				//console.log(data_activity)
+				//return;
 				var model = this.model;
 				if (model.id > 0) {
 
@@ -267,13 +288,22 @@
 				}
 				for (var item of data_transition) {
 					item.execution_id = model.id;
-					if (item.is_new)
+					if (item.is_new) {
 						var resp = await $.ajax({ url: path + "/admin/api/createtransition", data: item, type: "POST", dataType: "JSON" });
+					} else if (item.is_update) {
+						var resp = await $.ajax({ url: path + "/admin/api/updatetransition", data: item, type: "POST", dataType: "JSON" });
+					}
 				}
 				for (var item of data_activity) {
 					item.execution_id = model.id;
-					if (item.is_new && !item.blocking)
+					if (item.is_new && !item.blocking) {
+						if (item.fields) {
+							for (var field of item.fields) {
+								field.execution_id = model.id;
+							}
+						}
 						var resp = await $.ajax({ url: path + "/admin/api/createactivity", data: item, type: "POST", dataType: "JSON" });
+					}
 				}
 				location.href = path + "/admin/execution/details/" + process_version_id + "?execution_id=" + model.id;
 			}
@@ -313,24 +343,6 @@
 			padding: 5px 20px;
 			cursor: pointer;
 			line-height: 20px;
-		}
-
-		.processing {
-			background-color: #d8f4ff;
-			color: #0c9cdd;
-		}
-
-		.status {
-			border-radius: 4px;
-			padding: 0 16px;
-			height: 28px;
-			min-width: auto;
-			display: flex;
-			justify-content: center;
-			overflow: hidden;
-			font-size: 12px;
-			font-weight: 500;
-			line-height: 28px;
 		}
 	}
 </style>

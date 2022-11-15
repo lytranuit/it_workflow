@@ -33,6 +33,12 @@ namespace it.Data
         public DbSet<TransitionModel> TransitionModel { get; set; }
         public DbSet<ProcessVersionModel> ProcessVersionModel { get; set; }
         public DbSet<UserDepartmentModel> UserDepartmentModel { get; set; }
+
+        public DbSet<CommentModel> CommentModel { get; set; }
+        public DbSet<CommentFileModel> CommentFileModel { get; set; }
+        public DbSet<EventModel> EventModel { get; set; }
+        public DbSet<UserReadModel> UserReadModel { get; set; }
+        public DbSet<UserUnreadModel> UserUnreadModel { get; set; }
         //public override int SaveChanges()
         //{
         //    var audit = new Audit();

@@ -34,6 +34,10 @@ namespace it.Areas.Admin.Models
         }
         public string process_version_id { get; set; }
 
+
+        [ForeignKey("process_version_id")]
+        public ProcessVersionModel process_version { get; set; }
+
         public DateTime? created_at { get; set; }
 
         public DateTime? updated_at { get; set; }

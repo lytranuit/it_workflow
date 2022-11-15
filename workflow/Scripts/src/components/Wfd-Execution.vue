@@ -3,7 +3,7 @@
 		<ToolbarPanel ref="toolbar" :mode="mode" />
 		<div ref="canvas" class="canvasPanel" :style="{'height':height+'px','width':'100%'}"></div>
 		<Transition name="slide">
-			<sidebar :model="selectedModel" ref="sidebar" v-if="selectedModel != null" @execute_transition="execute_transition"></sidebar>
+			<sidebar :model="selectedModel" ref="sidebar" v-if="selectedModel != null" @execute_transition="execute_transition" :departments="departments" :users="users" :nodes="data.nodes"></sidebar>
 		</Transition>
 	</div>
 </template>
@@ -127,12 +127,41 @@
 						var outEdges = target.getOutEdges().map(function (i) {
 							return i.get("model");
 						});
+						var fields = node.fields || [];
+						fields = fields.map(function (i) {
+							i.data_setting = i.data_setting || {};
+							i.values = {};
+							switch (i.type) {
+								case "number":
+								case "text":
+								case "email":
+								case "date":
+								case "date_month":
+								case "date_time":
+								case "select":
+								case "department":
+								case "textarea":
+								case "employee":
+									var value = i.has_default ? i.data_setting.default_value : null;
+									i.values = { value: value };
+									break;
+								case "select_multiple":
+								case "employee_multiple":
+								case "department_multiple":
+									var value_array = i.has_default ? i.data_setting.default_value_array : null;
+									i.values = { value_array: value_array };
+									break;
+								case "table":
+									i.values = { list_data: [] };
+									break;
+							}
+							return i;
+						});
 						var activity = {
 							execution_id: null,
 							label: target.get("model").label,
 							block_id: target.get("model").id,
 							stt: data_activity.length + 1,
-							performer_id: null,////
 							clazz: target.get("model").clazz,
 							is_new: true,
 							executed: false,
@@ -304,6 +333,7 @@
 				return null;
 			},
 			execute_transition(from_activity_id, edge_id) {
+
 				var that = this;
 				var data_activity = this.data_activity;
 				var data_transition = this.data_transition;
@@ -321,13 +351,18 @@
 					return node.get('model').id === edge_id;
 				});
 				//////UPDATE Current
+				if (!edge.get("model").reverse) {
+					var vaild = $("#sidebar-right").valid();
+					if (!vaild) {
+						return;
+					}
+					activity.failed = false;
+				}
 				activity.blocking = false;
 				activity.executed = true;
 				activity.failed = true;
-				if (!edge.reverse) {
-					activity.failed = false;
-				}
 				transition.to_activity_id = activity.id;
+				transition.is_update = true;
 				//
 				var source = edge.getSource();
 				var target = edge.getTarget();
@@ -336,7 +371,7 @@
 				var transition_new = {
 					is_new: true,
 					label: edge.get("model").label,
-					reverse: false,
+					reverse: edge.get("model").reverse,
 					link_id: edge.get("model").id,
 					execution_id: null,
 					from_block_id: source.get("model").id,
@@ -347,7 +382,25 @@
 					id: rand(),
 				}
 				data_transition.push(transition_new);
+				//CHECK TARGET
+				if (target.get("model").clazz == 'success' || target.get("model").clazz == 'fail') {
+					var activity_new = {
+						execution_id: null,
+						label: target.get("model").label,
+						block_id: target.get("model").id,
+						stt: data_activity.length + 1,
+						clazz: target.get("model").clazz,
+						is_new: true,
+						executed: true,
+						failed: false,
+						blocking: false,
+						in_transition_id: transition.id,
+						id: rand()
+					}
+					data_activity.push(activity_new);
 
+					transition_new.to_activity_id = activity_new.id;
+				}
 				store.commit('SET_DATA_ACTIVITY', data_activity);
 				store.commit('SET_DATA_TRANSITION', data_transition);
 
@@ -360,6 +413,7 @@
 				}, 100)
 
 			},
+
 			save_data() {
 				this.$emit("save_data");
 			}
@@ -380,7 +434,7 @@
 		width: 100%;
 		height: 100%;
 		background-color: #fff;
-		display: block;
+		display: inline-block;
 	}
 
 	.canvasPanel {

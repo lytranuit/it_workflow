@@ -1,8 +1,12 @@
 ﻿<template>
-	<div class="sidebar-right">
+	<form id="sidebar-right">
 		<div class="header flex-m">
-			<span class="tilte">{{model.label}}</span>
-
+			<div>
+				<div class="tilte">{{model.label}}</div>
+				<div class="flex-m" v-if="html != ''">
+					<div class=" flex-m"> Người thực hiện: <span v-html="html" class="ml-1"></span></div>
+				</div>
+			</div>
 			<div class="ml-auto" v-if="model.blocking">
 				<button class="mr-2" :class="{'btn-reverse':item.reverse,'btn-next':!item.reverse}" tabindex="1" type="button" name="button" v-for="item in model.outEdges" :key="item.id" @click="execute_transition(model.id,item.id)">
 					{{item.label}}
@@ -10,143 +14,20 @@
 			</div>
 		</div>
 		<div class="body">
-			<div class="item-control flex-m" v-for="(element,index) in model.fields" :key="element.id">
-				<div class="mb-3 ml-3 flex-m w-100">
-					<div class="form-input-data-preview mr-3 w-100">
-						<div class="form-input-control flex-m">
-							<div class="mb-2 custom-title-inline pr-2" style="width:200px;">
-								<div class="container-label">
-									<div class="container-left">
-										<div id="idControlName" class="font-weight-bold font-14 pr-2 d-inline-block">
-											<div style="">
-												{{element.name}}
-												<span class="text-danger" style="float: inherit;" v-if="element.is_require"> * </span>
-											</div>
-										</div>
-										<div class="btn-selectTion-guide icon icon-infor-blue cursor-pointer icon-control" style="color:#0c9cdd;float:right;" v-show="element.guide && element.guide != ''">
-											<el-tooltip :content="element.guide" placement="bottom">
-												<i class="fas fa-info-circle" style="cursor:pointer;"></i>
-											</el-tooltip>
-										</div>
-									</div>
-								</div>
-							</div>
-							<div class="form-input-control-left w-100" v-if="element.type != 'table'">
-								<div v-if="element.type == 'number'">
-									<input class="form-control form-control-sm number" type='number' v-model="element.value" />
-								</div>
-								<div v-if="element.type == 'text'">
-									<input class="form-control form-control-sm text" type='text' v-model="element.value" />
-								</div>
-								<div v-if="element.type == 'email'">
-									<input class="form-control form-control-sm email" type='email' v-model="element.value" />
-								</div>
-								<div v-if="element.type == 'file'">
-									<input class="form-control form-control-sm file" type='file' />
-								</div>
-								<div v-if="element.type == 'date'">
-									<datetime type="datetime" format="yyyy-MM-dd" :flow="['date']" input-class="form-control form-control-sm"></datetime>
-								</div>
-								<div v-if="element.type == 'date_month'">
-									<datetime type="datetime" format="yyyy-MM" :flow="['year','month']" input-class="form-control form-control-sm"></datetime>
-								</div>
-
-								<div v-if="element.type == 'date_time'">
-									<datetime type="datetime" format="yyyy-MM-dd HH:mm:ss" input-class="form-control form-control-sm"></datetime>
-								</div>
-
-								<div v-if="element.type == 'select'">
-									<treeselect :options="get_options(element.data_setting.options)" :value="element.has_default ? element.data_setting.default_value : ''"> </treeselect>
-								</div>
-
-								<div v-if="element.type == 'select_multiple'">
-									<treeselect :options="get_options(element.data_setting.options)" :value="element.has_default ? element.data_setting.default_value_array : []" multiple></treeselect>
-								</div>
-								<div v-if="element.type == 'textarea'">
-									<textarea class="form-control form-control-sm textarea" :value="element.has_default ? element.data_setting.default_value : ''"></textarea>
-								</div>
-
-								<div v-if="element.type == 'employee'">
-									<treeselect :options="users" :value="element.has_default ? element.data_setting.default_value : ''"></treeselect>
-								</div>
-
-								<div v-if="element.type == 'employee_multiple'">
-									<treeselect :options="users" :value="element.has_default ? element.data_setting.default_value_array : []" multiple></treeselect>
-								</div>
-
-								<div v-if="element.type == 'department'">
-									<treeselect :options="departments" :value="element.has_default ? element.data_setting.default_value : ''"></treeselect>
-								</div>
-
-								<div v-if="element.type == 'department_multiple'">
-									<treeselect :options="departments" :value="element.has_default ? element.data_setting.default_value_array : []" multiple></treeselect>
-								</div>
-
-								<div v-if="element.type == 'task'">
-									<div class="checkbox checkbox-success checkbox-circle" v-for="element in element.data_setting.options" :key="element.id">
-										<input :id="'task-' + element.id" type="checkbox">
-										<label :for="'task-' + element.id">
-											{{element.name}}
-										</label>
-									</div>
-								</div>
-							</div>
-						</div>
-						<div v-if="element.type == 'table'">
-
-							<table class="table table-bordered mb-0 table-centered">
-								<thead class="thead-light">
-									<tr>
-										<th class="border-top-0" v-for="(column,index1) in element.data_setting.columns" :key="column.id">
-											{{column.name}}
-											<span class="text-danger" v-if="column.is_require">*</span>
-										</th>
-									</tr>
-								</thead>
-								<tr>
-									<td v-for="(column,index1) in element.data_setting.columns" :key="column.id">
-										<div v-if="column.type == 'stt'">
-											1
-										</div>
-										<div v-if="column.type == 'number'">
-											<input class="form-control form-control-sm number" type='number' />
-										</div>
-										<div v-if="column.type == 'text'">
-											<input class="form-control form-control-sm text" type='text' />
-										</div>
-										<div v-if="column.type == 'email'">
-											<input class="form-control form-control-sm email" type='email' />
-										</div>
-										<div v-if="column.type == 'date'">
-											<input class="form-control form-control-sm date" type='text' />
-										</div>
-										<div v-if="column.type == 'date_month'">
-											<input class="form-control form-control-sm date_month" type='text' />
-										</div>
-
-										<div v-if="column.type == 'date_time'">
-											<input class="form-control form-control-sm date_time" type='text' />
-										</div>
-										<div v-if="column.type == 'textarea'">
-											<textarea class="form-control form-control-sm textarea"></textarea>
-										</div>
-									</td>
-								</tr>
-								<tbody>
-								</tbody>
-							</table>
-						</div>
-					</div>
-				</div>
-			</div>
+			<FormTask :departments="departments" :users="users" :fields="fields" :readonly="readonly" v-if="model.clazz == 'formTask'"></FormTask>
+			<ApproveTask :departments="departments" :users="users" :nodes="nodes" v-if="model.clazz == 'approveTask'" :model="model"></ApproveTask>
 		</div>
-	</div>
+	</form>
 </template>
 <script>
-
+	import store from '../../../example/store';
+	import FormTask from './FormTask';
+	import ApproveTask from './ApproveTask';
 	export default {
 		inject: ['i18n'],
 		components: {
+			FormTask,
+			ApproveTask
 		},
 		props: {
 			model: {
@@ -166,16 +47,72 @@
 				default: () => ([]),
 			},
 		},
+		data() {
+			return {
+				readonly: false,
+				html: ""
+			}
+		},
+		watch: {
+			model: {
+				handler(newData, oldData) {
+					if (oldData !== newData) {
+						this.initHtml();
+						if (this.model.clazz == "formTask")
+							this.readonly = !this.model.blocking;
+					}
+				},
+				immediate: true,
+				deep: true
+			}
+		},
+		computed: {
+			fields() {
+				return this.model.fields;
+			}
+		},
+		mounted() {
+
+		},
 		methods: {
 			execute_transition(from_activity_id, edge_id) {
 				var that = this;
 				that.$emit('execute_transition', from_activity_id, edge_id);
+			},
+			initHtml() {
+				var html = "";
+				var model = this.model;
+				var transitions = store.state.data_transition;
+				var findTransition = transitions.findIndex(function (item) {
+					return item.from_activity_id == model.id;
+				});
+				var transition = transitions[findTransition];
+
+				var created_at = this.model.created_at;
+				var user_created_by = this.model.user_created_by;
+				if (user_created_by) {
+					html += "<b>" + user_created_by.fullName + "</b>";
+				}
+				if (transition && transition.label) {
+					var reverse = transition.reverse;
+					var label = transition.label;
+					var Iclass = "ml-1";
+					if (reverse)
+						Iclass += " text-danger";
+					else
+						Iclass += " text-success";
+					html += "<span class='" + Iclass + "'>đã " + label.toLowerCase() + "</span>";
+				}
+				if (created_at) {
+					html += " lúc <b>" + moment(created_at).format("HH:mm DD/MM/YYYY") + "</b>";
+				}
+				this.html = html;
 			}
 		}
 	}
 </script>
 <style lang="scss" scoped>
-	.sidebar-right {
+	#sidebar-right {
 		position: fixed;
 		top: 0;
 		right: 0;
@@ -218,6 +155,8 @@
 
 		.body {
 			padding: 20px 10px;
+			height: calc(100vh - 75px);
+			overflow: auto;
 		}
 	}
 </style>
