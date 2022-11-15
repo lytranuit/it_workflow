@@ -4,12 +4,12 @@
 			<b>Thảo luận</b>
 		</div>
 		<div class="card-body">
-			<form id="binhluan" :action="path + '/admin/api/addcomment'" method="POST" enctype="multipart/form-data">
+			<form id="binhluan" enctype="multipart/form-data">
 				<input name="execution_id" :value="model.id" type="hidden" />
 				<textarea required name="comment" style="padding:10px 20px;border: 1px solid #d5d5d5; width:100%;border-radius: 5px;" rows="2" placeholder="Bình luận?"></textarea>
 				<div>
 					<div class="float-right">
-						<button class="btn btn-sm btn-gradient-primary text-light px-4 mb-0 add_comment">Bình luận</button>
+						<button class="btn btn-sm btn-gradient-primary text-light px-4 mb-0" @click="add_comment">Bình luận</button>
 					</div>
 					<div class="d-inline-block">
 						<input name="file[]" multiple type="file" class="dropify" data-height="75" data-max-file-size="10M" />
@@ -61,6 +61,32 @@
 					data: { execution_id: execution_id },
 				});
 				this.comments = ress.comments;
+			},
+			async add_comment(e) {
+				e.preventDefault();
+				var comment = $("[name=comment]").val();
+				var files = $("[name='file[]']")[0].files;
+				//console.log(files);
+				//return false;
+				if (comment == "" && !files.length) {
+					alert("Mời nhập bình luận!");
+					return false;
+				}
+				var form = $('#binhluan')[0];
+				var formData = new FormData(form);
+
+				$('#binhluan').trigger("reset");
+				$.ajax({
+					url: path + "/admin/api/addcomment",
+					data: formData,
+					processData: false,
+					contentType: false,
+					type: "POST",
+					success: function (result) {
+						if (result.success) {
+						}
+					}
+				})
 			}
 		}
 	}
