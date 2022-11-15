@@ -72,6 +72,7 @@
         border-right: 1px solid #E9E9E9;
         border-bottom: 1px solid #E9E9E9;
         border-left: 1px solid #E9E9E9;
+        overflow: auto;
 
         .panelTitle {
             text-align: left;

@@ -17,6 +17,7 @@ module.exports = function (grunt) {
                         'wwwroot/lib/chosen/chosen.css',
                         'wwwroot/lib/datatables/datatables.min.css',
                         'wwwroot/lib/sweet-alert2/sweetalert2.min.css',
+                        'wwwroot/lib/fileicon/fileicon.css',
                         'wwwroot/lib/dropify/css/dropify.min.css',
                         'wwwroot/lib/multiselect/dist/css/bootstrap-multiselect.min.css',
                         'wwwroot/lib/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css',

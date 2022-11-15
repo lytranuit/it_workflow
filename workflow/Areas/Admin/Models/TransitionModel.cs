@@ -8,7 +8,7 @@ namespace it.Areas.Admin.Models
         [Key]
         public string id { get; set; }
 
-        public int? execution_id { get; set; }
+        public int execution_id { get; set; }
         public string? from_block_id { get; set; }
         public string? to_block_id { get; set; }
         public string? link_id { get; set; }

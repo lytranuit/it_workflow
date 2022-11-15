@@ -1,8 +1,8 @@
 import editorStyle from '../util/defaultStyle';
 import { getShapeName } from '../util/clazz';
 import ControlPoint from '../item/controlPoint';
-const Node = require('@antv/g6/lib/item/node');
-const Edge = require('@antv/g6/lib/item/edge');
+const Node = require('@antv/g6-core/lib/element/node');
+const Edge = require('@antv/g6-core/lib/element/edge');
 
 export default function(G6) {
   G6.registerNode('sub-process-node', {

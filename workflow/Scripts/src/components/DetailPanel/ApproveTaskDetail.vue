@@ -15,11 +15,12 @@
                                 <option value="2">Người thực hiện bước trước tự chọn</option>
                                 <option value="3">Bộ phận</option>
                                 <option value="4">Người dùng</option>
+                                <option value="5">Người khởi tạo</option>
                             </select>
                         </div>
                         <div class="my-2" v-if="model.type_performer == 1 || model.type_performer == 2">
                             <b>Bước:</b>
-                            <treeselect append-to-body :options="nodes" v-model="model.data_setting.block_id"></treeselect>
+                            <treeselect append-to-body :options="prev_nodes" v-model="model.data_setting.block_id"></treeselect>
                         </div>
                         <div class="my-2" v-if="model.type_performer == 4">
                             <b>Người dùng:</b>
@@ -66,7 +67,7 @@
                     <div class="cont-empty my-3 text-center"> Chọn bước cần phê duyệt </div>
                     <div class="row justify-content-center">
                         <div class="col-10">
-                            <treeselect :options="nodes" v-model="model.data_setting.blocks_approve_id" multiple append-to-body></treeselect>
+                            <treeselect :options="prev_nodes" v-model="model.data_setting.blocks_approve_id" multiple append-to-body></treeselect>
                         </div>
                     </div>
                 </el-collapse-item>
@@ -103,5 +104,15 @@
                 default: () => ([]),
             },
         },
+        computed: {
+            prev_nodes() {
+                var nodes = this.nodes;
+                var model = this.model;
+                return nodes.filter(function (item) {
+                    return item.stt < model.stt;
+                })
+            }
+        },
+
     }
 </script>

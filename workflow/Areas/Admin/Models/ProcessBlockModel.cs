@@ -13,7 +13,8 @@ namespace it.Areas.Admin.Models
         public string? process_id { get; set; }
         public string? label { get; set; }
         public string clazz { get; set; }
-        public int? type_performer { get; set; }
+		public int? stt { get; set; }
+		public int? type_performer { get; set; }
         public bool? has_deadline { get; set; }
         public string? guide { get; set; }
 
@@ -44,7 +45,10 @@ namespace it.Areas.Admin.Models
         public DateTime? updated_at { get; set; }
 
         public DateTime? deleted_at { get; set; }
-    }
+
+		[NotMapped]
+		public int? start_c { get; set; }
+	}
     public class BlockSettings
     {
         public int days { get; set; }
@@ -61,9 +65,6 @@ namespace it.Areas.Admin.Models
             get;
             set;
         }
-
         public List<int> listdepartment { get; set; }
-
-
     }
 }

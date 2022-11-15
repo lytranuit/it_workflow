@@ -19,6 +19,9 @@ import 'vue-datetime/dist/vue-datetime.css'
 Vue.use(Datetime)
 Vue.use(require('vue-moment'));
 Vue.component("datetime", Datetime);
+//file-upload
+const VueUploadComponent = require('vue-upload-component')
+Vue.component('file-upload', VueUploadComponent)
 //// Dragger
 import draggable from 'vuedraggable'
 Vue.component('draggable', draggable);
