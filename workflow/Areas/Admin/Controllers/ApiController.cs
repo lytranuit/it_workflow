@@ -116,6 +116,11 @@ namespace it.Areas.Admin.Controllers
 
             if (files != null && files.Count > 0)
             {
+                var pathroot = "private\\executions\\" + CommentModel.execution_id + "\\";
+                bool exists = System.IO.Directory.Exists(pathroot);
+
+                if (!exists)
+                    System.IO.Directory.CreateDirectory(pathroot);
 
                 var items_comment = new List<CommentFileModel>();
                 foreach (var file in files)
@@ -130,8 +135,8 @@ namespace it.Areas.Admin.Controllers
 
                     newName = newName.Replace("+", "_");
                     newName = newName.Replace("%", "_");
-                    var filePath = "private\\documents\\" + CommentModel.execution_id + "\\" + newName;
-                    string url = "/private/documents/" + CommentModel.execution_id + "/" + newName;
+                    var filePath = "private\\executions\\" + CommentModel.execution_id + "\\" + newName;
+                    string url = "/private/executions/" + CommentModel.execution_id + "/" + newName;
                     items_comment.Add(new CommentFileModel
                     {
                         ext = ext,

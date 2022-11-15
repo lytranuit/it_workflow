@@ -18,7 +18,7 @@
 			</form>
 			<hr />
 			<ul class="list-unstyled" id="comment_box">
-				<li class="media comment_box my-2" :data-id="comment.id" :data-read="comment.is_read" v-for="(comment,index) in comments">
+				<li class="media comment_box my-2" :data-read="comment.is_read" v-for="(comment,index) in comments">
 					<img class="mr-3 rounded-circle" :src="path + comment.user.image_url" width="50" alt="">
 					<div class="media-body border-bottom" style="display:grid;">
 						<h5 class="mt-0 mb-1">{{comment.user.fullName}} <small class="text-muted"> - {{comment.created_at | moment('HH:mm DD/MM/YYYY')}}</small></h5>
@@ -27,7 +27,7 @@
 					</div>
 				</li>
 			</ul>
-			<div class="text-center load_more"><a href="#" class="btn btn-primary btn-sm px-5">Xem thêm bình luận</a></div>
+			<div class="text-center load_more" @click="getComments()"><button class="btn btn-primary btn-sm px-5">Xem thêm bình luận</button></div>
 		</div>
 	</div>
 </template>
@@ -56,14 +56,26 @@
 			async getComments() {
 				/// Lấy comments
 				var execution_id = this.model.id;
+				var from_id;
+				if (this.comments.length > 0) {
+					from_id = this.comments[this.comments.length - 1].id;
+				}
 				var ress = await $.ajax({
 					url: path + "/admin/api/morecomment",
-					data: { execution_id: execution_id },
+					data: { execution_id: execution_id, from_id: from_id },
 				});
-				this.comments = ress.comments;
+				var comments = ress.comments;;
+				if (comments.length == 10) {
+					comments.pop();
+				} else {
+					$(".load_more").remove();
+				}
+				this.comments = this.comments.concat(comments);
+
 			},
 			async add_comment(e) {
 				e.preventDefault();
+				var that = this;
 				var comment = $("[name=comment]").val();
 				var files = $("[name='file[]']")[0].files;
 				//console.log(files);
@@ -84,6 +96,8 @@
 					type: "POST",
 					success: function (result) {
 						if (result.success) {
+							var comment = result.comment;
+							that.comments.unshift(comment);
 						}
 					}
 				})
