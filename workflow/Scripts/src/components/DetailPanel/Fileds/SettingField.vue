@@ -1,10 +1,10 @@
 ﻿<template>
-    <div>
+    <div style="width: 300px;">
         <draggable class="" v-model="model.fields">
             <transition-group type="transition" name="flip-list">
                 <div class="item-control flex-m" v-for="(element,index) in model.fields" :key="element.id">
                     <div class="handle icon-move"><i class="fas fa-grip-vertical"></i></div>
-                    <div class="control-preview-item background-sortable mb-2 ml-2 flex-m">
+                    <div class="control-preview-item background-sortable mb-2 ml-2 inline-flex-m">
                         <div class="form-input-data-preview mr-3 w-100">
                             <div class="form-input-control flex-m">
                                 <div class="mb-2 custom-title-inline pr-2" style="width:120px;">
@@ -28,6 +28,16 @@
                                     <div v-if="element.type == 'number'">
                                         <input class="form-control form-control-sm number" type='number' :value="element.has_default ? element.data_setting.default_value : ''" />
                                     </div>
+                                    <div v-if="element.type == 'currency'">
+                                        <CurrencyInput :value="element.has_default ? element.data_setting.default_value : ''"
+                                                       :options="{
+                                                        locale:'de-DE',
+                                                        currency: element.data_setting.currency,
+                                                        hideCurrencySymbolOnFocus: false,
+                                                        hideGroupingSeparatorOnFocus: false,
+                                                        hideNegligibleDecimalDigitsOnFocus: false,
+                                                    }" />
+                                    </div>
                                     <div v-if="element.type == 'text'">
                                         <input class="form-control form-control-sm text" type='text' :value="element.has_default ? element.data_setting.default_value : ''" />
                                     </div>
@@ -36,6 +46,10 @@
                                     </div>
                                     <div v-if="element.type == 'file'">
                                         <input class="form-control form-control-sm file" type='file' />
+                                    </div>
+
+                                    <div v-if="element.type == 'file_multiple'">
+                                        <input class="form-control form-control-sm file" type='file' multiple />
                                     </div>
                                     <div v-if="element.type == 'date'">
                                         <datetime type="datetime" format="yyyy-MM-dd" :flow="['date']" input-class="form-control form-control-sm"></datetime>
@@ -54,6 +68,24 @@
 
                                     <div v-if="element.type == 'select_multiple'">
                                         <treeselect :options="get_options(element.data_setting.options)" :value="element.has_default ? element.data_setting.default_value_array : []" multiple></treeselect>
+                                    </div>
+
+                                    <div v-if="element.type == 'radio'">
+                                        <div class="radio radio-success radio-circle" v-for="option in element.data_setting.options" :key="option.id">
+                                            <input :id="'radio-' + option.id" type="radio" :name="'radio-' + element.id">
+                                            <label :for="'radio-' + option.id">
+                                                {{option.name}}
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div v-if="element.type == 'checkbox'">
+                                        <div class="checkbox checkbox-success" v-for="option in element.data_setting.options" :key="option.id">
+                                            <input :id="'checkbox-' + option.id" type="checkbox">
+                                            <label :for="'checkbox-' + option.id">
+                                                {{option.name}}
+                                            </label>
+                                        </div>
                                     </div>
                                     <div v-if="element.type == 'textarea'">
                                         <textarea class="form-control form-control-sm textarea" :value="element.has_default ? element.data_setting.default_value : ''"></textarea>
@@ -76,16 +108,16 @@
                                     </div>
 
                                     <div v-if="element.type == 'task'">
-                                        <div class="checkbox checkbox-success checkbox-circle" v-for="element in element.data_setting.options" :key="element.id">
-                                            <input :id="'task-' + element.id" type="checkbox">
-                                            <label :for="'task-' + element.id">
-                                                {{element.name}}
+                                        <div class="checkbox checkbox-success checkbox-circle" v-for="option in element.data_setting.options" :key="option.id">
+                                            <input :id="'task-' + option.id" type="checkbox">
+                                            <label :for="'task-' + option.id">
+                                                {{option.name}}
                                             </label>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div v-if="element.type == 'table'">
+                            <div v-if="element.type == 'table'" style="overflow:auto;">
 
                                 <table class="table table-bordered mb-0 bg-white" style="outline: 1px solid #dee2e6 !important">
                                     <thead class="">
@@ -103,6 +135,15 @@
                                             </div>
                                             <div v-if="column.type == 'number'">
                                                 <input class="form-control form-control-sm number" type='number' />
+                                            </div>
+                                            <div v-if="column.type == 'currency'">
+                                                <CurrencyInput :options="{
+                                                        locale:'de-DE',
+                                                        currency: column.currency || 'VND',
+                                                        hideCurrencySymbolOnFocus: false,
+                                                        hideGroupingSeparatorOnFocus: false,
+                                                        hideNegligibleDecimalDigitsOnFocus: false,
+                                                    }" />
                                             </div>
                                             <div v-if="column.type == 'text'">
                                                 <input class="form-control form-control-sm text" type='text' />
@@ -146,7 +187,6 @@
                 </div>
             </transition-group>
         </draggable>
-
         <div class="dropdown text-center mt-3">
             <button class="btn btn-success btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="fas fa-plus mr-1"></i>
@@ -170,6 +210,16 @@
                                     <input class="form-control form-control-sm" type='text' name="name" required="" v-model="temp_add.name" />
                                 </div>
                             </div>
+                            <div class="col-lg-12 mt-2" v-if="temp_add.type == 'currency'">
+                                <b class="col-form-label">Tiền tệ:<span class="text-danger">*</span></b>
+                                <div class="pt-1">
+                                    <select class="form-control form-control-sm" v-model="temp_add.data_setting.currency" name="currency" required="">
+                                        <option value="VND" selected>VND</option>
+                                        <option value="USD">DOLLAR</option>
+                                        <option value="EUR">EURO</option>
+                                    </select>
+                                </div>
+                            </div>
                             <div class="col-lg-12 mt-2" v-if="temp_add.type == 'date' || temp_add.type == 'date_time' || temp_add.type == 'date_month'">
                                 <b class="col-form-label">Kiểu dữ liệu:</b>
                                 <div class="pt-1">
@@ -186,7 +236,7 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-lg-12 mt-2" v-if="temp_add.type == 'select' || temp_add.type == 'select_multiple' || temp_add.type == 'task'">
+                            <div class="col-lg-12 mt-2" v-if="temp_add.type == 'select' || temp_add.type == 'select_multiple' || temp_add.type == 'radio' || temp_add.type == 'checkbox' || temp_add.type == 'task'">
                                 <b class="col-form-label">Danh sách giá trị:</b>
                                 <div class="list-group-item">
                                     <draggable class="" v-model="temp_add.data_setting.options">
@@ -206,19 +256,31 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-lg-12 mt-2" v-if="temp_add.type == 'select' || temp_add.type == 'select_multiple'">
+                            <div class="col-lg-12 mt-2 flex-m" v-if="temp_add.type == 'select' || temp_add.type == 'select_multiple' || temp_add.type == 'radio' || temp_add.type == 'checkbox'">
                                 <b class="col-form-label mr-3">Kiểu chọn giá trị:</b>
-
-                                <div class="radio radio-primary form-check-inline">
-                                    <input type="radio" id="inlineRadio1" value="select" name="radioInline" v-model="temp_add.type">
-                                    <label class="mb-0" for="inlineRadio1"> Chọn một </label>
-                                </div>
-                                <div class="radio radio-primary form-check-inline">
-                                    <input type="radio" id="inlineRadio2" value="select_multiple" name="radioInline" v-model="temp_add.type">
-                                    <label class="mb-0" for="inlineRadio2"> Chọn nhiều </label>
+                                <div>
+                                    <div>
+                                        <div class="radio radio-primary form-check-inline">
+                                            <input type="radio" id="inlineRadio1" value="select" name="radioInline" v-model="temp_add.type">
+                                            <label class="mb-0" for="inlineRadio1"> Sổ chọn một </label>
+                                        </div>
+                                        <div class="radio radio-primary form-check-inline">
+                                            <input type="radio" id="inlineRadio2" value="select_multiple" name="radioInline" v-model="temp_add.type">
+                                            <label class="mb-0" for="inlineRadio2"> Sổ chọn nhiều </label>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="radio radio-primary form-check-inline">
+                                            <input type="radio" id="inlineRadio3" value="radio" name="radioInline" v-model="temp_add.type">
+                                            <label class="mb-0" for="inlineRadio3"> Tích chọn một </label>
+                                        </div>
+                                        <div class="radio radio-primary form-check-inline">
+                                            <input type="radio" id="inlineRadio4" value="checkbox" name="radioInline" v-model="temp_add.type">
+                                            <label class="mb-0" for="inlineRadio4"> Tích chọn nhiều </label>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-
                             <div class="col-lg-12 mt-2" v-if="temp_add.type == 'employee' || temp_add.type == 'employee_multiple'">
                                 <b class="col-form-label mr-3">Kiểu chọn giá trị:</b>
 
@@ -244,6 +306,19 @@
                                     <label class="mb-0" for="inlineRadio2"> Chọn nhiều </label>
                                 </div>
                             </div>
+
+                            <div class="col-lg-12 mt-2" v-if="temp_add.type == 'file' || temp_add.type == 'file_multiple'">
+                                <b class="col-form-label mr-3">Kiểu chọn giá trị:</b>
+
+                                <div class="radio radio-primary form-check-inline">
+                                    <input type="radio" id="inlineRadio1" value="file" name="radioInline" v-model="temp_add.type">
+                                    <label class="mb-0" for="inlineRadio1"> Chọn một </label>
+                                </div>
+                                <div class="radio radio-primary form-check-inline">
+                                    <input type="radio" id="inlineRadio2" value="file_multiple" name="radioInline" v-model="temp_add.type">
+                                    <label class="mb-0" for="inlineRadio2"> Chọn nhiều </label>
+                                </div>
+                            </div>
                             <div class="col-lg-12 mt-2" v-if="temp_add.type == 'table'">
                                 <div class="col-form-label mr-3">Thiết lập cột:</div>
                                 <div class="list-group-item">
@@ -258,14 +333,21 @@
                                                 <div class="handle icon-move mr-2" style="cursor:move;"><i class="fas fa-grip-vertical"></i></div>
 
                                                 <input class="form-control form-control-sm mr-2" v-model="column.name" />
-
-                                                <select class="form-control form-control-sm mr-5" v-model="column.type">
-                                                    <option value="stt">STT tăng dần</option>
-                                                    <option value="text">Một dòng</option>
-                                                    <option value="textarea">Nhiều dòng</option>
-                                                    <option value="number">Số</option>
-                                                    <option value="email">Email</option>
-                                                </select>
+                                                <div class="mr-5 flex-m" style="width: 700px;">
+                                                    <select class="form-control form-control-sm mr-1" v-model="column.type">
+                                                        <option value="stt">STT tăng dần</option>
+                                                        <option value="text">Một dòng</option>
+                                                        <option value="textarea">Nhiều dòng</option>
+                                                        <option value="number">Số</option>
+                                                        <option value="currency">Tiền tệ</option>
+                                                        <option value="email">Email</option>
+                                                    </select>
+                                                    <select class="form-control form-control-sm" v-if="column.type == 'currency'" v-model="column.currency" required>
+                                                        <option value="VND" selected>VND</option>
+                                                        <option value="USD">DOLLAR</option>
+                                                        <option value="EUR">EURO</option>
+                                                    </select>
+                                                </div>
                                                 <div class="custom-control custom-switch switch-primary mr-2">
                                                     <input type="checkbox" class="custom-control-input" :id="column.id" v-model="column.is_require">
                                                     <label class="custom-control-label" :for="column.id"></label>
@@ -296,7 +378,7 @@
                                         </label>
                                     </div>
                                 </div>
-                                <div class="col-lg-12 mt-2" v-if="temp_add.type != 'date' && temp_add.type != 'date_time' && temp_add.type != 'date_month'">
+                                <div class="col-lg-12 mt-2" v-if="temp_add.type != 'date' && temp_add.type != 'date_time' && temp_add.type != 'date_month' && temp_add.type != 'file' && temp_add.type != 'file_multiple'">
                                     <div class="checkbox checkbox-primary">
                                         <input id="checkbox3" type="checkbox" v-model="temp_add.has_default">
                                         <label for="checkbox3">
@@ -319,11 +401,19 @@
                             <div class="col-lg-12 mt-2" v-if="temp_add.type == 'number' && temp_add.has_default">
                                 <input class="form-control form-control-sm" type='number' v-model="temp_add.data_setting.default_value" placeholder="Mặc định" />
                             </div>
+
+                            <div class="col-lg-12 mt-2" v-if="temp_add.type == 'currency' && temp_add.has_default">
+                                <CurrencyInput v-model="temp_add.data_setting.default_value"
+                                               :options="{
+                                                        locale:'de-DE',
+                                                        currency: temp_add.data_setting.currency,
+                                                        hideCurrencySymbolOnFocus: false,
+                                                        hideGroupingSeparatorOnFocus: false,
+                                                        hideNegligibleDecimalDigitsOnFocus: false,
+                                                    }" />
+                            </div>
                             <div class="col-lg-12 mt-2" v-if="temp_add.type == 'email' && temp_add.has_default">
                                 <input class="form-control form-control-sm" type='email' v-model="temp_add.data_setting.default_value" placeholder="Mặc định" />
-                            </div>
-                            <div class="col-lg-12 mt-2" v-if="temp_add.type == 'file' && temp_add.has_default">
-                                <input class="form-control form-control-sm" type='file' />
                             </div>
                             <div class="col-lg-12 mt-2" v-if="temp_add.type == 'textarea' && temp_add.has_default">
                                 <textarea class="form-control form-control-sm" type='text' v-model="temp_add.data_setting.default_value" placeholder="Mặc định"></textarea>
@@ -366,8 +456,14 @@
     </div>
 </template>
 <script>
+
+    import CurrencyInput from "../../CurrencyInput.vue";
+
     export default {
         inject: ['i18n'],
+        components: {
+            CurrencyInput,
+        },
         props: {
             model: {
                 type: Object,
@@ -409,6 +505,11 @@
                         name: "Số",
                         icon: '<i class="fas fa-star"></i>',
                         type: "number"
+                    },
+                    {
+                        name: "Tiền tệ",
+                        icon: '<i class="fas fa-dollar-sign"></i>',
+                        type: "currency"
                     },
                     {
                         name: "Bảng",
@@ -483,6 +584,9 @@
                         }
                     ];
                 }
+                if (temp.type == "currency") {
+                    default1.data_setting.currency = 'VND'
+                }
                 if (temp.type == "table") {
                     default1.data_setting.columns = [
                         {
@@ -508,6 +612,14 @@
                 var new_item = $.extendext(true, 'replace', default1, temp);
                 this.temp_add = new_item;
                 $('#myModal').modal("show");
+            },
+            remove_field(id) {
+                var index = this.model.fields.findIndex(function (temp) {
+                    return temp.id == id;
+                });
+                if (index != -1) {
+                    this.model.fields.splice(index, 1);
+                }
             },
             dragOptions() {
                 return {

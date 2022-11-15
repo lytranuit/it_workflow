@@ -15,6 +15,7 @@
                                 <option value="2">Người thực hiện bước trước tự chọn</option>
                                 <option value="3">Bộ phận</option>
                                 <option value="4">Người dùng</option>
+                                <option value="5">Người khởi tạo</option>
                             </select>
                         </div>
                         <div class="my-2" v-if="model.type_performer == 1 || model.type_performer == 2">
@@ -63,16 +64,12 @@
                     </div>
                 </el-collapse-item>
                 <el-collapse-item :title="i18n['detail.fields']" name="4">
-
                     <setting-field :model="model" :users="users"
                                    :departments="departments"></setting-field>
-
                 </el-collapse-item>
             </el-collapse>
 
         </div>
-
-
     </div>
 </template>
 <script>
@@ -90,7 +87,7 @@
             }
         },
         methods: {
-           
+
         },
         props: {
             model: {

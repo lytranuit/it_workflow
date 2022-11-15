@@ -1,6 +1,6 @@
 import editorStyle from "../util/defaultStyle";
-import { shapeBase } from '@antv/g6/lib/shape/shapeBase';
-import Shape from '@antv/g6/lib/shape/shape';
+import { shapeBase } from '@antv/g6-core/lib/element/shapeBase';
+import Shape from '@antv/g6-core/lib/element/shape';
 
 export default function(G6) {
   Shape.registerFactory('controlPoint', {

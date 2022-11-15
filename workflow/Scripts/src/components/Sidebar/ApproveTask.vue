@@ -55,7 +55,7 @@
 			var block = this.nodes[indexBlock];
 			var blocks_approve_id = block.data_setting.blocks_approve_id || [];
 			var blocks_approve = blocks_approve_id.map(function (block_id) {
-				let indexActivity = that.data_activity.findIndex(function (i) {
+                let indexActivity = that.data_activity.findLastIndex(function (i) {
 					return i.block_id == block_id;
 				});
 				let activity = that.data_activity[indexActivity];

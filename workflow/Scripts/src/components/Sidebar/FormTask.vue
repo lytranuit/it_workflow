@@ -25,6 +25,17 @@
 							<div v-if="element.type == 'number'">
 								<input class="form-control form-control-sm number" type='number' v-model="element.values.value" :required="element.is_require" :name="element.id" />
 							</div>
+							<div v-if="element.type == 'currency'">
+								<CurrencyInput :name="element.id" :required="element.is_require" v-model="element.values.value"
+											   :options="{
+                                                        locale:'de-DE',
+                                                        currency: element.data_setting.currency,
+                                                        hideCurrencySymbolOnFocus: false,
+                                                        hideGroupingSeparatorOnFocus: false,
+                                                        hideNegligibleDecimalDigitsOnFocus: false,
+                                                    }" />
+							</div>
+
 							<div v-if="element.type == 'text'">
 								<input class="form-control form-control-sm text" type='text' v-model="element.values.value" :required="element.is_require" :name="element.id" />
 							</div>
@@ -33,6 +44,9 @@
 							</div>
 							<div v-if="element.type == 'file'">
 								<input class="form-control form-control-sm file" type='file' :required="element.is_require" :name="element.id" />
+							</div>
+							<div v-if="element.type == 'file_multiple'">
+								<input class="form-control form-control-sm file" type='file' :required="element.is_require" :name="element.id" multiple />
 							</div>
 							<div v-if="element.type == 'date'">
 								<datetime type="datetime" format="yyyy-MM-dd" :flow="['date']" input-class="form-control form-control-sm" v-model="element.values.value" :required="element.is_require" :name="element.id"></datetime>
@@ -80,9 +94,7 @@
 								</div>
 							</div>
 						</div>
-						<div class="w-100" v-else>
-							{{display(element)}}
-						</div>
+						<div class="w-100" v-else v-html="display(element)"></div>
 					</div>
 					<div v-if="element.type == 'table'">
 
@@ -104,6 +116,16 @@
 										</div>
 										<div v-if="column.type == 'number'">
 											<input class="form-control form-control-sm number" type='number' v-model="row[column.id]" :name="column.id + '_' + index1" :required="column.is_require" />
+										</div>
+										<div v-if="column.type == 'currency'">
+											<CurrencyInput :name="column.id + '_' + index1" :required="column.is_require" v-model="row[column.id]"
+														   :options="{
+                                                        locale:'de-DE',
+                                                        currency: column.currency,
+                                                        hideCurrencySymbolOnFocus: false,
+                                                        hideGroupingSeparatorOnFocus: false,
+                                                        hideNegligibleDecimalDigitsOnFocus: false,
+                                                    }" />
 										</div>
 										<div v-if="column.type == 'text'">
 											<input class="form-control form-control-sm text" type='text' v-model="row[column.id]" :name="column.id + '_' + index1" :required="column.is_require" />
@@ -138,7 +160,8 @@
 							<tbody v-else>
 								<tr v-for="(row,index1) in element.values.list_data" :key="index1">
 									<td v-for="(column,index2) in element.data_setting.columns" :key="column.id">
-										<div>{{row[column.id]}}</div>
+										<div v-if="column.type == 'currency'">{{format_currency(row[column.id],column.currency)}}</div>
+										<div v-else>{{row[column.id]}}</div>
 									</td>
 								</tr>
 							</tbody>
@@ -151,167 +174,184 @@
 </template>
 <script>
 
-	export default {
-		inject: ['i18n'],
-		components: {
-		},
-		props: {
-			fields: {
-				type: Array,
-				default: () => ([]),
-			},
-			users: {
-				type: Array,
-				default: () => ([]),
-			},
-			nodes: {
-				type: Array,
-				default: () => ([]),
-			},
-			departments: {
-				type: Array,
-				default: () => ([]),
-			},
-			readonly: {
-				type: Boolean,
-				default: () => (false),
-			},
-		},
-		mounted() {
-			var index = 0;
-			$(".vue-treeselect__input").each(function () {
-				$(this).attr("name", "index_" + index++);
-			});
-			if (this.$refs.addRowTable) {
-				this.$refs.addRowTable.map(function (item) {
-					if ($(item).data("count") == 0) {
-						item.click();
-					}
+    import CurrencyInput from "../CurrencyInput.vue";
+    export default {
+        inject: ['i18n'],
+        components: {
+            CurrencyInput
+        },
+        props: {
+            fields: {
+                type: Array,
+                default: () => ([]),
+            },
+            users: {
+                type: Array,
+                default: () => ([]),
+            },
+            nodes: {
+                type: Array,
+                default: () => ([]),
+            },
+            departments: {
+                type: Array,
+                default: () => ([]),
+            },
+            readonly: {
+                type: Boolean,
+                default: () => (false),
+            },
+        },
+        mounted() {
+            var index = 0;
+            $(".vue-treeselect__input").each(function () {
+                $(this).attr("name", "index_" + index++);
+            });
+            if (this.$refs.addRowTable) {
+                this.$refs.addRowTable.map(function (item) {
+                    if ($(item).data("count") == 0) {
+                        item.click();
+                    }
 
-				})
-			}
-		},
-		methods: {
-			get_options(options) {
-				return options.map(function (item) {
-					item.label = item.name;
-					return item;
-				});
-			},
-			add_row_table(field) {
-				var columns = field.data_setting.columns;
-				var data = {};
-				var column_stt = null;
-				for (var column of columns) {
-					if (column.type == 'stt') {
-						column_stt = column.id;
-					} else {
-						data[column.id] = null;
-					}
+                })
+            }
+        },
+        methods: {
+            get_options(options) {
+                return options.map(function (item) {
+                    item.label = item.name;
+                    return item;
+                });
+            },
+            add_row_table(field) {
+                var columns = field.data_setting.columns;
+                var data = {};
+                var column_stt = null;
+                for (var column of columns) {
+                    if (column.type == 'stt') {
+                        column_stt = column.id;
+                    } else {
+                        data[column.id] = null;
+                    }
 
-				}
-				field.values.list_data.push(data);
-				if (column_stt) {
-					field.values.list_data = field.values.list_data.map(function (item, key) {
-						item[column_stt] = key + 1;
-						return item;
-					});
-				}
-				var name = field.name
-				field.name = rand();
-				field.name = name;
-			},
-			remove_row(element, index) {
+                }
+                field.values.list_data.push(data);
+                if (column_stt) {
+                    field.values.list_data = field.values.list_data.map(function (item, key) {
+                        item[column_stt] = key + 1;
+                        return item;
+                    });
+                }
+                var name = field.name
+                field.name = rand();
+                field.name = name;
+            },
+            remove_row(element, index) {
 
-				element.values.list_data.splice(index, 1);
-
-
+                element.values.list_data.splice(index, 1);
 
 
-				var columns = element.data_setting.columns;
-				var column_stt = null;
-				for (var column of columns) {
-					if (column.type == 'stt') {
-						column_stt = column.id;
-					}
-				}
-				if (column_stt) {
-					element.values.list_data = element.values.list_data.map(function (item, key) {
-						item[column_stt] = key + 1;
-						return item;
-					});
-				}
-				var name = element.name
-				element.name = rand();
-				element.name = name;
-			},
-			display(field) {
-				var text = field.values.value;
-				var data_setting = field.data_setting;
-				if (field.type == 'select') {
-					var options = data_setting.options;
-					var index = options.findIndex(function (item) {
-						return item.id = field.values.value;
-					})
-					if (index != -1) {
-						var option = options[index];
-						text = option.name;
-					}
-				} else if (field.type == 'department') {
-					var index = this.departments.findIndex(function (item) {
-						return item.id = field.values.value;
-					})
-					if (index != -1) {
-						var option = this.departments[index];
-						text = option.label;
-					}
-				} else if (field.type == 'employee') {
-					var index = this.users.findIndex(function (item) {
-						return item.id = field.values.value;
-					})
-					if (index != -1) {
-						var option = this.users[index];
-						text = option.label;
-					}
-				} else if (field.type == 'select_multiple') {
-					var value_array = field.values.value_array || [];
-					var options = data_setting.options;
-					var list = options.filter(function (item) {
-						return value_array.indexOf(item.id) != -1;
-					}).map(function (item) {
-						return item.name;
-					});
-					text = list.join(", ");
-				}
-				else if (field.type == 'select_department') {
-					var value_array = field.values.value_array || [];
-					var list = this.departments.filter(function (item) {
-						return value_array.indexOf(item.id) != -1;
-					}).map(function (item) {
-						return item.label;
-					});
-					text = list.join(", ");
-				}
-				else if (field.type == 'select_employee') {
-					var value_array = field.values.value_array || [];
-					var list = this.users.filter(function (item) {
-						return value_array.indexOf(item.id) != -1;
-					}).map(function (item) {
-						return item.label;
-					});
-					text = list.join(", ");
-				} else if (field.type == 'date') {
 
-					text = field.values.value ? moment(field.values.value).format("YYYY-MM-DD") : "";
-				} else if (field.type == 'date_month') {
-					text = field.values.value ? moment(field.values.value).format("YYYY-MM") : "";
-				} else if (field.type == 'date_time') {
-					text = field.values.value ? moment(field.values.value).format("YYYY-MM-DD HH:mm") : "";
-				}
-				return text
-			}
-		}
-	}
+
+                var columns = element.data_setting.columns;
+                var column_stt = null;
+                for (var column of columns) {
+                    if (column.type == 'stt') {
+                        column_stt = column.id;
+                    }
+                }
+                if (column_stt) {
+                    element.values.list_data = element.values.list_data.map(function (item, key) {
+                        item[column_stt] = key + 1;
+                        return item;
+                    });
+                }
+                var name = element.name
+                element.name = rand();
+                element.name = name;
+            },
+            display(field) {
+                var text = field.values.value;
+                var data_setting = field.data_setting;
+                if (field.type == 'select') {
+                    var options = data_setting.options;
+                    var index = options.findIndex(function (item) {
+                        return item.id == field.values.value;
+                    })
+                    if (index != -1) {
+                        var option = options[index];
+                        text = option.name;
+                    }
+                } else if (field.type == 'file' || field.type == 'file_multiple') {
+                    text = "";
+                    for (var file of field.values.files) {
+                        text += `
+                    <div class="flex-m mb-1">
+                        <div class="file-icon" data-type="`+ file.ext + `"></div>
+                        <a href="`+ file.url + `" download="` + file.name + `" style="margin-left: 5px;">
+							`+ file.name + `
+						</a>
+                    </div>`;
+                    }
+                } else if (field.type == 'department') {
+                    var index = this.departments.findIndex(function (item) {
+                        return item.id == field.values.value;
+                    })
+                    if (index != -1) {
+                        var option = this.departments[index];
+                        text = option.label;
+                    }
+                } else if (field.type == 'employee') {
+                    var index = this.users.findIndex(function (item) {
+                        return item.id == field.values.value;
+                    })
+                    if (index != -1) {
+                        var option = this.users[index];
+                        text = option.label;
+                    }
+                } else if (field.type == 'select_multiple') {
+                    var value_array = field.values.value_array || [];
+                    var options = data_setting.options;
+                    var list = options.filter(function (item) {
+                        return value_array.indexOf(item.id) != -1;
+                    }).map(function (item) {
+                        return item.name;
+                    });
+                    text = list.join(", ");
+                }
+                else if (field.type == 'select_department') {
+                    var value_array = field.values.value_array || [];
+                    var list = this.departments.filter(function (item) {
+                        return value_array.indexOf(item.id) != -1;
+                    }).map(function (item) {
+                        return item.label;
+                    });
+                    text = list.join(", ");
+                }
+                else if (field.type == 'select_employee') {
+                    var value_array = field.values.value_array || [];
+                    var list = this.users.filter(function (item) {
+                        return value_array.indexOf(item.id) != -1;
+                    }).map(function (item) {
+                        return item.label;
+                    });
+                    text = list.join(", ");
+                } else if (field.type == 'date') {
+                    text = field.values.value ? moment(field.values.value).format("YYYY-MM-DD") : "";
+                } else if (field.type == 'date_month') {
+                    text = field.values.value ? moment(field.values.value).format("YYYY-MM") : "";
+                } else if (field.type == 'date_time') {
+                    text = field.values.value ? moment(field.values.value).format("YYYY-MM-DD HH:mm") : "";
+                } else if (field.type == 'currency') {
+                    text = field.values.value ? new Intl.NumberFormat('de-DE', { style: 'currency', currency: data_setting.currency }).format(field.values.value) : "";
+                }
+                return text
+            },
+            format_currency(value, currency) {
+                return new Intl.NumberFormat('de-DE', { style: 'currency', currency: currency }).format(value)
+            }
+        }
+    }
 </script>
 <style lang="scss" scoped>
 	#sidebar-right {

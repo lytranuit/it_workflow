@@ -1,5 +1,5 @@
 import editorStyle from '../util/defaultStyle';
-import Item from '@antv/g6/lib/item/item';
+import Item from '@antv/g6-core/lib/item/item';
 import { deepMix } from '@antv/util';
 
 export default class Anchor extends Item {

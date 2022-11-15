@@ -2,18 +2,20 @@
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @addTagHelper *, workflow
 @{
-	ViewData["Title"] = "Create";
-	Layout = "~/Views/Shared/_Admin.cshtml";
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Admin.cshtml";
 }
 
 <link href="~/lib/el-ui/index.css" rel="stylesheet" type="text/css" />
-<div id="execution"></div>
+<div class="wait_loading">
+    <div id="execution"></div>
+</div>
 @section Scripts {
-	@{
-		await Html.RenderPartialAsync("_ValidationScriptsPartial");
-	}
-	<script setup>
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script setup>
 		var execution_id = null;
 		var process_version_id = '@ViewBag.id';
-	</script>
+    </script>
 }

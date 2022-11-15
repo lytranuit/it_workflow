@@ -110,7 +110,7 @@
 
 						nodes: data.nodes.map(node => {
 							return {
-								shape: getShapeName(node.clazz),
+								type: getShapeName(node.clazz),
 								...node,
 							}
 						}),
@@ -129,9 +129,7 @@
 						//     item = this.getNodeInSubProcess(items[0])
 						// }
 						that.selectedModel = item;
-					} else {
-						that.selectedModel = {};
-					}
+					} 
 				});
 				this.graph.on('beforeadditem', (node) => {
 					var model = node.model;
@@ -239,9 +237,10 @@
 						edit: ['drag-canvas', 'hoverNodeActived', 'hoverAnchorActived', 'dragNode', 'dragEdge',
 							'dragPanelItemAddNode', 'clickSelected', 'deleteItem', 'itemAlign', 'dragPoint', 'brush-select'],
 					},
-					defaultEdge: {
-						shape: 'flow-polyline-round',
-					},
+                    defaultEdge: {
+                        type: 'flow-polyline-round',
+                        // Other properties for all the nodes
+                    },
 				});
 				if (this.isView)
 					this.graph.setMode('view');
@@ -249,9 +248,7 @@
 					this.graph.setMode(this.mode);
 				this.graph.data(this.initShape(this.data));
 				this.graph.render();
-				if (this.isView && this.data && this.data.nodes) {
-					this.graph.fitView(5)
-				}
+                this.graph.fitView()
 				this.initEvents();
 			},
 			onItemCfgChange(key, value) {

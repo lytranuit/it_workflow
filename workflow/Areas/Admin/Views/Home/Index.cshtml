@@ -1,10 +1,297 @@
-﻿@using Microsoft.AspNetCore.Identity
-@using it.Areas.Admin.Models
-@*
+﻿@*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
-
-@inject UserManager<UserModel> userManager;
 @{
-       Layout = "_Admin";
+    Layout = "_Admin";
 }
+
+
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-3">
+        <div class="card report-card bg-purple-gradient shadow-purple">
+            <div class="card-body">
+                <div class="float-right">
+                    <i class="dripicons-wallet report-main-icon bg-icon-purple"></i>
+                </div>
+                <span class="badge badge-light text-purple">Tổng số lượt chạy</span>
+                <h3 class="my-3">@ViewBag.count</h3>
+            </div><!--end card-body-->
+        </div><!--end card-->
+    </div> <!--end col-->
+    <div class="col-md-6 col-lg-3">
+        <div class="card report-card bg-warning-gradient shadow-warning">
+            <div class="card-body">
+                <div class="float-right">
+                    <i class="fas fa-spinner report-main-icon bg-icon-warning"></i>
+                </div>
+                <span class="badge badge-light text-warning">Đang thực hiện</span>
+                <h3 class="my-3">@ViewBag.wait_count</h3>
+            </div><!--end card-body-->
+        </div><!--end card-->
+    </div> <!--end col-->
+    <div class="col-md-6 col-lg-3">
+        <div class="card report-card bg-success-gradient shadow-success">
+            <div class="card-body">
+                <div class="float-right">
+                    <i class="dripicons-checkmark report-main-icon bg-icon-success"></i>
+                </div>
+                <span class="badge badge-light text-success">Đã hoàn thành</span>
+                <h3 class="my-3">@ViewBag.done_count</h3>
+            </div><!--end card-body-->
+        </div><!--end card-->
+    </div> <!--end col-->
+
+    <div class="col-md-6 col-lg-3">
+        <div class="card report-card bg-danger-gradient shadow-danger">
+            <div class="card-body">
+                <div class="float-right">
+                    <i class="fas fa-ban report-main-icon bg-icon-danger"></i>
+                </div>
+                <span class="badge badge-light text-danger">Đã thất bại</span>
+                <h3 class="my-3">@ViewBag.cancle_count</h3>
+            </div><!--end card-body-->
+        </div><!--end card-->
+    </div> <!--end col-->
+
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="header-title mt-0 mb-3">Lượt chạy tồn theo bộ phận</h4>
+                <div class="">
+                    <canvas id="bar" class="drop-shadow" height="400"></canvas>
+                </div><!--end /div-->
+            </div><!--end card-body-->
+        </div><!--end card-->
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="header-title mt-0 mb-3">Lượt chạy tồn theo người</h4>
+                <div class="">
+                    <table class="table mb-0" id="table_user">
+                        <thead class="thead-light">
+                            <tr>
+                                <th class="border-top-0">Họ và tên</th>
+                                <th class="border-top-0">Email</th>
+                                <th class="border-top-0">Số lượt</th>
+                            </tr><!--end tr-->
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table> <!--end table-->
+                </div><!--end /div-->
+            </div><!--end card-body-->
+        </div><!--end card-->
+    </div>
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="header-title mt-0 mb-3">Lượt chạy theo quy trình</h4>
+                <div class="">
+                    <table class="table mb-0" id="table_process">
+                        <thead class="thead-light">
+                            <tr>
+                                <th class="border-top-0">Tên Quy trình</th>
+                                <th class="border-top-0">Version</th>
+                                <th class="border-top-0">Số lượt</th>
+                                <th class="border-top-0">Export</th>
+                            </tr><!--end tr-->
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table> <!--end table-->
+                </div><!--end /div-->
+            </div><!--end card-body-->
+        </div><!--end card-->
+    </div>
+</div>
+
+<!-- Chart JS -->
+<script src="lib/chartjs/chart.min.js"></script>
+@section Scripts {
+    <script type="text/javascript">
+        !function ($) {
+            "use strict";
+
+            var ChartJs = function () { };
+
+            ChartJs.prototype.respChart = function (selector, type, data, options) {
+                // get selector by context
+                var ctx = selector.get(0).getContext("2d");
+                // pointing parent container to make chart js inherit its width
+                var container = $(selector).parent();
+
+                // enable resizing matter
+                //$(window).resize(generateChart);
+
+                // this function produce the responsive Chart JS
+                function generateChart() {
+                    // make chart width fit with its container
+                    var ww = selector.attr('width', $(container).width());
+                    switch (type) {
+                        case 'Line':
+                            new Chart(ctx, { type: 'line', data: data, options: options });
+                            break;
+                        case 'Doughnut':
+                            new Chart(ctx, { type: 'doughnut', data: data, options: options });
+                            break;
+                        case 'Pie':
+                            new Chart(ctx, { type: 'pie', data: data, options: options });
+                            break;
+                        case 'Bar':
+                            new Chart(ctx, { type: 'bar', data: data, options: options });
+                            break;
+                        case 'horizontalBar':
+                            new Chart(ctx, { type: 'horizontalBar', data: data, options: options });
+                            break;
+                        case 'Radar':
+                            new Chart(ctx, { type: 'radar', data: data, options: options });
+                            break;
+                        case 'PolarArea':
+                            new Chart(ctx, { data: data, type: 'polarArea', options: options });
+                            break;
+                    }
+                    // Initiate new chart or Redraw
+
+                };
+                // run function - render chart at first load
+                generateChart();
+            },
+
+                //init
+                ChartJs.prototype.initBarDepartment = function (barChart) {
+
+                    var barOpts = {
+                        responsive: true,
+                        legend: false,
+                        scales: {
+                            xAxes: [{
+                                display: true,
+                                gridLines: {
+                                    color: "#eaf0f7"
+                                },
+                                ticks: {
+                                    fontColor: '#a4abc5'
+                                }
+                            }],
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero: true,
+                                    suggestedMax: 20,
+                                },
+                                gridLines: {
+                                    color: "#eaf0f7",
+                                }
+                            }]
+                        },
+                        tooltips: {
+                            enabled: false
+                        },
+                        animation: {
+                            onComplete: function () {
+                                var chartInstance = this.chart,
+                                    ctx = chartInstance.ctx;
+                                ctx.font = Chart.helpers.fontString(Chart.defaults.global.defaultFontSize, Chart.defaults.global.defaultFontStyle, Chart.defaults.global.defaultFontFamily);
+                                ctx.textAlign = 'center';
+                                ctx.textBaseline = 'bottom';
+
+                                this.data.datasets.forEach(function (dataset, i) {
+                                    var meta = chartInstance.controller.getDatasetMeta(i);
+                                    meta.data.forEach(function (bar, index) {
+                                        var data = dataset.data[index];
+                                        ctx.fillText(data, bar._model.x, bar._model.y - 5);
+                                    });
+                                });
+                            }
+                        }
+                    };
+                    this.respChart($("#bar"), 'Bar', barChart, barOpts);
+                },
+                $.ChartJs = new ChartJs, $.ChartJs.Constructor = ChartJs
+
+        }(window.jQuery),
+
+            $(document).ready(function () {
+                let table_user = $('#table_user').DataTable({
+                    //"stateSave": true,
+                    "processing": true,
+                    "serverSide": true,
+                    pageLength: 5,
+                    searching: false,
+                    bLengthChange: false,
+                    // "ordering": false,
+                    "ajax": {
+                        "url": "/admin/home/tableUser",
+                        "dataType": "json",
+                        "type": "POST",
+                        'data': function (data) {
+                        }
+                    },
+                    "columns": [{
+                        "data": "fullName",
+                        "orderable": false
+                    }, {
+                        "data": "email",
+                        "orderable": false
+                    }, {
+                        "data": "count",
+                        "className": "text-center",
+                        "orderable": false
+                    }
+                    ]
+                });
+                let table_process = $('#table_process').DataTable({
+                    //"stateSave": true,
+                    "processing": true,
+                    "serverSide": true,
+                    pageLength: 5,
+                    searching: false,
+                    bLengthChange: false,
+                    // "ordering": false,
+                    "ajax": {
+                        "url": "/admin/home/tableProcess",
+                        "dataType": "json",
+                        "type": "POST",
+                        'data': function (data) {
+                        }
+                    },
+                    "columns": [{
+                        "data": "name",
+                        "orderable": false
+                    }, {
+                        "data": "version",
+                        "orderable": false
+                    }, {
+                        "data": "count",
+                        "className": "text-center",
+                        "orderable": false
+                    }, {
+                        "data": "excel",
+                        "className": "text-center",
+                        "orderable": false
+                    }
+                    ]
+                });
+                $(document).on("click", ".export", async function () {
+                    var href = $(this).attr("href");
+                    var resp = await $.ajax({
+                        url: href,
+                        dataType: "JSON",
+                    })
+                    var url = resp.url;
+                    location.href = url;
+                })
+                get_departmentChart();
+            })
+        async function get_departmentChart() {
+            var barChart = await $.ajax({
+                dataType: "JSON",
+                url: "/admin/home/datachartDepartment"
+            });
+
+            $.ChartJs.initBarDepartment(barChart);
+        }
+    </script>
+}
+

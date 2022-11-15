@@ -7,7 +7,9 @@
 }
 
 <link href="~/lib/el-ui/index.css" rel="stylesheet" type="text/css" />
-<div id="execution"></div>
+<div class="wait_loading">
+    <div id="execution"></div>
+</div>
 @section Scripts {
 	@{
 		await Html.RenderPartialAsync("_ValidationScriptsPartial");

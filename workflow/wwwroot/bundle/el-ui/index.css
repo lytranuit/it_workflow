@@ -11162,7 +11162,6 @@
 
 .el-collapse-item__wrap {
     will-change: height;
-    overflow: hidden;
     -webkit-box-sizing: border-box;
     box-sizing: border-box;
     border-bottom: 1px solid #EBEEF5
@@ -11176,7 +11175,6 @@
     padding-bottom: 25px;
     font-size: 13px;
     color: #303133;
-    background: #f0f2f5;
     line-height: 1.769230769230769
 }
 
