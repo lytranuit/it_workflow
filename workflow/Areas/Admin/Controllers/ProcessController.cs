@@ -402,7 +402,6 @@ namespace it.Areas.Admin.Controllers
 												row.Cells[(start_col_table - 1)].Value = value_column;
 											}
 										}
-
 									}
 								}
 
@@ -698,16 +697,33 @@ namespace it.Areas.Admin.Controllers
 										{
 											var start_col_table = (int)column.start_c;
 											var value_column = data[column.id];
-											if (i != 0)
+											if (column.type == "currency")
 											{
-												new_row.Cells[(start_col_table - 1)].Value = value_column;
+												if (i != 0)
+												{
+													new_row.Cells[(start_col_table - 1)].NumberValue = double.Parse(value_column.ToString());
+													new_row.Cells[(start_col_table - 1)].NumberFormat = "#,##0.00";
+												}
+												else
+												{
+													row.Cells[(start_col_table - 1)].NumberValue = double.Parse(value_column.ToString());
+													row.Cells[(start_col_table - 1)].NumberFormat = "#,##0.00";
+												}
 											}
 											else
 											{
-												row.Cells[(start_col_table - 1)].Value = value_column;
+												if (i != 0)
+												{
+													new_row.Cells[(start_col_table - 1)].Value = value_column;
+												}
+												else
+												{
+													row.Cells[(start_col_table - 1)].Value = value_column;
+												}
 											}
 										}
 									}
+
 								}
 								else
 								{
@@ -735,9 +751,9 @@ namespace it.Areas.Admin.Controllers
 					}
 
 					////STYLE
-					var first_col = "A";
-					var last_col = GetExcelLetter(newSheet.Columns.Count());
-					var range = newSheet.Range[first_col + "3:" + last_col + start_r];
+					var last_col = GetExcelLetter(newSheet.Columns.Count() - 1);
+					var last_row = newSheet.Rows.Count() - 1;
+					var range = newSheet.Range["A3:" + last_col + last_row];
 
 					//Console.WriteLine("Columns: " + first_col + "3:" + last_col + start_r);
 					range.BorderInside(LineStyleType.Thin, Color.Black);
