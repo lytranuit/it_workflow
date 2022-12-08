@@ -4537,6 +4537,28 @@ dt {
     background-color: #f3f6f7;
 }
 
+.modal.modal-fullscreen .modal-dialog {
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    max-width: none;
+}
+
+.modal.modal-fullscreen .modal-content {
+    height: 100vh;
+    border-radius: 0;
+    border: none;
+}
+
+.modal.modal-fullscreen .modal-body {
+    overflow-y: auto;
+}
+
+
+
+
+
 #custom-modal .close {
     color: #435177;
 }
@@ -11706,6 +11728,7 @@ label.medium.m-b-8 {
     -ms-align-items: center;
     align-items: center;
 }
+
 .flex-m {
     display: flex;
     -ms-align-items: center;

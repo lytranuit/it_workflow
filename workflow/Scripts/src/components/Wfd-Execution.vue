@@ -172,6 +172,7 @@
                                 case "department":
                                 case "textarea":
                                 case "employee":
+                                case "currency":
                                     var value = i.has_default ? i.data_setting.default_value : null;
                                     i.values = { value: value };
                                     break;
@@ -456,26 +457,39 @@
                 }
                 data_transition.push(transition_new);
                 //TARGET
-
-                var blocking = false;
-                if (target.get("model").clazz == 'formTask' || target.get("model").clazz == 'approveTask') {
-                    blocking = true;
+                var create_new = true;
+                if (target.get("model").clazz == 'inclusiveGateway') {
+                    var find_activity = that.data_activity.findLastIndex(function (item) {
+                        return item.block_id == target.get("model").id;
+                    });
+                    if (find_activity != -1) {
+                        create_new = false;
+                        activity_new = that.data_activity[find_activity];
+                    }
                 }
+                if (create_new) {
+                    var blocking = false;
+                    if (target.get("model").clazz == 'formTask' || target.get("model").clazz == 'approveTask' || target.get("model").clazz == 'mailSystem') {
+                        blocking = true;
+                    }
 
-                var activity_new = {
-                    execution_id: null,
-                    label: target.get("model").label,
-                    block_id: target.get("model").id,
-                    stt: data_activity.length + 1,
-                    clazz: target.get("model").clazz,
-                    is_new: true,
-                    executed: !blocking,
-                    failed: false,
-                    blocking: blocking,
-                    in_transition_id: transition_new.id,
-                    id: rand()
+                    var data_setting = target.get("model").data_setting || {};
+                    var activity_new = {
+                        execution_id: null,
+                        label: target.get("model").label,
+                        block_id: target.get("model").id,
+                        stt: data_activity.length + 1,
+                        clazz: target.get("model").clazz,
+                        is_new: true,
+                        executed: !blocking,
+                        failed: false,
+                        blocking: blocking,
+                        data_setting: data_setting,
+                        in_transition_id: transition_new.id,
+                        id: rand()
+                    }
+                    data_activity.push(activity_new);
                 }
-                data_activity.push(activity_new);
                 transition_new.to_activity_id = activity_new.id;
                 ////Custom Block
                 if (blocking) {
@@ -488,7 +502,7 @@
                         var data_setting = {};
                         if (type_performer == 1 && data_setting_block.block_id == null) {
                             data_setting.type_performer = 4;
-                            data_setting.listuser = [activity.created_by];
+                            data_setting.listuser = [that.current_user.id];
                         } else if (type_performer == 1 && data_setting_block.block_id != null) {
                             data_setting.type_performer = 4;
                             var findIndexActivity = data_activity.findLastIndex(function (item) {
@@ -535,16 +549,32 @@
 
             },
             create_next(activity) {
-                if (activity.blocking)
-                    return;
+
                 var that = this;
-                var data_custom_block = this.data_custom_block;
-                var data_activity = this.data_activity;
-                var data_transition = this.data_transition;
                 var graph = this.graph;
                 var node = graph.find('node', (node) => {
                     return node.get('model').id == activity.block_id;
                 });
+                if (activity.clazz == "inclusiveGateway") {
+                    var ins = node.getInEdges();
+                    var transitions = this.data_transition.filter(function (item) {
+                        return item.to_activity_id == activity.id;
+                    });
+                    if (transitions.length < ins.length) {
+                        activity.blocking = true;
+                    } else {
+                        activity.blocking = false;
+                    }
+                    ////
+                    if (!activity.is_new)
+                        activity.is_update = true;
+                }
+                if (activity.blocking)
+                    return;
+                var data_custom_block = this.data_custom_block;
+                var data_activity = this.data_activity;
+                var data_transition = this.data_transition;
+
                 var outs = node.getOutEdges();
                 if (outs.length) {
                     for (var out of outs) {
@@ -567,56 +597,73 @@
                         data_transition.push(transition);
 
                         ///CREATE TARGET ACTIVITY
-                        var fields = target.get("model").fields || [];
-                        fields = fields.map(function (i) {
-                            i.data_setting = i.data_setting || {};
-                            i.values = {};
-                            switch (i.type) {
-                                case "number":
-                                case "text":
-                                case "email":
-                                case "date":
-                                case "date_month":
-                                case "date_time":
-                                case "select":
-                                case "department":
-                                case "textarea":
-                                case "employee":
-                                    var value = i.has_default ? i.data_setting.default_value : null;
-                                    i.values = { value: value };
-                                    break;
-                                case "select_multiple":
-                                case "employee_multiple":
-                                case "department_multiple":
-                                    var value_array = i.has_default ? i.data_setting.default_value_array : null;
-                                    i.values = { value_array: value_array };
-                                    break;
-                                case "table":
-                                    i.values = { list_data: [] };
-                                    break;
+
+                        var create_new = true;
+                        if (target.get("model").clazz == 'inclusiveGateway') {
+                            var find_activity = that.data_activity.findLastIndex(function (item) {
+                                return item.block_id == target.get("model").id;
+                            });
+                            if (find_activity != -1) {
+                                create_new = false;
+                                activity_new = that.data_activity[find_activity];
                             }
-                            return i;
-                        });
-                        var blocking = false;
-                        if (target.get("model").clazz == 'formTask' || target.get("model").clazz == 'approveTask') {
-                            blocking = true;
                         }
-                        var activity_new = {
-                            execution_id: null,
-                            label: target.get("model").label,
-                            block_id: target.get("model").id,
-                            stt: data_activity.length + 1,
-                            clazz: target.get("model").clazz,
-                            is_new: true,
-                            executed: !blocking,
-                            failed: false,
-                            blocking: blocking,
-                            fields: fields,
-                            in_transition_id: transition.id,
-                            created_by: that.current_user.id,
-                            id: rand()
+                        if (create_new) {
+                            var fields = target.get("model").fields || [];
+                            fields = fields.map(function (i) {
+                                i.data_setting = i.data_setting || {};
+                                i.values = {};
+                                switch (i.type) {
+                                    case "number":
+                                    case "text":
+                                    case "email":
+                                    case "date":
+                                    case "date_month":
+                                    case "date_time":
+                                    case "select":
+                                    case "department":
+                                    case "textarea":
+                                    case "employee":
+                                    case "currency":
+                                        var value = i.has_default ? i.data_setting.default_value : null;
+                                        i.values = { value: value };
+                                        break;
+                                    case "select_multiple":
+                                    case "employee_multiple":
+                                    case "department_multiple":
+                                        var value_array = i.has_default ? i.data_setting.default_value_array : null;
+                                        i.values = { value_array: value_array };
+                                        break;
+                                    case "table":
+                                        i.values = { list_data: [] };
+                                        break;
+                                }
+                                return i;
+                            });
+                            var data_setting = target.get("model").data_setting || {};
+                            var blocking = false;
+                            if (target.get("model").clazz == 'formTask' || target.get("model").clazz == 'approveTask' || target.get("model").clazz == 'mailSystem') {
+                                blocking = true;
+                            }
+                            var activity_new = {
+                                execution_id: null,
+                                label: target.get("model").label,
+                                block_id: target.get("model").id,
+                                stt: data_activity.length + 1,
+                                clazz: target.get("model").clazz,
+                                is_new: true,
+                                executed: !blocking,
+                                failed: false,
+                                blocking: blocking,
+                                fields: fields,
+                                data_setting: data_setting,
+                                in_transition_id: transition.id,
+                                created_by: that.current_user.id,
+                                id: rand()
+                            }
+                            data_activity.push(activity_new);
                         }
-                        data_activity.push(activity_new);
+
                         transition.to_activity_id = activity_new.id;
                         ////Custom Block
                         if (blocking) {
@@ -629,7 +676,7 @@
                                 var data_setting = {};
                                 if (type_performer == 1 && data_setting_block.block_id == null) {
                                     data_setting.type_performer = 4;
-                                    data_setting.listuser = [activity.created_by];
+                                    data_setting.listuser = [that.current_user.id];
                                 } else if (type_performer == 1 && data_setting_block.block_id != null) {
                                     data_setting.type_performer = 4;
                                     var findIndexActivity = data_activity.findLastIndex(function (item) {

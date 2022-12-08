@@ -74,7 +74,7 @@
 </template>
 <script>
     import DefaultDetail from "./DefaultDetail";
-    import SettingField from "./Fileds/SettingField";
+    import SettingField from "./Fields/SettingField";
     export default {
         inject: ['i18n'],
         components: {

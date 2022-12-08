@@ -44,6 +44,8 @@
     "@antv/util": "~2.0.9",
     "@riophae/vue-treeselect": "^0.4.0",
     "@vueuse/core": "^9.6.0",
+    "devextreme": "^22.2.3",
+    "devextreme-vue": "^22.2.3",
     "element-ui": "2.12.0",
     "luxon": "^1.28.0",
     "vue": "^2.6.10",

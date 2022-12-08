@@ -29,7 +29,7 @@
 								<CurrencyInput :name="element.id" :required="element.is_require" v-model="element.values.value"
 											   :options="{
                                                         locale:'de-DE',
-                                                        currency: element.data_setting.currency,
+                                                        currency: element.data_setting.currency || 'VND',
                                                         hideCurrencySymbolOnFocus: false,
                                                         hideGroupingSeparatorOnFocus: false,
                                                         hideNegligibleDecimalDigitsOnFocus: false,
@@ -121,7 +121,7 @@
 											<CurrencyInput :name="column.id + '_' + index1" :required="column.is_require" v-model="row[column.id]"
 														   :options="{
                                                         locale:'de-DE',
-                                                        currency: column.currency,
+                                                        currency: column.currency || 'VND',
                                                         hideCurrencySymbolOnFocus: false,
                                                         hideGroupingSeparatorOnFocus: false,
                                                         hideNegligibleDecimalDigitsOnFocus: false,

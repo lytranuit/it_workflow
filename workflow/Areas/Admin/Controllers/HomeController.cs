@@ -10,6 +10,9 @@ using Newtonsoft.Json.Linq;
 using System.Collections;
 using System.Drawing.Printing;
 using System.ComponentModel.DataAnnotations;
+using Spire.Doc.Documents;
+using Spire.Doc;
+//using FastReport.Web;
 
 namespace it.Areas.Admin.Controllers
 {
@@ -34,6 +37,50 @@ namespace it.Areas.Admin.Controllers
 			ViewBag.wait_count = _context.ExecutionModel.Where(d => d.deleted_at == null && d.status_id == (int)ExecutionStatus.Executing).Count();
 			ViewBag.done_count = _context.ExecutionModel.Where(d => d.deleted_at == null && d.status_id == (int)ExecutionStatus.Success).Count();
 			ViewBag.cancle_count = _context.ExecutionModel.Where(d => d.deleted_at == null && d.status_id == (int)ExecutionStatus.Fail).Count();
+			return View();
+		}
+
+		public async Task<IActionResult> Designer()
+		{
+			Document doc = new Document();
+
+
+			Section sec = doc.AddSection();
+
+
+			Paragraph para = sec.AddParagraph();
+
+
+			para.AppendText("Quantity: ");
+
+			para.AppendField("Quantity", FieldType.FieldMergeField);
+
+			para.AppendBreak(BreakType.LineBreak);
+
+			para.AppendText("Date: ");
+
+			para.AppendField("Date", FieldType.FieldMergeField);
+
+
+
+
+			//string[] fieldName = { "Quantity", "Date" };
+
+
+			//string[] fieldValue = { "1800", DateTime.Now.ToShortDateString() };
+
+
+			//doc.MailMerge.Execute(fieldName, fieldValue);
+
+
+			doc.SaveToFile("result.docx", FileFormat.Docx);
+
+			return View();
+		}
+		[HttpPost]
+		// Call-back for save the designed report 
+		public ActionResult SaveDesignedReport(string reportID, string reportUUID)
+		{
 			return View();
 		}
 		[HttpPost]
@@ -63,7 +110,7 @@ namespace it.Areas.Admin.Controllers
 			foreach (var block in custom_block)
 			{
 				var data_setting = block.data_setting;
-				if (data_setting.type_performer == 4)
+				if (data_setting.type_performer == 4 && data_setting.listuser != null)
 				{
 					list.AddRange(data_setting.listuser);
 				}
@@ -75,15 +122,15 @@ namespace it.Areas.Admin.Controllers
 					count = grp.Count(),
 					user = _context.UserModel.Find(grp.Key)
 				})
-				.Where(d => d.user != null)
-				.OrderByDescending(d => d.count).Skip(skip).Take(pageSize)
-				.ToList();
+				.Where(d => d.user != null);
 
 			int recordsTotal = groupedCustomerList.Count();
 			int recordsFiltered = groupedCustomerList.Count();
+			var records = groupedCustomerList.OrderByDescending(d => d.count).Skip(skip).Take(pageSize)
+				.ToList();
 			var data = new ArrayList();
 
-			foreach (var record in groupedCustomerList)
+			foreach (var record in records)
 			{
 				var data1 = new
 				{
@@ -142,21 +189,24 @@ namespace it.Areas.Admin.Controllers
 					count = grp.Count(),
 					process_version_id = grp.Key,
 					process_version = _context.ProcessVersionModel.Where(d => d.id == grp.Key).FirstOrDefault(),
-				})
-				.OrderByDescending(d => d.count).Skip(skip).Take(pageSize)
+				}).ToList();
+
+
+
+			var records = groupedCustomerList.OrderByDescending(d => d.count).Skip(skip).Take(pageSize)
 				.ToList();
 
 			int recordsTotal = groupedCustomerList.Count();
 			int recordsFiltered = groupedCustomerList.Count();
 			var data = new ArrayList();
 
-			foreach (var record in groupedCustomerList)
+			foreach (var record in records)
 			{
 				var process_version = record.process_version;
 				var process = process_version.process;
 				var data1 = new
 				{
-					name = $"<a href='/admin/execution/wait?user_id={process_version.id}'>{process.name}</a>",
+					name = $"<a href='#'>{process.name}</a>",
 					version = process_version.version,
 					count = record.count,
 					excel = $"<a href='/admin/process/exportVersion?process_version_id={process_version.id}' class='export'><i class=\"fas fa-download\"></i></a>",

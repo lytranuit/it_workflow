@@ -17,7 +17,7 @@ namespace it.Areas.Admin.Models
 		public string name { get; set; }
 		public bool? is_require { get; set; }
 		public int? stt { get; set; }
-
+		public string? variable { get; set; }
 
 		[ForeignKey("activity_id")]
 		public virtual ActivityModel activity { get; set; }

@@ -90,6 +90,10 @@
             data_custom_block() {
                 return store.state.data_custom_block;
             },
+
+            current_user() {
+                return store.state.current_user;
+            }
         },
         async mounted() {
             var that = this;
@@ -160,11 +164,23 @@
                     graph.read(data2);
                     graph.fitView()
                     graph.executeCommand("currentFlow");
-                    var node_block = graph.find('node', (node) => {
+                    //// active block lên
+                    var node_blocks = graph.findAll('node', (node) => {
                         return node.get("model").active == true;
                     });
-                    if (node_block)
-                        graph.emit('node:click', { item: node_block });
+                    for (var node of node_blocks) {
+                        var index_activity_block = that.data_activity.findLastIndex(function (i) {
+                            return i.block_id == node.get("model").id;
+                        });
+                        if (index_activity_block == -1) {
+                            continue;
+                        }
+                        var activity = that.data_activity[index_activity_block];
+                        if (that.hasPermission(activity)) {
+                            graph.emit('node:click', { item: node });
+                        }
+                    }
+                    /////Bỏ loadding
                     $(".preloader").fadeOut();
 
                 }, 100)
@@ -211,11 +227,25 @@
                         graph.read(data2);
                         graph.fitView()
                         graph.executeCommand("currentFlow")
-                        var node_block = graph.find('node', (node) => {
+                        //// active block lên
+                        var node_blocks = graph.findAll('node', (node) => {
                             return node.get("model").active == true;
                         });
-                        if (node_block)
-                            graph.emit('node:click', { item: node_block });
+                        for (var node of node_blocks) {
+                            var index_activity_block = that.data_activity.findLastIndex(function (i) {
+                                return i.block_id == node.get("model").id;
+                            });
+                            if (index_activity_block == -1) {
+                                continue;
+                            }
+                            var activity = that.data_activity[index_activity_block];
+                            if (that.hasPermission(activity)) {
+                                graph.emit('node:click', { item: node });
+                            }
+                        }
+
+
+                        /////Bỏ loadding
                         $(".preloader").fadeOut();
 
                         //console.log(node_block);
@@ -226,6 +256,31 @@
             }
         },
         methods: {
+            hasPermission(activity) {
+                var data_setting = activity.data_setting || {};
+                var type_performer = data_setting.type_performer;
+                var current_user = this.current_user;
+                var user_id = current_user.id;
+                var user_department = current_user.departments.map(function (item) {
+                    return item.department_id;
+                })
+                if (type_performer == 4) {
+                    var listuser = data_setting.listuser || [];
+                    var result = listuser.filter(function (n) {
+                        return n == user_id
+                    });
+                    if (result.length > 0)
+                        return true;
+                } else if (type_performer == 3) {
+                    var listdepartment = data_setting.listdepartment || [];
+                    var result = listdepartment.filter(function (n) {
+                        return user_department.indexOf(n) !== -1;
+                    });
+                    if (result.length > 0)
+                        return true;
+                }
+                return false;
+            },
             update(e) {
                 var value = $(e.target).text();
                 this.model.title = value;

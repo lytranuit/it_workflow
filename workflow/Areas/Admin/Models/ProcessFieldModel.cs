@@ -17,6 +17,7 @@ namespace it.Areas.Admin.Models
 		public string type { get; set; }
 		public string name { get; set; }
 		public string? guide { get; set; }
+		public string? variable { get; set; }
 		public bool? is_require { get; set; }
 		public bool? has_default { get; set; }
 		public int? stt { get; set; }

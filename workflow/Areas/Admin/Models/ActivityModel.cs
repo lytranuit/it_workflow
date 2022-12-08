@@ -24,7 +24,20 @@ namespace it.Areas.Admin.Models
 		public List<ExecutionFieldModel>? fields { get; set; }
 
 		public string? created_by { get; set; }
-
+		public string? settings { get; set; }
+		[NotMapped]
+		public virtual BlockSettings? data_setting
+		{
+			get
+			{
+				//Console.WriteLine(settings);
+				return Newtonsoft.Json.JsonConvert.DeserializeObject<BlockSettings>(string.IsNullOrEmpty(settings) ? "{}" : settings);
+			}
+			set
+			{
+				settings = Newtonsoft.Json.JsonConvert.SerializeObject(value);
+			}
+		}
 
 		[ForeignKey("execution_id")]
 		public virtual ExecutionModel execution { get; set; }

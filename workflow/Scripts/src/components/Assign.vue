@@ -45,7 +45,7 @@
     </div>
 </template>
 <script>
-export default {
+    export default {
         components: {
         },
         props: {
@@ -68,11 +68,15 @@ export default {
         },
         data() {
             return {
-                activeName: [0, 1, 2],
+                //activeName: [0, 1, 2],
             }
         },
         computed: {
-
+            activeName() {
+                return this.data_custom_block.map(function (item, key) {
+                    return key;
+                })
+            }
         },
         mounted() {
 
@@ -103,7 +107,7 @@ export default {
                 return text
             }
         }
-}
+    }
 </script>
 
 <style lang="scss"></style>

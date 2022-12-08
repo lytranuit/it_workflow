@@ -7,17 +7,25 @@
         <FailEventDetail v-else-if="model.clazz === 'fail'" :model="model" :onChange="onChange" :readOnly="readOnly" />
         <SuccessEventDetail v-else-if="model.clazz === 'success'" :model="model" :onChange="onChange" :readOnly="readOnly" />
         <ApproveTaskDetail v-else-if="model.clazz === 'approveTask'" :model="model" :onChange="onChange" :readOnly="readOnly" :nodes="nodes" />
+        <MailDetail v-else-if="model.clazz === 'mailSystem'" :model="model" :onChange="onChange" :readOnly="readOnly" :nodes="nodes" />
     </div>
 </template>
 <script>
-    import ApproveTaskDetail from "./ApproveTaskDetail"
-    import FormTaskDetail from "./FormTaskDetail"
-    import TimerEventDetail from "./TimerEventDetail"
-    import GatewayDetail from "./GatewayDetail"
-    import FlowDetail from "./FlowDetail"
     import StartEventDetail from "./StartEventDetail"
     import FailEventDetail from "./FailEventDetail"
     import SuccessEventDetail from "./SuccessEventDetail"
+
+    import ApproveTaskDetail from "./ApproveTaskDetail"
+    import FormTaskDetail from "./FormTaskDetail"
+    import TimerEventDetail from "./TimerEventDetail"
+
+    import GatewayDetail from "./GatewayDetail"
+
+    import FlowDetail from "./FlowDetail"
+
+    import MailDetail from "./MailDetail"
+
+
     export default {
         inject: ['i18n'],
         components: {
@@ -29,6 +37,7 @@
             FailEventDetail,
             SuccessEventDetail,
             ApproveTaskDetail,
+            MailDetail,
         },
         props: {
             height: {

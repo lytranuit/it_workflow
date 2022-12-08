@@ -85,7 +85,7 @@ namespace it.Areas.Admin.Controllers
 			{
 				var user_departments = _context.UserDepartmentModel.Where(d => d.user_id == user_id).Select(d => d.department_id).ToList();
 				var list_exe = _context.CustomBlockModel.ToList();
-				var list = list_exe.Where(d => (d.data_setting.type_performer == 4 && d.data_setting.listuser.Contains(user_id))
+				var list = list_exe.Where(d => (d.data_setting.type_performer == 4 && d.data_setting.listuser != null && d.data_setting.listuser.Contains(user_id))
 				|| (d.data_setting.type_performer == 3 && check_department(d.data_setting.listdepartment, user_departments))).Select(d => d.block_id + d.execution_id).ToList();
 				var execution = _context.ActivityModel.Where(d => d.blocking == true && d.deleted_at == null && list.Contains(d.block_id + d.execution_id)).Select(d => d.execution_id).ToList();
 				customerData = customerData.Where(d => execution.Contains(d.id));

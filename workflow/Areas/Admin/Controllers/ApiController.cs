@@ -44,7 +44,8 @@ namespace it.Areas.Admin.Controllers
 				{
 
 					id = user.Id,
-					label = user.FullName + "(" + user.Email + ")"
+					label = user.FullName + "(" + user.Email + ")",
+					name = user.FullName
 				};
 				list.Add(DepartmentResponse);
 			}
@@ -91,14 +92,14 @@ namespace it.Areas.Admin.Controllers
 
 		public async Task<JsonResult> TransitionByExecution(int execution_id)
 		{
-			var TransitionModel = _context.TransitionModel.Where(x => x.execution_id == execution_id).OrderBy(d => d.stt).ToList();
+			var TransitionModel = _context.TransitionModel.Where(x => x.execution_id == execution_id && x.deleted_at == null).OrderBy(d => d.stt).ToList();
 			//var jsonData = new { data = ProcessModel };
 			return Json(TransitionModel);
 		}
 
 		public async Task<JsonResult> ActivityByExecution(int execution_id)
 		{
-			var ActivityModel = _context.ActivityModel.Where(x => x.execution_id == execution_id).Include(d => d.fields.OrderBy(d => d.stt)).Include(d => d.user_created_by).OrderBy(d => d.stt).ToList();
+			var ActivityModel = _context.ActivityModel.Where(x => x.execution_id == execution_id && x.deleted_at == null).Include(d => d.fields.OrderBy(d => d.stt)).Include(d => d.user_created_by).OrderBy(d => d.stt).ToList();
 			//var jsonData = new { data = ProcessModel };
 			return Json(ActivityModel);
 		}
@@ -142,6 +143,7 @@ namespace it.Areas.Admin.Controllers
 
 					newName = newName.Replace("+", "_");
 					newName = newName.Replace("%", "_");
+					newName = newName.Replace(",", "_");
 					var filePath = "private\\executions\\" + CommentModel.execution_id + "\\" + newName;
 					string url = "/private/executions/" + CommentModel.execution_id + "/" + newName;
 					items_comment.Add(new CommentFileModel
@@ -301,7 +303,7 @@ namespace it.Areas.Admin.Controllers
 			string user_id = UserManager.GetUserId(currentUser); // Get user id:
 			if (user_id == null)
 				user_id = "1c8daf01-36a5-4be2-a9a3-47608e6c2096";
-			UserModel User = await UserManager.FindByIdAsync(user_id);
+			UserModel User = _context.UserModel.Where(d => d.Id == user_id).Include(d => d.departments).FirstOrDefault();
 			return Json(User);
 		}
 		public async Task<JsonResult> ProcessGroup()
@@ -508,7 +510,7 @@ namespace it.Areas.Admin.Controllers
 					created_at = DateTime.Now,
 				};
 				_context.Add(EventModel);
-				_context.SaveChangesAsync();
+				await _context.SaveChangesAsync();
 			}
 			catch (DbUpdateConcurrencyException)
 			{
@@ -594,10 +596,21 @@ namespace it.Areas.Admin.Controllers
 			{
 				System.Security.Claims.ClaimsPrincipal currentUser = this.User;
 				string user_id = UserManager.GetUserId(currentUser); // Get user id:
+				if (ActivityModel.clazz == "parallelGateway" || ActivityModel.clazz == "inclusiveGateway" || ActivityModel.clazz == "success" || ActivityModel.clazz == "fail")
+				{
+					user_id = "a76834c7-c4b7-48aa-bf95-05dbd33210ff";
+				}
 				ActivityModel.created_at = DateTime.Now;
+				ActivityModel.started_at = DateTime.Now;
 				ActivityModel.created_by = user_id;
+				if (ActivityModel.blocking == true)
+				{
+					ActivityModel.created_at = null;
+					ActivityModel.created_by = null;
+				}
 				_context.Add(ActivityModel);
 				_context.SaveChanges();
+
 
 				if (ActivityModel.clazz == "fail")
 				{
@@ -605,13 +618,46 @@ namespace it.Areas.Admin.Controllers
 					ExecutionModel.status_id = (int)ExecutionStatus.Fail;
 					_context.Update(ExecutionModel);
 					_context.SaveChanges();
+					/////create event
+					var user = _context.UserModel.Find(user_id);
+					EventModel EventModel = new EventModel
+					{
+						execution_id = ActivityModel.execution_id,
+						event_content = "Đã hoàn thành",
+						created_at = DateTime.Now,
+					};
+					_context.Add(EventModel);
+					await _context.SaveChangesAsync();
 				}
-				if (ActivityModel.clazz == "success")
+				else if (ActivityModel.clazz == "success")
 				{
 					var ExecutionModel = _context.ExecutionModel.Find(ActivityModel.execution_id);
 					ExecutionModel.status_id = (int)ExecutionStatus.Success;
 					_context.Update(ExecutionModel);
 					_context.SaveChanges();
+					/////create event
+					var user = _context.UserModel.Find(user_id);
+					EventModel EventModel = new EventModel
+					{
+						execution_id = ActivityModel.execution_id,
+						event_content = "Đã thất bại",
+						created_at = DateTime.Now,
+					};
+					_context.Add(EventModel);
+					await _context.SaveChangesAsync();
+				}
+				else if (ActivityModel.blocking == false)
+				{
+					/////create event
+					var user = _context.UserModel.Find(user_id);
+					EventModel EventModel = new EventModel
+					{
+						execution_id = ActivityModel.execution_id,
+						event_content = "<b>" + user.FullName + "</b> đã thực hiện <b>" + ActivityModel.label + "</b>",
+						created_at = DateTime.Now,
+					};
+					_context.Add(EventModel);
+					await _context.SaveChangesAsync();
 				}
 			}
 			catch (DbUpdateConcurrencyException)
@@ -623,14 +669,48 @@ namespace it.Areas.Admin.Controllers
 		}
 
 		[HttpPost]
-		public async Task<JsonResult> UpdateActivity(int id, ActivityModel ActivityModel)
+		public async Task<JsonResult> UpdateActivity(string id, ActivityModel ActivityModel)
 		{
+			System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+			string user_id = UserManager.GetUserId(currentUser); // Get user id:
+
 			var ActivityModel_old = await _context.ActivityModel.FindAsync(id);
+			var is_change_blocking = ActivityModel_old.blocking != ActivityModel.blocking;
 			if (ActivityModel_old != null)
 			{
 				CopyValues<ActivityModel>(ActivityModel_old, ActivityModel);
+				if (is_change_blocking)
+				{
+					if (ActivityModel_old.clazz == "parallelGateway" || ActivityModel_old.clazz == "inclusiveGateway" || ActivityModel_old.clazz == "success" || ActivityModel_old.clazz == "fail")
+					{
+						user_id = "a76834c7-c4b7-48aa-bf95-05dbd33210ff";
+					}
+					ActivityModel_old.created_at = DateTime.Now;
+					ActivityModel_old.created_by = user_id;
+
+					if (ActivityModel_old.blocking == true)
+					{
+						ActivityModel_old.created_at = null;
+						ActivityModel_old.created_by = null;
+					}
+				}
+
 				_context.Update(ActivityModel_old);
 				_context.SaveChanges();
+
+				if (is_change_blocking && ActivityModel.blocking == false)
+				{
+					/////create event
+					var user = _context.UserModel.Find(user_id);
+					EventModel EventModel = new EventModel
+					{
+						execution_id = ActivityModel.execution_id,
+						event_content = "<b>" + user.FullName + "</b> đã thực hiện <b>" + ActivityModel.label + "</b>",
+						created_at = DateTime.Now,
+					};
+					_context.Add(EventModel);
+					await _context.SaveChangesAsync();
+				}
 			}
 			return Json(new { success = 1 });
 
@@ -662,6 +742,7 @@ namespace it.Areas.Admin.Controllers
 
 					newName = newName.Replace("+", "_");
 					newName = newName.Replace("%", "_");
+					newName = newName.Replace(",", "_");
 					var filePath = "private\\executions\\" + execution_id + "\\" + newName;
 					string url = "/private/executions/" + execution_id + "/" + newName;
 					items.Add(new FileUp
@@ -681,8 +762,48 @@ namespace it.Areas.Admin.Controllers
 			return Json(new { success = 1, list = items });
 		}
 		[HttpPost]
-		public async Task<JsonResult> WithDraw()
+		public async Task<JsonResult> WithDraw(string transition_id)
 		{
+			var transition = _context.TransitionModel.Where(d => d.id == transition_id).FirstOrDefault();
+			transition.deleted_at = DateTime.Now;
+			_context.Update(transition);
+			var to_activity_id = transition.to_activity_id;
+			var to_activity = _context.ActivityModel.Find(to_activity_id);
+			if (to_activity != null)
+			{
+				to_activity.deleted_at = DateTime.Now;
+				_context.Update(to_activity);
+			}
+			var from_activity_id = transition.from_activity_id;
+			var from_activity = _context.ActivityModel.Where(d => d.id == from_activity_id).Include(d => d.fields).FirstOrDefault();
+			if (from_activity != null)
+			{
+				if (from_activity.clazz == "approveTask" || from_activity.clazz == "formTask")
+				{
+					from_activity.created_by = null;
+					from_activity.created_at = null;
+					from_activity.executed = false;
+					from_activity.failed = false;
+					from_activity.blocking = true;
+					from_activity.fields = null;
+				}
+				_context.Update(from_activity);
+			}
+			_context.SaveChanges();
+
+			/////create event
+			System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+			string user_id = UserManager.GetUserId(currentUser); // Get user id:
+
+			var user = _context.UserModel.Find(user_id);
+			EventModel EventModel = new EventModel
+			{
+				execution_id = transition.execution_id,
+				event_content = "<b>" + user.FullName + "</b> đã rút lại lượt thực hiện <b>" + transition.label + "</b> cho <b>" + from_activity.label + "</b>",
+				created_at = DateTime.Now,
+			};
+			_context.Add(EventModel);
+			await _context.SaveChangesAsync();
 			return Json(new { success = 1 });
 		}
 		// GET: Admin/Process/Delete/5
@@ -712,7 +833,7 @@ namespace it.Areas.Admin.Controllers
 				version = ProcessVersionModel_old[0].version + 1;
 			}
 			var json = _context.ProcessModel.Where(x => x.id == ProcessModel.id)
-				.Include(x => x.blocks)
+				.Include(x => x.blocks.OrderBy(x => x.stt))
 				.ThenInclude(d => d.fields.OrderBy(x => x.stt))
 				.Include(x => x.links)
 				.FirstOrDefault();
@@ -752,6 +873,7 @@ namespace it.Areas.Admin.Controllers
 		public string id { get; set; }
 		public string label { get; set; }
 
+		public string name { get; set; }
 		public virtual List<SelectResponse> children { get; set; }
 	}
 }

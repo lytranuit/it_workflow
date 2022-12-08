@@ -140,6 +140,43 @@ export default function (G6) {
             return style;
         }
     }, 'base-node');
+    G6.registerNode('form-task-node', {
+        options: $.extendext(true, 'replace', {}, taskDefaultOptions, {
+            icon: require('../assets/icons/flow/icon_script.svg'),
+            style: {
+                fill: '#FFF7E6',
+                stroke: '#FFA940',
+            },
+            stateStyles: {
+                selected: {
+                    fill: '#FFE7BA',
+                },
+            }
+        }),
+
+    }, 'task-node');
+    G6.registerNode('approve-task-node', {
+        options: $.extendext(true, 'replace', {}, startDefaultOptions, {
+            icon: require('../assets/icons/flow/approve.svg'),
+            iconStyle: {
+                width: 8,
+                height: 8,
+                left: 4,
+                top: 4,
+            },
+            style: {
+                fill: '#FFF7E6',
+                stroke: '#FFA940',
+            },
+            stateStyles: {
+                selected: {
+                    fill: '#FFE7BA',
+                },
+            }
+
+        }),
+    }, 'task-node');
+
     G6.registerNode('gateway-node', {
         shapeType: 'path',
         labelPosition: 'bottom',
@@ -220,6 +257,48 @@ export default function (G6) {
             this.runAnimate(cfg, group);
         },
     }, 'gateway-node');
+
+
+
+    G6.registerNode('mail-system-node', {
+        shapeType: 'rect',
+        labelPosition: 'bottom',
+        options: $.extendext(true, 'replace', {}, taskDefaultOptions, {
+            icon: require('../assets/icons/flow/icon_mail.svg'),
+            iconStyle: {
+                width: 15,
+                height: 15,
+                left: 18,
+                top: 7,
+            },
+            style: {
+                fill: 'aliceblue',
+                stroke: 'rgb(103 194 58)',
+            },
+            stateStyles: {
+                selected: {
+                    fill: 'rgb(189 221 199)',
+                },
+            }
+        }),
+        getShapeStyle(cfg) {
+            cfg.size = [50, 30];
+            const width = cfg.size[0];
+            const height = cfg.size[1];
+            const style = {
+                x: 0 - width / 2,
+                y: 0 - height / 2,
+                width,
+                height,
+                ...this.options.style,
+            };
+            return style;
+        },
+    }, 'base-node');
+
+
+
+
     G6.registerNode('start-node', {
         shapeType: 'circle',
         labelPosition: 'bottom',
@@ -383,93 +462,11 @@ export default function (G6) {
             ]
         }
     }, 'base-node');
-    G6.registerNode('catch-node', {
-        shapeType: 'path',
-        labelPosition: 'bottom',
-        options: {
-            ...catchDefaultOptions
-        },
-        getShapeStyle(cfg) {
-            cfg.size = [50, 30];
-            const width = cfg.size[0];
-            const height = cfg.size[1];
-            const style = {
-                path: [
-                    ['M', 0, -height / 3],
-                    ['L', width / 2, -height / 3],
-                    ['L', 0, height / 3 * 2],
-                    ['L', -width / 2, -height / 3],
-                    ['Z'] // close
-                ],
-                ...this.options.style,
-            };
-            return style;
-        },
-        getAnchorPoints() {
-            return [
-                [0.5, 0], // top
-                [0.8, 0.38], // right
-                [0.5, 1], // bottom
-                [0.2, 0.38], // left
-            ]
-        }
-    }, 'base-node');
-    G6.registerNode('form-task-node', {
-        options: $.extendext(true, 'replace', {}, taskDefaultOptions, {
-            icon: require('../assets/icons/flow/icon_script.svg'),
-            style: {
-                fill: '#FFF7E6',
-                stroke: '#FFA940',
-            },
-            stateStyles: {
-                selected: {
-                    fill: '#FFE7BA',
-                },
-            }
-        }),
 
-    }, 'task-node');
+    //G6.registerNode('timer-start-node', {
+    //    options: $.extendext(true, 'replace', {}, startDefaultOptions, { icon: require('../assets/icons/flow/icon_timer.svg') }),
+    //    afterDraw(cfg, group) { this.runAnimate(cfg, group) },
+    //}, 'start-node');
 
-    G6.registerNode('approve-task-node', {
-        options: $.extendext(true, 'replace', {}, startDefaultOptions, {
-            icon: require('../assets/icons/flow/approve.svg'),
-            iconStyle: {
-                width: 8,
-                height: 8,
-                left: 4,
-                top: 4,
-            },
-            style: {
-                fill: '#FFF7E6',
-                stroke: '#FFA940',
-            },
-            stateStyles: {
-                selected: {
-                    fill: '#FFE7BA',
-                },
-            }
 
-        }),
-    }, 'task-node');
-    G6.registerNode('timer-start-node', {
-        options: $.extendext(true, 'replace', {}, startDefaultOptions, { icon: require('../assets/icons/flow/icon_timer.svg') }),
-        afterDraw(cfg, group) { this.runAnimate(cfg, group) },
-    }, 'start-node');
-    G6.registerNode('message-start-node', {
-        options: $.extendext(true, 'replace', {}, startDefaultOptions, { icon: require('../assets/icons/flow/icon_message.svg') }),
-        afterDraw(cfg, group) { this.runAnimate(cfg, group) },
-    }, 'start-node');
-    G6.registerNode('signal-start-node', {
-        options: $.extendext(true, 'replace', {}, startDefaultOptions, { icon: require('../assets/icons/flow/icon_signal.svg') }),
-        afterDraw(cfg, group) { this.runAnimate(cfg, group) },
-    }, 'start-node');
-    G6.registerNode('timer-catch-node', {
-        options: $.extendext(true, 'replace', {}, catchDefaultOptions, { icon: require('../assets/icons/flow/icon_timer.svg') }),
-    }, 'catch-node');
-    G6.registerNode('signal-catch-node', {
-        options: $.extendext(true, 'replace', {}, catchDefaultOptions, { icon: require('../assets/icons/flow/icon_signal.svg') }),
-    }, 'catch-node');
-    G6.registerNode('message-catch-node', {
-        options: $.extendext(true, 'replace', {}, catchDefaultOptions, { icon: require('../assets/icons/flow/icon_message.svg') }),
-    }, 'catch-node');
 }
