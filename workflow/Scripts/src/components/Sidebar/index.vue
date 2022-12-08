@@ -14,7 +14,7 @@
                             <i class="fas fa-ellipsis-v text-muted"></i>
                         </a>
                         <div class="dropdown-menu" aria-labelledby="drop2" style="z-index:1999">
-                            <a class="nav-link cursor-pointer flex-m items-center font-13" href="#" @click="assign_again(model.block_id)">
+                            <a class="nav-link cursor-pointer flex-m items-center font-13" href="#" @click="assign_again(model.block_id)" v-if="model.blocking && hasPermission()">
                                 <i class="fas fa-share font-16"></i>
                                 <div class="ml-2"> Phân công lại</div>
                             </a>
@@ -101,7 +101,7 @@
         },
         mounted() {
             this.isPopup = JSON.parse(localStorage.getItem('isPopup')) || false;
-            console.log(this.isPopup);
+            //console.log(this.isPopup);
         },
         methods: {
             setIsPopup(isPopup) {
@@ -141,6 +141,8 @@
                     var type_performer = data_setting.type_performer;
                     if (type_performer == 4) {
                         var listuser = data_setting.listuser;
+                        //console.log(data_setting);
+                        //console.log(that.users)
                         listuser = listuser.map(function (item) {
                             var findUser = that.users.findLastIndex(function (user) {
                                 return user.id == item;
@@ -205,7 +207,7 @@
                 this.html = html;
             },
             hasPermission() {
-                var data_setting = this.model.data_setting;
+                var data_setting = this.model.data_setting || {};
                 var type_performer = data_setting.type_performer;
                 var current_user = this.current_user;
                 var user_id = current_user.id;
@@ -213,14 +215,14 @@
                     return item.department_id;
                 })
                 if (type_performer == 4) {
-                    var listuser = data_setting.listuser;
+                    var listuser = data_setting.listuser || [];
                     var result = listuser.filter(function (n) {
                         return n == user_id
                     });
                     if (result.length > 0)
                         return true;
                 } else if (type_performer == 3) {
-                    var listdepartment = data_setting.listdepartment;
+                    var listdepartment = data_setting.listdepartment || [];
                     var result = listdepartment.filter(function (n) {
                         return user_department.indexOf(n) !== -1;
                     });

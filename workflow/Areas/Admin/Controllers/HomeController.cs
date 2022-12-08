@@ -75,15 +75,15 @@ namespace it.Areas.Admin.Controllers
 					count = grp.Count(),
 					user = _context.UserModel.Find(grp.Key)
 				})
-				.Where(d => d.user != null)
-				.OrderByDescending(d => d.count).Skip(skip).Take(pageSize)
-				.ToList();
+				.Where(d => d.user != null);
 
 			int recordsTotal = groupedCustomerList.Count();
 			int recordsFiltered = groupedCustomerList.Count();
+			var records = groupedCustomerList.OrderByDescending(d => d.count).Skip(skip).Take(pageSize)
+				.ToList();
 			var data = new ArrayList();
 
-			foreach (var record in groupedCustomerList)
+			foreach (var record in records)
 			{
 				var data1 = new
 				{
@@ -142,21 +142,24 @@ namespace it.Areas.Admin.Controllers
 					count = grp.Count(),
 					process_version_id = grp.Key,
 					process_version = _context.ProcessVersionModel.Where(d => d.id == grp.Key).FirstOrDefault(),
-				})
-				.OrderByDescending(d => d.count).Skip(skip).Take(pageSize)
+				}).ToList();
+
+
+
+			var records = groupedCustomerList.OrderByDescending(d => d.count).Skip(skip).Take(pageSize)
 				.ToList();
 
 			int recordsTotal = groupedCustomerList.Count();
 			int recordsFiltered = groupedCustomerList.Count();
 			var data = new ArrayList();
 
-			foreach (var record in groupedCustomerList)
+			foreach (var record in records)
 			{
 				var process_version = record.process_version;
 				var process = process_version.process;
 				var data1 = new
 				{
-					name = $"<a href='/admin/execution/wait?user_id={process_version.id}'>{process.name}</a>",
+					name = $"<a href='#'>{process.name}</a>",
 					version = process_version.version,
 					count = record.count,
 					excel = $"<a href='/admin/process/exportVersion?process_version_id={process_version.id}' class='export'><i class=\"fas fa-download\"></i></a>",

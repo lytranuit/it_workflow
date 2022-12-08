@@ -378,6 +378,8 @@ namespace it.Areas.Admin.Controllers
 									{
 										var start_col_table = (int)column.start_c;
 										var value_column = data[column.id];
+										if (value_column == null)
+											continue;
 										if (column.type == "currency")
 										{
 											if (i != 0)
