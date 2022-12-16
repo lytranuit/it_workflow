@@ -469,7 +469,7 @@
                 }
                 if (create_new) {
                     var blocking = false;
-                    if (target.get("model").clazz == 'formTask' || target.get("model").clazz == 'approveTask' || target.get("model").clazz == 'mailSystem') {
+                    if (target.get("model").clazz == 'formTask' || target.get("model").clazz == 'approveTask' || target.get("model").clazz == 'mailSystem' || target.get("model").clazz == 'printSystem') {
                         blocking = true;
                     }
 
@@ -642,7 +642,7 @@
                             });
                             var data_setting = target.get("model").data_setting || {};
                             var blocking = false;
-                            if (target.get("model").clazz == 'formTask' || target.get("model").clazz == 'approveTask' || target.get("model").clazz == 'mailSystem') {
+                            if (target.get("model").clazz == 'formTask' || target.get("model").clazz == 'approveTask' || target.get("model").clazz == 'mailSystem' || target.get("model").clazz == 'printSystem') {
                                 blocking = true;
                             }
                             var activity_new = {
@@ -687,6 +687,9 @@
                                 } else if (type_performer == 3 || type_performer == 4) {
                                     data_setting = data_setting_block;
                                     data_setting.type_performer = type_performer;
+                                } else if (type_performer == 5) {
+                                    data_setting.type_performer = 4;
+                                    data_setting.listuser = [this.model.user_id];
                                 }
                                 var custom_block = {
                                     data_setting: data_setting,

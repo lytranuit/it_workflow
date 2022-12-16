@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.FileProviders;
 using System.Text.Json.Serialization;
 using schedule.Middleware;
+using it.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 ConfigurationManager configuration = builder.Configuration;
@@ -26,6 +27,8 @@ builder.Services.AddControllersWithViews().AddJsonOptions(x =>
 builder.Services.AddDbContext<ItContext>(options =>
   options.UseSqlServer(connectionString)
   );
+
+builder.Services.AddScoped<Workflow, Workflow>();
 
 //builder.Services.AddAuthorization(options =>
 //{

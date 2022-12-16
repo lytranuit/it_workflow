@@ -54,7 +54,7 @@ namespace it.Areas.Admin.Models
 		public int days { get; set; }
 		public int hours { get; set; }
 		public int minutes { get; set; }
-
+		public FileUp file_template { get; set; }
 		public MailSetting mail { get; set; }
 		public List<string> listuser { get; set; }
 

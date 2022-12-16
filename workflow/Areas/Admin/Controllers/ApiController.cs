@@ -762,6 +762,47 @@ namespace it.Areas.Admin.Controllers
 			return Json(new { success = 1, list = items });
 		}
 		[HttpPost]
+		public async Task<JsonResult> uploadFileTemplate()
+		{
+
+			var files = Request.Form.Files;
+			var file = files[0];
+			var pathroot = "private\\templates\\";
+			bool exists = System.IO.Directory.Exists(pathroot);
+
+			if (!exists)
+				System.IO.Directory.CreateDirectory(pathroot);
+
+			var timeStamp = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
+			string name = file.FileName;
+			string ext = Path.GetExtension(name);
+			string mimeType = file.ContentType;
+
+			//var fileName = Path.GetFileName(name);
+			var newName = timeStamp + " - " + name;
+
+			newName = newName.Replace("+", "_");
+			newName = newName.Replace("%", "_");
+			newName = newName.Replace(",", "_");
+			var filePath = "private\\templates\\" + newName;
+			string url = "/private/templates/" + newName;
+			var item = new FileUp
+			{
+				ext = ext,
+				url = url,
+				name = name,
+				mimeType = mimeType
+			};
+
+			using (var fileSrteam = new FileStream(filePath, FileMode.Create))
+			{
+				await file.CopyToAsync(fileSrteam);
+			}
+
+
+			return Json(new { success = 1, item = item });
+		}
+		[HttpPost]
 		public async Task<JsonResult> WithDraw(string transition_id)
 		{
 			var transition = _context.TransitionModel.Where(d => d.id == transition_id).FirstOrDefault();

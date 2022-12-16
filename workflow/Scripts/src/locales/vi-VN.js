@@ -46,6 +46,7 @@
     'failEvent': 'Thất bại',
     'successEvent': 'Hoàn thành',
     'mail': 'Gửi mail',
+    'print': 'In biểu mẫu',
     'start': 'Bắt đầu',
     'end': 'Kết thúc',
     'gateway': 'Cổng',
@@ -83,5 +84,6 @@
     'detail.general': "Chung",
     'detail.fields': "Trường dữ liệu",
     'detail.user_performer': "Người thực hiện",
+    'detail.template': "Biểu mẫu",
     'detail.time': "Thời hạn"
 };

@@ -202,7 +202,7 @@
                         text: field.name,
                         type: field.type,
                         group: label,
-                        id: field.id
+                        id: field.variable
                     })
                 }
             }

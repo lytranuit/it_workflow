@@ -45,6 +45,9 @@
                 <img data-item="{clazz:'mailSystem',size:'80*44',label:''}"
                      :src="require('../assets/flow/mail-task.svg')" style="width: 80px;height: 44px" />
                 <div>{{i18n['mail']}}</div>
+                <img data-item="{clazz:'printSystem',size:'70*80',label:''}"
+                     :src="require('../assets/flow/printSystem.svg')" style="width: 70px;height:80px" />
+                <div>{{i18n['print']}}</div>
             </el-collapse-item>
             <el-collapse-item :title="i18n['gateway']" name="5">
                 <!--<img data-item="{clazz:'exclusiveGateway',size:'40*40',label:''}"

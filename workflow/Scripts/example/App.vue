@@ -6,7 +6,8 @@
             </button>
             <div v-for="error in errors" v-html="error"></div>
         </div>
-        <button type="button" class="el-button el-button--default el-button--small" style="float: right;margin-top: 6px;margin-right: 6px;" @click="save_data"><span>Lưu lại</span></button>
+        <button type="button" class="el-button el-button--success el-button--small" style="float: right;margin-top: 6px;margin-right: 6px;" @click="save_data"><span>Lưu lại</span></button>
+        <DataFields :data="data"></DataFields>
         <wfd-vue ref="wfd" :data="data" :departments="departments" :users="users" :groups="groups" :height="600" :lang="lang" />
 
     </div>
@@ -15,6 +16,7 @@
 <script>
     import store from './store'
     import WfdVue from '../src/components/Wfd'
+    import DataFields from '../src/components/DataFields'
     var new_process_id = rand();
     var startNode1 = rand();
     var taskNode1 = rand();
@@ -24,7 +26,8 @@
     export default {
         name: 'app',
         components: {
-            WfdVue
+            WfdVue,
+            DataFields
         },
         data() {
 
@@ -54,7 +57,8 @@
                 },
                 departments: [],
                 users: [],
-                groups: []
+                groups: [],
+
             }
         },
         computed: {

@@ -296,6 +296,42 @@ export default function (G6) {
         },
     }, 'base-node');
 
+    G6.registerNode('print-system-node', {
+        shapeType: 'rect',
+        labelPosition: 'bottom',
+        options: $.extendext(true, 'replace', {}, taskDefaultOptions, {
+            icon: require('../assets/icons/flow/printSystem.svg'),
+            iconStyle: {
+                width: 20,
+                height: 22,
+                left: 8,
+                top: 9,
+            },
+            style: {
+                fill: 'white',
+                stroke: '#0000009e',
+            },
+            stateStyles: {
+                selected: {
+                    fill: '#E9E9E9',
+                },
+            }
+        }),
+        getShapeStyle(cfg) {
+            cfg.size = [35, 40];
+            const width = cfg.size[0];
+            const height = cfg.size[1];
+            const style = {
+                x: 0 - width / 2,
+                y: 0 - height / 2,
+                width,
+                height,
+                ...this.options.style,
+            };
+            return style;
+        },
+    }, 'base-node');
+
 
 
 

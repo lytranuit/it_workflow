@@ -66,16 +66,6 @@ export default createStore({
                 }
             })
         },
-        async execute_transition({ state, commit }, payload) {
-
-
-        },
-        async add_transition({ state, commit }, payload) {
-
-        },
-        async add_activity({ state, commit }, payload) {
-
-        },
         async fetchRoles({ commit, state }) {
             if (state.roles)
                 return;

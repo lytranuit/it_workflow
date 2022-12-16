@@ -8,6 +8,7 @@
         <SuccessEventDetail v-else-if="model.clazz === 'success'" :model="model" :onChange="onChange" :readOnly="readOnly" />
         <ApproveTaskDetail v-else-if="model.clazz === 'approveTask'" :model="model" :onChange="onChange" :readOnly="readOnly" :nodes="nodes" />
         <MailDetail v-else-if="model.clazz === 'mailSystem'" :model="model" :onChange="onChange" :readOnly="readOnly" :nodes="nodes" />
+        <PrintDetail v-else-if="model.clazz === 'printSystem'" :model="model" :onChange="onChange" />
     </div>
 </template>
 <script>
@@ -24,6 +25,7 @@
     import FlowDetail from "./FlowDetail"
 
     import MailDetail from "./MailDetail"
+    import PrintDetail from "./PrintDetail"
 
 
     export default {
@@ -38,6 +40,7 @@
             SuccessEventDetail,
             ApproveTaskDetail,
             MailDetail,
+            PrintDetail,
         },
         props: {
             height: {
