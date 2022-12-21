@@ -1,4 +1,6 @@
 ﻿using it.Data;
+using Microsoft.CodeAnalysis.VisualBasic.Syntax;
+using NuGet.Packaging.Signing;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json;
@@ -55,12 +57,15 @@ namespace it.Areas.Admin.Models
 		public int hours { get; set; }
 		public int minutes { get; set; }
 		public FileUp file_template { get; set; }
+
+		public Esign esign { get; set; }
 		public MailSetting mail { get; set; }
 		public List<string> listuser { get; set; }
 
 		public string block_id { get; set; }
 
 		public List<string> blocks_approve_id { get; set; }
+		public string blocks_esign_id { get; set; }
 
 		public virtual List<ProcessBlockModel> blocks_approve
 		{
@@ -75,5 +80,34 @@ namespace it.Areas.Admin.Models
 		public string title { get; set; }
 		public string content { get; set; }
 		public string filecontent { get; set; }
+	}
+	public class Esign
+	{
+		public List<FileUp> files { get; set; }
+		public List<Signature> signatures { get; set; }
+	}
+	public class Signature
+	{
+
+		public string block_id { get; set; }
+		public string url { get; set; }
+		public string user_sign { get; set; }
+		public string user_esign { get; set; }
+		public double position_x { get; set; }
+		public double position_y { get; set; }
+		public int page { get; set; }
+		public DateTime date { get; set; }
+		public string reason { get; set; }
+		//public string image_sign { get; set; }
+
+
+		public double position_image_x { get; set; }
+		public double position_image_y { get; set; }
+		public double image_size_width { get; set; }
+		public double image_size_height { get; set; }
+
+
+
+
 	}
 }

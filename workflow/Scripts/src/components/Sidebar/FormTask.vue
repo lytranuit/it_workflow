@@ -354,51 +354,5 @@
     }
 </script>
 <style lang="scss" scoped>
-	#sidebar-right {
-		position: fixed;
-		top: 0;
-		right: 0;
-		width: 500px;
-		border: 1px solid #d5d5d5;
-		height: 100vh;
-		background: #f0f2f5;
-		opacity: 1;
-		z-index: 1999;
-
-		.header {
-			padding: 20px 10px;
-			border-bottom: 1px solid #d5d5d5;
-
-			.tilte {
-				font-weight: bold;
-				font-size: 16px;
-			}
-
-			.btn-reverse {
-				border-radius: 4px;
-				padding: 6px 16px;
-				background-color: rgb(255, 255, 255);
-				color: rgb(239, 41, 47);
-				border: 1px solid rgb(239, 41, 47);
-				cursor: pointer;
-				font-weight: bold;
-			}
-
-			.btn-next {
-				border-radius: 4px;
-				padding: 6px 16px;
-				background-color: #0c9cdd;
-				color: white;
-				border: 1px solid #0c9cdd;
-				cursor: pointer;
-				font-weight: bold;
-			}
-		}
-
-		.body {
-			padding: 20px 10px;
-			height: calc(100vh - 75px);
-			overflow: auto;
-		}
-	}
+	
 </style>

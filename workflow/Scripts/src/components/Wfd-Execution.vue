@@ -155,7 +155,7 @@
                             return item.block_id == block.id;
                         });
                         if (findCustomBlock != -1) {
-                            activity.data_setting = data_custom_block[findCustomBlock].data_setting;
+                            activity.data_setting = $.extendext(true, 'replace', node.get("model").data_setting, data_custom_block[findCustomBlock].data_setting);
                         }
                         var fields = block.fields || [];
                         fields = fields.map(function (i) {
@@ -421,6 +421,7 @@
                     if (!vaild) {
                         return;
                     }
+
                     activity.failed = false;
                     $("#sidebar-right input[type='file']").each(function (item) {
                         var id = $(this).attr("name");
@@ -430,6 +431,61 @@
                         var field = activity.fields[findfield];
                         field.files = $(this)[0].files;
                     });
+                    //////
+                    let sign = $(".signature");
+                    if (sign.length) {
+                        var sign_x = sign[0].offsetLeft;
+                        var sign_y = sign[0].offsetTop;
+                        var parent = sign.closest(".box-canvas");
+                        if (!parent.length) {
+                            alert("Kéo chữ ký vào văn bản để ký!");
+                            return;
+                        }
+                        var reason_b = $(".reason", sign).text();
+                        var explode = reason_b.split("Ý kiến:");
+                        var reason;
+                        if (explode.length > 1) {
+                            reason = explode[1];
+                        }
+                        var page = parent.index() + 1;
+                        var height_page = $(".pdf-page-canvas", parent).height();
+                        var sign_image = $(".sign_image", sign);
+                        var sign_info = $(".sign_info", sign);
+                        //var sign_info_x = sign_info[0].offsetLeft;
+                        //var sign_info_y = sign_info[0].offsetTop;
+                        var sign_image_x = sign_image[0].offsetLeft;
+                        var sign_image_y = sign_image[0].offsetTop;
+                        var image_size_width = sign_image.width();
+                        var image_size_height = sign_image.height();
+                        var position_image_x = sign_image_x + sign_x;
+                        var position_image_y = height_page - (image_size_height + sign_y);
+                        var position_x = sign_x;
+                        var position_y = height_page - (image_size_height + sign_y + 40);
+                        if (reason) {
+                            position_y -= 30;
+                        }
+                        if (!sign_info.length) {
+                            position_y = position_image_y;
+                        }
+                        var url = $("#pdf-viewer").data("url");
+                        var activity_esign_id = $("#pdf-viewer").data("activity_esign");
+                        var user_esign = sign.data("id");
+                        activity.sign = {
+                            block_id: activity.block_id,
+                            page: page,
+                            position_x: position_x,
+                            position_y: position_y,
+                            position_image_x: position_image_x,
+                            position_image_y: position_image_y,
+                            image_size_width: image_size_width,
+                            image_size_height: image_size_height,
+                            url: url,
+                            reason: reason,
+                            user_sign: that.current_user.id,
+                            user_esign: user_esign,
+                            activity_esign_id: activity_esign_id
+                        }
+                    }
                 } else {
                     activity.failed = true;
                 }
@@ -609,37 +665,6 @@
                             }
                         }
                         if (create_new) {
-                            var fields = target.get("model").fields || [];
-                            fields = fields.map(function (i) {
-                                i.data_setting = i.data_setting || {};
-                                i.values = {};
-                                switch (i.type) {
-                                    case "number":
-                                    case "text":
-                                    case "email":
-                                    case "date":
-                                    case "date_month":
-                                    case "date_time":
-                                    case "select":
-                                    case "department":
-                                    case "textarea":
-                                    case "employee":
-                                    case "currency":
-                                        var value = i.has_default ? i.data_setting.default_value : null;
-                                        i.values = { value: value };
-                                        break;
-                                    case "select_multiple":
-                                    case "employee_multiple":
-                                    case "department_multiple":
-                                        var value_array = i.has_default ? i.data_setting.default_value_array : null;
-                                        i.values = { value_array: value_array };
-                                        break;
-                                    case "table":
-                                        i.values = { list_data: [] };
-                                        break;
-                                }
-                                return i;
-                            });
                             var data_setting = target.get("model").data_setting || {};
                             var blocking = false;
                             if (target.get("model").clazz == 'formTask' || target.get("model").clazz == 'approveTask' || target.get("model").clazz == 'mailSystem' || target.get("model").clazz == 'printSystem') {
@@ -655,7 +680,6 @@
                                 executed: !blocking,
                                 failed: false,
                                 blocking: blocking,
-                                fields: fields,
                                 data_setting: data_setting,
                                 in_transition_id: transition.id,
                                 created_by: that.current_user.id,
@@ -786,6 +810,7 @@
             save_data() {
                 this.$emit("save_data");
             },
+
             close() {
                 this.custom_block = [];
                 this.selectedModel = null;

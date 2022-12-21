@@ -39,7 +39,8 @@
         </div>
         <div class="body" v-if="(model.blocking && hasPermission()) || model.executed">
             <FormTask :departments="departments" :users="users" :fields="fields" :readonly="readonly" v-if="model.clazz == 'formTask'"></FormTask>
-            <ApproveTask :departments="departments" :users="users" :nodes="nodes" v-if="model.clazz == 'approveTask'" :model="model"></ApproveTask>
+            <ApproveTask :departments="departments" :users="users" :nodes="nodes" :readonly="readonly"v-if="model.clazz == 'approveTask'" :model="model"></ApproveTask>
+            <PrintSystem v-if="model.clazz == 'printSystem'" :model="model"></PrintSystem>
         </div>
     </form>
 </template>
@@ -47,11 +48,13 @@
     import store from '../../../example/store';
     import FormTask from './FormTask';
     import ApproveTask from './ApproveTask';
+    import PrintSystem from './PrintSystem';
     export default {
         inject: ['i18n'],
         components: {
             FormTask,
-            ApproveTask
+            ApproveTask,
+            PrintSystem
         },
         props: {
             model: {
@@ -83,8 +86,7 @@
                 handler(newData, oldData) {
                     if (oldData !== newData) {
                         this.initHtml();
-                        if (this.model.clazz == "formTask")
-                            this.readonly = !this.model.blocking;
+                        this.readonly = !this.model.blocking;
                     }
                 },
                 immediate: true,
@@ -250,9 +252,10 @@
         &.centered {
             left: 50%;
             top: 50%;
+            -webkit-transform: translate(-50%, -50%);
             transform: translate(-50%, -50%);
-            width: calc(100vw - 80px);
-            height: 90vh;
+            width: 100%;
+            height: 100%;
         }
 
         .header {
@@ -298,7 +301,7 @@
 
         .body {
             padding: 20px 10px;
-            height: calc(90vh - 150px);
+            height: calc(100% - 129px);
             overflow: auto;
         }
     }

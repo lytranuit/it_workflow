@@ -4,10 +4,32 @@ using System.Diagnostics;
 using it.Areas.Admin.Models;
 using it.Data;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
-using Microsoft.AspNetCore.Cors;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
+using System.Drawing;
+
+
+
+using iText.IO.Font;
+using iText.IO.Image;
+using iText.Kernel.Font;
+using iText.Kernel.Pdf;
+using iText.Kernel.Pdf.Canvas;
+using iText.Kernel.Pdf.Xobject;
+using iText.Layout;
+using iText.Layout.Element;
+using iText.Signatures;
+using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Pkcs;
+using Org.BouncyCastle.X509;
+using System.Reflection;
+using it.Areas.Identity.Pages.Account;
+using System.Net.Http.Headers;
+using System.Net.Mime;
+using System.Text;
+using it.Services;
 
 namespace it.Areas.Admin.Controllers
 {
@@ -17,17 +39,22 @@ namespace it.Areas.Admin.Controllers
 		private UserManager<UserModel> UserManager;
 		private RoleManager<IdentityRole> RoleManager;
 
+		private readonly IConfiguration _configuration;
+		private readonly Workflow _workflow;
+
 
 		//public ApiController(ItContext context, UserManager<UserModel> UserMgr) : base(context)
 		// {
 		//    UserManager = UserMgr;
 		//}
 		private ItContext _context;
-		public ApiController(ItContext context, UserManager<UserModel> UserMgr, RoleManager<IdentityRole> RoleMgr)
+		public ApiController(ItContext context, IConfiguration configuration, UserManager<UserModel> UserMgr, RoleManager<IdentityRole> RoleMgr, Workflow workflow)
 		{
+			_configuration = configuration;
 			_context = context;
 			UserManager = UserMgr;
 			RoleManager = RoleMgr;
+			_workflow = workflow;
 		}
 		public async Task<IActionResult> Index()
 		{
@@ -646,6 +673,10 @@ namespace it.Areas.Admin.Controllers
 					_context.Add(EventModel);
 					await _context.SaveChangesAsync();
 				}
+				else if (ActivityModel.clazz == "printSystem")
+				{
+					await _workflow.PrintTask(ActivityModel);
+				}
 				else if (ActivityModel.blocking == false)
 				{
 					/////create event
@@ -907,7 +938,178 @@ namespace it.Areas.Admin.Controllers
 					prop.SetValue(target, value, null);
 			}
 		}
+		[HttpPost]
+		public async Task<JsonResult> SaveSign(Signature sign, string activity_esign_id)
+		{
+			var user_local = _context.UserModel.Where(d => d.Id == sign.user_sign).FirstOrDefault();
+			if (user_local == null)
+				return Json(new { success = 0 });
+			///// Request get user info esign
+			var client = new HttpClient();
 
+			var url = _configuration["JWT:ValidIssuer"] + "/api/UserInfo?email=" + user_local.Email;
+			var response = await client.GetAsync(url);
+			EsignResponse user = await response.Content.ReadFromJsonAsync<EsignResponse>();
+
+			/////
+			var timeStamp = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
+			string fileName = Path.GetFileNameWithoutExtension(sign.url);
+			string forlder = Path.GetDirectoryName(sign.url);
+			string ext = Path.GetExtension(user.image_sign);
+			string save = forlder.Substring(1) + "\\" + timeStamp + ".pdf";
+			string Domain = (HttpContext.Request.IsHttps ? "https://" : "http://") + HttpContext.Request.Host.Value + "/";
+			var dir = "../../it/it";
+			if (Domain.Contains("workflow.pymepharco.com"))
+				dir = "../esign.pymepharco.com";
+			//Draw the image
+			var file_image = dir + user.image_sign;
+			//PdfImage pdfImage = PdfImage.FromFile("." + user.image_sign);
+			ImageData da = ImageDataFactory.Create(file_image);
+			int image_size_width = (int)Math.Round((float)sign.image_size_width);
+			int image_size_height = (int)Math.Round((float)sign.image_size_height);
+			if (ext.ToLower() == ".png")
+			{
+				using (System.Drawing.Image src = System.Drawing.Image.FromFile(dir + user.image_sign))
+				using (Bitmap dst = new Bitmap(image_size_width, image_size_height))
+				using (Graphics g = Graphics.FromImage(dst))
+				{
+					//g.Clear(Color.White);
+					g.SmoothingMode = SmoothingMode.AntiAlias;
+					g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+					g.DrawImage(src, 0, 0, dst.Width, dst.Height);
+					file_image = "wwwroot\\temp\\" + timeStamp + ".png";
+					dst.Save(file_image, ImageFormat.Png);
+					da = ImageDataFactory.CreatePng(new Uri(Domain + "/temp/" + timeStamp + ".png"));
+				}
+				//pdfImage = PdfImage.FromFile("wwwroot\\temp\\" + timeStamp + "png");
+			}
+			// os = new FileStream(dest, FileMode.Create, FileAccess.Write);
+
+			//Activate MultiSignatures
+			//To disable Multi signatures uncomment this line : every new signature will invalidate older ones !
+			//stamper = PdfStamper.CreateSignature(reader, os, '\0');
+			var dest = new PdfWriter(save);
+			var reader = new PdfReader("." + sign.url);
+
+			PdfSignerNoObjectStream signer = new PdfSignerNoObjectStream(reader, dest, new StampingProperties().UseAppendMode());
+			// Creating the appearance
+			FontProgram fontProgram = FontProgramFactory.CreateFont("wwwroot/assets/fonts/vuArial.ttf");
+			PdfFont font = PdfFontFactory.CreateFont(fontProgram, PdfEncodings.IDENTITY_H);
+			var width = (int)sign.image_size_width;
+			var heigth = (int)sign.image_size_height;
+
+			if (width < 180)
+				width = 180;
+			heigth += 40;
+			if (sign.reason != null)
+			{
+				heigth += 30;
+			}
+
+			iText.Kernel.Geom.Rectangle rect = new iText.Kernel.Geom.Rectangle((int)sign.position_x, (int)sign.position_y, width, heigth);
+			PdfSignatureAppearance appearance = signer.GetSignatureAppearance()
+				.SetReuseAppearance(false)
+				.SetPageRect(rect)
+				.SetPageNumber((int)sign.page);
+
+
+			if (sign.reason != null)
+			{
+				appearance = appearance.SetReason(sign.reason);
+			}
+			PdfFormXObject layer2 = appearance.GetLayer2();
+			PdfDocument doc = signer.GetDocument();
+			PdfCanvas canvas = new PdfCanvas(layer2, doc);
+
+			int p_y = 0;
+			p_y += 40;
+			var text = user.FullName + "\n" + DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
+			if (sign.reason != null)
+			{
+				text += "\nÝ kiến: " + sign.reason;
+				p_y += 30;
+			}
+			iText.Kernel.Geom.Rectangle signatureRect = new iText.Kernel.Geom.Rectangle(0, 0, 180, p_y);
+			Canvas signLayoutCanvas = new Canvas(canvas, signatureRect);
+			Paragraph paragraph = new Paragraph(text).SetFont(font).SetMargin(0).SetMultipliedLeading(1.2f).SetFontSize(10);
+			Div div = new Div();
+			div.SetHeight(signatureRect.GetHeight());
+			div.SetWidth(signatureRect.GetWidth());
+			div.SetVerticalAlignment(iText.Layout.Properties.VerticalAlignment.TOP);
+			div.SetHorizontalAlignment(iText.Layout.Properties.HorizontalAlignment.CENTER);
+			div.Add(paragraph);
+			signLayoutCanvas.Add(div);
+
+
+
+
+			iText.Kernel.Geom.Rectangle dataRect = new iText.Kernel.Geom.Rectangle(0, p_y, (float)sign.image_size_width, rect.GetHeight() - p_y);
+			Canvas dataLayoutCanvas = new Canvas(canvas, dataRect);
+			iText.Layout.Element.Image image = new iText.Layout.Element.Image(da);
+			image.SetAutoScale(true);
+			Div dataDiv = new Div();
+			dataDiv.SetHeight(dataRect.GetHeight());
+			dataDiv.SetWidth(dataRect.GetWidth());
+			dataDiv.SetVerticalAlignment(iText.Layout.Properties.VerticalAlignment.MIDDLE);
+			dataDiv.SetHorizontalAlignment(iText.Layout.Properties.HorizontalAlignment.CENTER);
+			dataDiv.Add(image);
+			dataLayoutCanvas.Add(dataDiv);
+
+
+
+
+			signer.SetFieldName(timeStamp.ToString());
+			// Creating the signature
+			string KEYSTORE = dir + "/private/pfx/" + user.Id + ".pfx";
+			char[] PASSWORD = "!PMP_it123456".ToCharArray();
+
+			Pkcs12Store pk12 = new Pkcs12Store(new FileStream(KEYSTORE,
+			FileMode.Open, FileAccess.Read), PASSWORD);
+			string alias = null;
+			foreach (object a in pk12.Aliases)
+			{
+				alias = ((string)a);
+				if (pk12.IsKeyEntry(alias))
+				{
+					break;
+				}
+			}
+			ICipherParameters pk = pk12.GetKey(alias).Key;
+			X509CertificateEntry[] ce = pk12.GetCertificateChain(alias);
+			X509Certificate[] chain = new X509Certificate[ce.Length];
+			for (int k = 0; k < ce.Length; ++k)
+			{
+				chain[k] = ce[k].Certificate;
+			}
+			IExternalSignature pks = new PrivateKeySignature(pk, DigestAlgorithms.SHA256);
+
+			signer.SignDetached(pks, chain, null, null, null, 0,
+					PdfSignerNoObjectStream.CryptoStandard.CMS);
+
+			dest.Close();
+			sign.date = DateTime.Now;
+
+			///Save DB
+			///// Cap nhat user_sign
+			var activity_esign = _context.ActivityModel.Where(d => d.id == activity_esign_id).FirstOrDefault();
+			var data_setting = activity_esign.data_setting;
+			var files = data_setting.esign.files;
+			files.Add(new FileUp()
+			{
+				name = files[0].name,
+				url = "/" + save.Replace("\\", "/"),
+				ext = ".pdf",
+				mimeType = "application/pdf"
+			});
+			data_setting.esign.files = files;
+
+			activity_esign.data_setting = data_setting;
+			_context.Update(activity_esign);
+
+			_context.SaveChanges();
+
+			return Json(new { success = 1 });
+		}
 	}
 	public class SelectResponse
 	{
@@ -917,4 +1119,38 @@ namespace it.Areas.Admin.Controllers
 		public string name { get; set; }
 		public virtual List<SelectResponse> children { get; set; }
 	}
+	public class EsignResponse
+	{
+		public string Id { get; set; }
+		public string Email { get; set; }
+		public string image_url { get; set; }
+		public string image_sign { get; set; }
+		public bool is_sign { get; set; }
+		public string position { get; set; }
+		public string FullName { get; set; }
+	}
+	public class PdfSignerNoObjectStream : PdfSigner
+	{
+		public PdfSignerNoObjectStream(PdfReader reader, Stream outputStream, StampingProperties properties) : base(reader, outputStream, properties)
+		{
+		}
+
+		protected override PdfDocument InitDocument(PdfReader reader, PdfWriter writer, StampingProperties properties)
+		{
+			try
+			{
+				return base.InitDocument(reader, writer, properties);
+			}
+			finally
+			{
+				if (reader.HasHybridXref())
+				{
+					FieldInfo propertiesField = typeof(PdfWriter).GetField("properties", BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+					WriterProperties writerProperties = (WriterProperties)propertiesField.GetValue(writer);
+					writerProperties.SetFullCompressionMode(false);
+				}
+			}
+		}
+	}
+
 }

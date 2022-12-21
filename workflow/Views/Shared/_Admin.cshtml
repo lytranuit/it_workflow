@@ -161,14 +161,17 @@
     <!-- end page-wrapper -->
     <!-- App js -->
     <script>
-        var path = '';
+        var path = window.location.origin;
     </script>
+
     <environment names="Development">
         <script src="/admin/js/combined.js"></script>
     </environment>
     <environment names="Staging,Production">
         <script src="/admin/js/admin.min.js"></script>
     </environment>
+    @*<script src="~/lib/kendo/kendo.all.min.js"></script>*@
+    <script src="~/lib/pdfview/pdf.js"></script>
     <div id="popup-execution">
     </div>
     @await RenderSectionAsync("Scripts", required: false)

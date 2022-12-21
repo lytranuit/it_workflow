@@ -347,12 +347,6 @@
                         var resp = await $.ajax({ url: path + "/admin/api/updatecustomblock", data: item, type: "POST", dataType: "JSON" });
                     }
                 }
-                for (var item of data_transition) {
-                    item.execution_id = model.id;
-                    if (item.is_new) {
-                        var resp = await $.ajax({ url: path + "/admin/api/createtransition", data: item, type: "POST", dataType: "JSON" });
-                    }
-                }
                 for (var item of data_activity) {
                     item.execution_id = model.id;
                     if (item.is_new || item.is_update) {
@@ -379,11 +373,23 @@
                                 }
                             }
                         }
+                        if (item.sign) {
+                            var sign = item.sign;
+                            var resp = await $.ajax({ url: path + "/admin/api/SaveSign", data: sign, type: "POST", dataType: "JSON" });
+                            delete item.sign;
+                        }
                     }
                     if (item.is_new) {
                         var resp = await $.ajax({ url: path + "/admin/api/createactivity", data: item, type: "POST", dataType: "JSON" });
                     } else if (item.is_update) {
                         var resp = await $.ajax({ url: path + "/admin/api/updateactivity", data: item, type: "POST", dataType: "JSON" });
+                    }
+                }
+
+                for (var item of data_transition) {
+                    item.execution_id = model.id;
+                    if (item.is_new) {
+                        var resp = await $.ajax({ url: path + "/admin/api/createtransition", data: item, type: "POST", dataType: "JSON" });
                     }
                 }
                 location.href = path + "/admin/execution/details/" + process_version_id + "?execution_id=" + model.id;

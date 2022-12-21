@@ -108,9 +108,11 @@ app.UseStaticFiles(new StaticFileOptions
 	RequestPath = "/private",
 	OnPrepareResponse = ctx =>
 	{
-		if (!ctx.Context.User.Identity.IsAuthenticated)
-		{
+		var token = "sdfxvbdfgertewrkvcbgyrewbnfgsdfwetyrtrgdgweqfvqqazqhjkuiyort";
+		var token_query = ctx.Context.Request.Query["token"].ToString();
 
+		if (!ctx.Context.User.Identity.IsAuthenticated && token_query != token)
+		{
 			ctx.Context.Response.Redirect("/admin");
 		}
 	}

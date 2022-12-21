@@ -1,6 +1,6 @@
 <template>
     <div :data-clazz="model.clazz">
-        <div class="panelTitle">{{i18n['startEvent']}}</div>
+        <div class="panelTitle">{{i18n['successEvent']}}</div>
         <div class="panelBody">
             <DefaultDetail :model="model" :onChange="onChange" :readOnly="readOnly" />
         </div>

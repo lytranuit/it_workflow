@@ -20,7 +20,7 @@
     'userTask.counterSign': 'CounterSign',
     'scriptTask': 'Script Task',
     'scriptTask.script': 'Script',
-    'javaTask': 'Java Task',
+    'esign': 'Chứ ký điện tử',
     'javaTask.javaClass': 'Java Class Name',
     'mailTask': 'Mail Task',
     'mailTask.to': 'To',
