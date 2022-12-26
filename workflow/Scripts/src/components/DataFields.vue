@@ -77,7 +77,7 @@
             }
         },
         mounted() {
-            console.log(this.data);
+            //console.log(this.data);
         },
         methods: {
             save_variable() {
@@ -99,7 +99,7 @@
         watch: {
             data: {
                 handler(newData, oldData) {
-                    console.log(this.data);
+                    //console.log(this.data);
                 },
                 deep: true
             }

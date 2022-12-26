@@ -122,6 +122,7 @@
             initEvents() {
                 var that = this;
                 this.graph.on('afteritemselected', (items) => {
+                    console.log(items);
                     if (items && items.length > 0) {
 
                         let item = that.findItembyId(items[0]);
@@ -129,6 +130,8 @@
                         //     item = this.getNodeInSubProcess(items[0])
                         // }
                         that.selectedModel = item;
+                    } else {
+                        that.selectedModel = {};
                     }
                 });
                 this.graph.on('beforeadditem', (node) => {

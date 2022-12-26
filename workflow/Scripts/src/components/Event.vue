@@ -6,7 +6,7 @@
         <div class="card-body" style="max-height: 500px;overflow: auto;">
             <div class="activity" id="event">
                 <div v-for="(event,index) in events">
-                    <i class="mdi mdi-checkbox-marked-circle-outline icon-success"></i>
+                    <i class="mdi" :class="{'mdi-checkbox-marked-circle-outline icon-success':event.type != 2,'mdi-close-circle icon-danger':event.type == 2}"></i>
                     <div class="time-item">
                         <div class="item-info">
                             <div class="d-flex justify-content-between align-items-center">
@@ -21,7 +21,7 @@
     </div>
 </template>
 <script>
-export default {
+    export default {
         components: {
         },
         props: {
@@ -52,7 +52,7 @@ export default {
 
             },
         }
-}
+    }
 </script>
 
 <style lang="scss"></style>

@@ -59,6 +59,7 @@ namespace it.Areas.Admin.Models
 		public FileUp file_template { get; set; }
 
 		public Esign esign { get; set; }
+		public Dictionary<string, Signature> suggests { get; set; }
 		public MailSetting mail { get; set; }
 		public List<string> listuser { get; set; }
 

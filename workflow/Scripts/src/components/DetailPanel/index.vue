@@ -6,7 +6,8 @@
         <StartEventDetail v-else-if="model.clazz === 'start'" :model="model" :onChange="onChange" :readOnly="readOnly" />
         <FailEventDetail v-else-if="model.clazz === 'fail'" :model="model" :onChange="onChange" :readOnly="readOnly" />
         <SuccessEventDetail v-else-if="model.clazz === 'success'" :model="model" :onChange="onChange" :readOnly="readOnly" />
-        <ApproveTaskDetail v-else-if="model.clazz === 'approveTask'" :model="model" :onChange="onChange" :readOnly="readOnly" :nodes="nodes" />
+        <ApproveTaskDetail v-else-if="model.clazz === 'approveTask'" :model="model" :onChange="onChange" :readOnly="readOnly" :nodes="nodes" :users="users" :departments="departments" />
+        <SuggestTaskDetail v-else-if="model.clazz === 'suggestTask'" :model="model" :onChange="onChange" :readOnly="readOnly" :nodes="nodes" :users="users" :departments="departments" />
         <MailDetail v-else-if="model.clazz === 'mailSystem'" :model="model" :onChange="onChange" :readOnly="readOnly" :nodes="nodes" />
         <PrintDetail v-else-if="model.clazz === 'printSystem'" :model="model" :onChange="onChange" />
     </div>
@@ -17,6 +18,7 @@
     import SuccessEventDetail from "./SuccessEventDetail"
 
     import ApproveTaskDetail from "./ApproveTaskDetail"
+    import SuggestTaskDetail from "./SuggestTaskDetail"
     import FormTaskDetail from "./FormTaskDetail"
     import TimerEventDetail from "./TimerEventDetail"
 
@@ -39,6 +41,7 @@
             FailEventDetail,
             SuccessEventDetail,
             ApproveTaskDetail,
+            SuggestTaskDetail,
             MailDetail,
             PrintDetail,
         },

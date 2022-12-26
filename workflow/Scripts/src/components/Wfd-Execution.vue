@@ -135,9 +135,9 @@
                     } else {
                         edge.reverse = true;
                     }
-                    if (i == data_transition.length - 1 && that.current_user.id == transition.created_by && status_id == 2) {
-                        edge.allowDelete = true;
-                    }
+                    //if (i == data_transition.length - 1 && that.current_user.id == transition.created_by && status_id == 2) {
+                    //    edge.allowDelete = true;
+                    //}
                 }
                 for (var activity of data_activity) {
                     if (activity.blocking) {
@@ -403,13 +403,19 @@
                         confirmButtonText: 'Gửi đi',
                         showLoaderOnConfirm: true,
                         preConfirm: (data) => {
-                            that.model.title = data;
-                            //$(".tieu_de").val(data);
-                            return true;
+                            if (data) {
+                                that.model.title = data;
+                                return true;
+                            } else {
+                                return false;
+                            }
                         },
                         allowOutsideClick: () => !Swal.isLoading()
                     }).then((result) => {
-                        that.execute_transition(from_activity_id, edge_id);
+                        console.log(result);
+                        if (result.value) {
+                            that.execute_transition(from_activity_id, edge_id);
+                        }
                     })
                     alert("Bạn chưa nhập tiêu đề!");
                     $(".tieu_de").focus();
@@ -432,8 +438,8 @@
                         field.files = $(this)[0].files;
                     });
                     //////
-                    let sign = $(".signature");
-                    if (sign.length) {
+                    if ($("#approve").length) {
+                        let sign = $(".signature");
                         var sign_x = sign[0].offsetLeft;
                         var sign_y = sign[0].offsetTop;
                         var parent = sign.closest(".box-canvas");
@@ -486,8 +492,84 @@
                             activity_esign_id: activity_esign_id
                         }
                     }
-                } else {
+                    if ($("#suggest").length) {
+                        var list = {};
+                        if ($("#pdf-viewer .signature").length != $("#sign .signature").length) {
+                            alert("Kéo chữ ký vào văn bản để gợi ý!");
+                            return;
+                        }
+                        $("#pdf-viewer .signature").each(function () {
+                            let sign = $(this);
+                            var sign_x = sign[0].offsetLeft;
+                            var sign_y = sign[0].offsetTop;
+                            var parent = sign.closest(".box-canvas");
+                            var page = parent.index() + 1;
+                            var height_page = $(".pdf-page-canvas", parent).height();
+                            var sign_image = $(".sign_image", sign);
+                            var sign_info = $(".sign_info", sign);
+                            //var sign_info_x = sign_info[0].offsetLeft;
+                            //var sign_info_y = sign_info[0].offsetTop;
+                            var sign_image_x = sign_image[0].offsetLeft;
+                            var sign_image_y = sign_image[0].offsetTop;
+                            var image_size_width = sign_image.width();
+                            var image_size_height = sign_image.height();
+                            var position_image_x = sign_image_x + sign_x;
+                            var position_image_y = height_page - (image_size_height + sign_y);
+                            var position_x = sign_x;
+                            var position_y = height_page - (image_size_height + sign_y + 40);
+                            if (!sign_info.length) {
+                                position_y = position_image_y;
+                            }
+                            var block_id = sign.data("id");
+
+                            var item = {
+                                page: page,
+                                position_x: position_x,
+                                position_y: position_y,
+                                position_image_x: position_image_x,
+                                position_image_y: position_image_y,
+                                image_size_width: image_size_width,
+                                image_size_height: image_size_height,
+                                block_id: block_id,
+                            }
+                            list[block_id] = item;
+                        });
+
+                        activity.data_setting.suggests = list;
+                    }
+                }
+                else if (!activity.note) {
+                    Swal.fire({
+                        title: 'Nhập lý do',
+                        input: 'textarea',
+                        inputAttributes: {
+                            autocapitalize: 'off'
+                        },
+                        showCancelButton: true,
+                        confirmButtonText: 'Xác nhận',
+                        showLoaderOnConfirm: true,
+                        preConfirm: (login) => {
+                            if (login) {
+                                activity.note = login;
+                                return true;
+                            } else {
+                                Swal.showValidationMessage(
+                                    "Vui lòng nhập lý do!"
+                                )
+                                return false;
+                            }
+                        },
+                        allowOutsideClick: () => !Swal.isLoading()
+                    }).then((result) => {
+                        if (result.value) {
+                            that.execute_transition(from_activity_id, edge_id);
+                        }
+                    })
+                    return;
+                }
+                else {
                     activity.failed = true;
+                    delete activity.fields;
                 }
                 activity.blocking = false;
                 activity.executed = true;
@@ -508,7 +590,8 @@
                     to_block_id: target.get("model").id,
                     from_activity_id: activity.id,
                     //to_activity_id: activity_to.id,
-                    stt: data_transition.length + 1,
+                    stt: data_transition[data_transition.length - 1].stt + 1,
+                    created_at: moment().valueOf(),
                     id: rand(),
                 }
                 data_transition.push(transition_new);
@@ -525,7 +608,7 @@
                 }
                 if (create_new) {
                     var blocking = false;
-                    if (target.get("model").clazz == 'formTask' || target.get("model").clazz == 'approveTask' || target.get("model").clazz == 'mailSystem' || target.get("model").clazz == 'printSystem') {
+                    if (target.get("model").clazz == 'formTask' || target.get("model").clazz == 'approveTask' || target.get("model").clazz == 'suggestTask' || target.get("model").clazz == 'mailSystem' || target.get("model").clazz == 'printSystem') {
                         blocking = true;
                     }
 
@@ -534,14 +617,14 @@
                         execution_id: null,
                         label: target.get("model").label,
                         block_id: target.get("model").id,
-                        stt: data_activity.length + 1,
+                        stt: data_activity[data_activity.length - 1].stt + 1,
                         clazz: target.get("model").clazz,
                         is_new: true,
                         executed: !blocking,
                         failed: false,
                         blocking: blocking,
                         data_setting: data_setting,
-                        in_transition_id: transition_new.id,
+                        created_at: moment().valueOf(),
                         id: rand()
                     }
                     data_activity.push(activity_new);
@@ -648,6 +731,7 @@
                             from_activity_id: activity.id,
                             //to_activity_id: activity.id,
                             stt: data_transition.length + 1,
+                            created_at: moment().valueOf(),
                             id: rand(),
                         }
                         data_transition.push(transition);
@@ -667,14 +751,14 @@
                         if (create_new) {
                             var data_setting = target.get("model").data_setting || {};
                             var blocking = false;
-                            if (target.get("model").clazz == 'formTask' || target.get("model").clazz == 'approveTask' || target.get("model").clazz == 'mailSystem' || target.get("model").clazz == 'printSystem') {
+                            if (target.get("model").clazz == 'formTask' || target.get("model").clazz == 'approveTask' || target.get("model").clazz == 'suggestTask' || target.get("model").clazz == 'mailSystem' || target.get("model").clazz == 'printSystem') {
                                 blocking = true;
                             }
                             var activity_new = {
                                 execution_id: null,
                                 label: target.get("model").label,
                                 block_id: target.get("model").id,
-                                stt: data_activity.length + 1,
+                                stt: data_activity[data_activity.length - 1].stt + 1,
                                 clazz: target.get("model").clazz,
                                 is_new: true,
                                 executed: !blocking,
@@ -683,6 +767,7 @@
                                 data_setting: data_setting,
                                 in_transition_id: transition.id,
                                 created_by: that.current_user.id,
+                                created_at: moment().valueOf(),
                                 id: rand()
                             }
                             data_activity.push(activity_new);
@@ -786,12 +871,13 @@
                     block_id: block_id,
                     block: node
                 }
-                custom_block.push(custom);
+                //custom_block.push(custom);
                 var findCustom = data_custom_block.findIndex(function (item) {
                     return item.block_id == block_id;
                 });
                 if (findCustom != -1) {
                     if (data_custom_block[findCustom].id) {
+                        0
                         custom.is_update = true;
                         custom.id = data_custom_block[findCustom].id;
                     } else {

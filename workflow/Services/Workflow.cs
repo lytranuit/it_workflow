@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Xml.Linq;
 using Spire.Doc.Fields;
+using System.Net.WebSockets;
 
 namespace it.Services
 {
@@ -24,8 +25,8 @@ namespace it.Services
 		public void create_next(ActivityModel activity)
 		{
 			var execution = _context.ExecutionModel.Where(d => d.id == activity.execution_id).Include(d => d.process_version).FirstOrDefault();
-			var transitions = _context.TransitionModel.Where(d => d.execution_id == activity.execution_id).ToList();
-			var activites = _context.ActivityModel.Where(d => d.execution_id == activity.execution_id).ToList();
+			var transitions = _context.TransitionModel.Where(d => d.execution_id == activity.execution_id && d.deleted_at == null).OrderBy(d => d.created_at).ToList();
+			var activites = _context.ActivityModel.Where(d => d.execution_id == activity.execution_id && d.deleted_at == null).OrderBy(d => d.created_at).ToList();
 			var process_version = execution.process_version;
 			var process = process_version.process;
 			var blocks = process.blocks;
@@ -70,7 +71,7 @@ namespace it.Services
 						to_block_id = target.id,
 						from_activity_id = activity.id,
 						//to_activity_id: activity.id,
-						stt = transitions.Count + 1,
+						stt = transitions[transitions.Count - 1].stt + 1,
 						id = Guid.NewGuid().ToString(),
 						created_by = "a76834c7-c4b7-48aa-bf95-05dbd33210ff",
 						created_at = DateTime.Now
@@ -92,7 +93,7 @@ namespace it.Services
 					if (create_new == true)
 					{
 						var blocking = false;
-						if (target.clazz == "formTask" || target.clazz == "approveTask" || target.clazz == "mailSystem" || target.clazz == "printSystem")
+						if (target.clazz == "formTask" || target.clazz == "approveTask" || target.clazz == "suggestTask" || target.clazz == "mailSystem" || target.clazz == "printSystem")
 						{
 							blocking = true;
 						}
@@ -102,7 +103,7 @@ namespace it.Services
 							execution_id = execution.id,
 							label = target.label,
 							block_id = target.id,
-							stt = activites.Count + 1,
+							stt = activites[activites.Count - 1].stt + 1,
 							clazz = target.clazz,
 							executed = !blocking,
 							failed = false,
@@ -217,12 +218,24 @@ namespace it.Services
 				.ThenInclude(d => d.fields).FirstOrDefault();
 			if (ExecutionModel == null)
 				return false;
+			var data_setting_block = ActivityModel.data_setting;
+			var file_template = data_setting_block.file_template;
 
+
+			//Creates Document instance
+			Spire.Doc.Document document = new Spire.Doc.Document();
+
+			//Loads the word document
+			document.LoadFromFile("." + file_template.url, Spire.Doc.FileFormat.Docx);
+			Section section = document.Sections[0];
 
 
 			Dictionary<string, string> replacements = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
 																  { "id", ExecutionModel.id.ToString()},
 																  { "created_at", ExecutionModel.created_at.Value.ToString("dd/MM/yyyy HH:mm:ss")},
+																  { "created_at_day", ExecutionModel.created_at.Value.ToString("dd")},
+																  { "created_at_month", ExecutionModel.created_at.Value.ToString("MM")},
+																  { "created_at_year", ExecutionModel.created_at.Value.ToString("yyyy")},
 																  { "created_by_name", ExecutionModel.user.FullName},
 																  { "title", ExecutionModel.title},
 															};
@@ -232,6 +245,9 @@ namespace it.Services
 															};
 
 			Dictionary<string, string> replacements_file = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) { };
+
+			Dictionary<string, Table> replacements_table = new Dictionary<string, Table>(StringComparer.OrdinalIgnoreCase) { };
+
 			foreach (var activity in ExecutionModel.activities)
 			{
 				if (activity.user_created_by != null)
@@ -340,7 +356,75 @@ namespace it.Services
 					{
 						var columns = data_setting.columns;
 						var list_data = values.list_data;
-						text = "table_tran_it";
+						text = field.id;
+
+						Table table = section.AddTable(true);
+						table.ResetCells(list_data.Count + 1, columns.Count);
+						//Set the first row as table header
+						TableRow FRow = table.Rows[0];
+
+						FRow.IsHeader = true;
+						//Set the height and color of the first row
+						FRow.Height = 30;
+						var i = 0;
+						foreach (var column in columns)
+						{
+							//Set alignment for cells
+
+							Paragraph p = FRow.Cells[i].AddParagraph();
+
+							FRow.Cells[i].CellFormat.VerticalAlignment = VerticalAlignment.Middle;
+							p.Format.HorizontalAlignment = HorizontalAlignment.Center;
+							//Set data format
+							TextRange TR = p.AppendText(column.name);
+
+							TR.CharacterFormat.FontName = "Arial";
+
+							TR.CharacterFormat.FontSize = 13;
+
+							TR.CharacterFormat.Bold = true;
+							i++;
+						}
+						//Add data to the rest of rows and set cell format
+
+
+						for (int r = 0; r < list_data.Count; r++)
+						{
+							TableRow DataRow = table.Rows[r + 1];
+
+							DataRow.Height = 20;
+							var c = 0;
+							foreach (var column in columns)
+							{
+
+
+								DataRow.Cells[c].CellFormat.VerticalAlignment = VerticalAlignment.Middle;
+
+
+								Paragraph p2 = DataRow.Cells[c].AddParagraph();
+
+								var value_column = list_data[r][column.id] ?? "";
+								if (column.type == "currency")
+								{
+									CultureInfo cul = CultureInfo.GetCultureInfo("vi-VN");   // try with "en-US"
+									value_column = double.Parse(value_column).ToString("#,###", cul.NumberFormat);
+								}
+								TextRange TR2 = p2.AppendText(value_column);
+
+
+								p2.Format.HorizontalAlignment = HorizontalAlignment.Center;
+
+								//Set data format
+
+								TR2.CharacterFormat.FontName = "Arial";
+
+								TR2.CharacterFormat.FontSize = 12;
+
+								c++;
+
+							}
+						}
+						replacements_table.Add(text, table);
 						//text = $"<table style='width:100%;border:1px solid #eaf0f7;border-collapse:collapse;'><thead style='background:aliceblue;'><tr>";
 						//foreach (var column in columns)
 						//{
@@ -379,34 +463,27 @@ namespace it.Services
 			}
 
 
-			var data_setting_block = ActivityModel.data_setting;
-			var file_template = data_setting_block.file_template;
 
-
-			//Creates Document instance
-			Spire.Doc.Document document = new Spire.Doc.Document();
-
-			//Loads the word document
-			document.LoadFromFile("." + file_template.url, Spire.Doc.FileFormat.Docx);
 
 			string[] fieldName = replacements.Keys.ToArray();
 			string[] fieldValue = replacements.Values.ToArray();
-			string[] MergeFieldNames = document.MailMerge.GetMergeFieldNames();
+			//string[] MergeFieldNames = document.MailMerge.GetMergeFieldNames();
 
 			document.MailMerge.Execute(fieldName, fieldValue);
 
-			TextSelection selection = document.FindString("table_tran_it", true, true);
-			TextRange range = selection.GetAsOneRange();
-			Paragraph paragraph = range.OwnerParagraph;
-			Body body = paragraph.OwnerTextBody;
-			int index = body.ChildObjects.IndexOf(paragraph);
+			foreach (KeyValuePair<string, Table> entry in replacements_table)
+			{
+				TextSelection selection = document.FindString(entry.Key, true, true);
+				TextRange range = selection.GetAsOneRange();
+				Paragraph paragraph = range.OwnerParagraph;
+				Body body = paragraph.OwnerTextBody;
+				int index = body.ChildObjects.IndexOf(paragraph);
 
-			Section section = document.Sections[0];
-			Table table = section.AddTable(true);
-			table.ResetCells(3, 3);
 
-			body.ChildObjects.Remove(paragraph);
-			body.ChildObjects.Insert(index, table);
+				body.ChildObjects.Remove(paragraph);
+				body.ChildObjects.Insert(index, entry.Value);
+			}
+
 
 			var timeStamp = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
 

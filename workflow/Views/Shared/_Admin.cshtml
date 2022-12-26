@@ -1,8 +1,10 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @using it.Areas.Admin.Models
+@inject IConfiguration Configuration
 @inject UserManager<UserModel> userManager
 @{
     var user = await userManager.GetUserAsync(User);
+    var path_esign = Configuration["JWT:ValidIssuer"];
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -162,6 +164,7 @@
     <!-- App js -->
     <script>
         var path = window.location.origin;
+        var path_esign = '@path_esign';
     </script>
 
     <environment names="Development">

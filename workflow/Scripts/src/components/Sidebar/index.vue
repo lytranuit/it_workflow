@@ -18,6 +18,10 @@
                                 <i class="fas fa-share font-16"></i>
                                 <div class="ml-2"> Phân công lại</div>
                             </a>
+                            <a class="nav-link cursor-pointer flex-m items-center font-13" href="#" @click="sign(model.block_id)" v-if="model.blocking && hasPermission() && model.clazz == 'approveTask'">
+                                <i class="fas fa-signature"></i>
+                                <div class="ml-2"> Yêu cầu ký nháy</div>
+                            </a>
                             <a class="nav-link cursor-pointer flex-m items-center font-13" href="#" v-if="isPopup == false" @click="setIsPopup(true)">
                                 <i class="fas fa-expand font-16"></i>
                                 <div class="ml-2"> Phóng to </div>
@@ -36,11 +40,15 @@
                     {{item.label}}
                 </button>
             </div>
+            <div class="box_transition" v-if="model.blocking && !hasPermission()">
+               <span class="text-danger">Bạn không có quyền thực hiện bước này.</span>
+            </div>
         </div>
         <div class="body" v-if="(model.blocking && hasPermission()) || model.executed">
             <FormTask :departments="departments" :users="users" :fields="fields" :readonly="readonly" v-if="model.clazz == 'formTask'"></FormTask>
-            <ApproveTask :departments="departments" :users="users" :nodes="nodes" :readonly="readonly"v-if="model.clazz == 'approveTask'" :model="model"></ApproveTask>
-            <PrintSystem v-if="model.clazz == 'printSystem'" :model="model"></PrintSystem>
+            <ApproveTask :departments="departments" :users="users" :nodes="nodes" :readonly="readonly" v-if="model.clazz == 'approveTask'" :model="model"></ApproveTask>
+            <SuggestTask :departments="departments" :users="users" :nodes="nodes" :readonly="readonly" v-if="model.clazz == 'suggestTask'" :model="model"></SuggestTask>
+            <PrintSystem v-if="model.clazz == 'printSystem'" :nodes="nodes" :model="model"></PrintSystem>
         </div>
     </form>
 </template>
@@ -48,12 +56,14 @@
     import store from '../../../example/store';
     import FormTask from './FormTask';
     import ApproveTask from './ApproveTask';
+    import SuggestTask from './SuggestTask';
     import PrintSystem from './PrintSystem';
     export default {
         inject: ['i18n'],
         components: {
             FormTask,
             ApproveTask,
+            SuggestTask,
             PrintSystem
         },
         props: {

@@ -1,6 +1,6 @@
 ﻿<template>
     <div :data-clazz="model.clazz">
-        <div class="panelTitle">{{i18n['approveTask']}}</div>
+        <div class="panelTitle">{{i18n['suggest']}}</div>
         <div class="panelBody">
             <el-collapse v-model="activeName">
                 <el-collapse-item :title="i18n['detail.general']" name="1">
@@ -63,17 +63,8 @@
                         </div>
                     </div>
                 </el-collapse-item>
-                <el-collapse-item :title="i18n['approveTask']" name="4">
-                    <div class="cont-empty my-3 text-center"> Chọn bước cần phê duyệt </div>
-                    <div class="row justify-content-center">
-                        <div class="col-10">
-                            <treeselect :options="prev_nodes_form" v-model="model.data_setting.blocks_approve_id" multiple append-to-body></treeselect>
-                        </div>
-                    </div>
-                </el-collapse-item>
-
-                <el-collapse-item :title="i18n['esign']" name="5">
-                    <div class="cont-empty my-3 text-center"> Chọn mẫu cần ký </div>
+                <el-collapse-item :title="i18n['esign']" name="4">
+                    <div class="cont-empty my-3 text-center"> Chọn mẫu gợi ý </div>
                     <div class="row justify-content-center">
                         <div class="col-10">
                             <treeselect :options="prev_nodes_print" v-model="model.data_setting.blocks_esign_id" append-to-body></treeselect>
@@ -91,9 +82,21 @@
         components: {
             DefaultDetail
         },
-        data() {
-            return {
-                activeName: '1',
+
+        computed: {
+            prev_nodes() {
+                var nodes = this.nodes;
+                var model = this.model;
+                return nodes.filter(function (item) {
+                    return item.stt < model.stt;
+                })
+            },
+            prev_nodes_print() {
+                var nodes = this.nodes;
+                var model = this.model;
+                return nodes.filter(function (item) {
+                    return item.stt < model.stt && item.clazz == 'printSystem';
+                })
             }
         },
         props: {
@@ -121,29 +124,5 @@
                 default: () => ([]),
             },
         },
-        computed: {
-            prev_nodes() {
-                var nodes = this.nodes;
-                var model = this.model;
-                return nodes.filter(function (item) {
-                    return item.stt < model.stt;
-                })
-            },
-            prev_nodes_form() {
-                var nodes = this.nodes;
-                var model = this.model;
-                return nodes.filter(function (item) {
-                    return item.stt < model.stt && item.clazz == 'formTask';
-                })
-            },
-            prev_nodes_print() {
-                var nodes = this.nodes;
-                var model = this.model;
-                return nodes.filter(function (item) {
-                    return item.stt < model.stt && item.clazz == 'printSystem';
-                })
-            }
-        },
-
     }
 </script>

@@ -6079,6 +6079,12 @@ dt {
             background-color: #ff7F50;
         }
 
+        .activity img.icon-danger,
+        .activity i.icon-danger {
+            color: #ffffff;
+            background-color: #e75860;
+        }
+
     .activity .mdi:before, .activity .mdi-set {
         -webkit-transform: rotate(-45deg);
         transform: rotate(-45deg);

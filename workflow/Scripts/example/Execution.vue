@@ -19,7 +19,9 @@
                         <span class="">ID</span>: <span class="font-weight-bold"> {{model.id}} </span>
                     </span>
                     <span class="mx-2">|</span>
-                    <div class=" flex-m"> Người tạo: <span class="font-weight-bold" v-if="model.user"> {{model.user.fullName}} </span></div>
+                    <div class=" flex-m">
+                        <span class="">Người tạo</span>: <span class="font-weight-bold" v-if="model.user"> {{model.user.fullName}} </span>
+                    </div>
                     <span class="mx-2 ">|</span>
                     <div data-v-cf52cf0c=""><span class=""> Ngày tạo: </span><span class="font-weight-bold"> {{model.created_at}} </span></div>
                 </div>
@@ -215,6 +217,7 @@
                         failed: false,
                         blocking: false,
                         created_by: user.id,
+                        created_at: moment().valueOf(),
                         id: rand()
                     }
                     data_activity.push(activity_start);
@@ -327,6 +330,7 @@
                 //console.log(data_transition);
                 //console.log(data_activity)
                 //return;
+                var tasks = [];
                 $(".preloader").fadeIn();
                 var model = this.model;
                 if (model.id > 0) {
@@ -347,9 +351,17 @@
                         var resp = await $.ajax({ url: path + "/admin/api/updatecustomblock", data: item, type: "POST", dataType: "JSON" });
                     }
                 }
+                for (var item of data_transition) {
+                    item.execution_id = model.id;
+                    if (item.is_new) {
+                        var task = { api: "createtransition", data: item };
+                        tasks.push(task);
+                        //var resp = await $.ajax({ url: path + "/admin/api/createtransition", data: item, type: "POST", dataType: "JSON" });
+                    }
+                }
                 for (var item of data_activity) {
                     item.execution_id = model.id;
-                    if (item.is_new || item.is_update) {
+                    if ((item.is_new || item.is_update) && !item.failed) {
                         if (item.fields) {
                             for (var field of item.fields) {
                                 field.execution_id = model.id;
@@ -380,17 +392,26 @@
                         }
                     }
                     if (item.is_new) {
-                        var resp = await $.ajax({ url: path + "/admin/api/createactivity", data: item, type: "POST", dataType: "JSON" });
+
+                        var task = { api: "createactivity", data: item };
+                        tasks.push(task);
+                        //var resp = await $.ajax({ url: path + "/admin/api/createactivity", data: item, type: "POST", dataType: "JSON" });
                     } else if (item.is_update) {
-                        var resp = await $.ajax({ url: path + "/admin/api/updateactivity", data: item, type: "POST", dataType: "JSON" });
+                        var task = { api: "updateactivity", data: item };
+                        tasks.push(task);
+                        //var resp = await $.ajax({ url: path + "/admin/api/updateactivity", data: item, type: "POST", dataType: "JSON" });
                     }
                 }
-
-                for (var item of data_transition) {
-                    item.execution_id = model.id;
-                    if (item.is_new) {
-                        var resp = await $.ajax({ url: path + "/admin/api/createtransition", data: item, type: "POST", dataType: "JSON" });
-                    }
+                tasks.sort(function (a, b) {
+                    if (a.data.created_at == b.data.created_at)
+                        return 0;
+                    if (a.data.created_at > b.data.created_at)
+                        return 1;
+                    if (a.data.created_at < b.data.created_at)
+                        return -1
+                });
+                for (var item of tasks) {
+                    var resp = await $.ajax({ url: path + "/admin/api/" + item.api, data: item.data, type: "POST", dataType: "JSON" });
                 }
                 location.href = path + "/admin/execution/details/" + process_version_id + "?execution_id=" + model.id;
             }

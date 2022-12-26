@@ -37,16 +37,19 @@
                 <img data-item="{clazz:'formTask',size:'80*44',label:''}"
                      :src="require('../assets/flow/script-task.svg')" style="width: 80px;height: 44px" />
                 <div>{{i18n['formTask']}}</div>
-                <img data-item="{clazz:'approveTask',size:'48*60',label:''}"
+                <img data-item="{clazz:'approveTask',size:'80*44',label:''}"
                      :src="require('../assets/flow/approve.svg')" style="width: 44px;height: 44px" />
                 <div>{{i18n['approveTask']}}</div>
+                <img data-item="{clazz:'suggestTask',size:'60*44',label:''}"
+                     :src="require('../assets/flow/suggest-task.svg')" style="width: 60px; height: 44px; padding: 5px 10px; border: 2px solid #c5c5c5; border-radius: 8px; " />
+                <div>{{i18n['suggest']}}</div>
             </el-collapse-item>
             <el-collapse-item :title="i18n['system']" name="4">
                 <img data-item="{clazz:'mailSystem',size:'80*44',label:''}"
                      :src="require('../assets/flow/mail-task.svg')" style="width: 80px;height: 44px" />
                 <div>{{i18n['mail']}}</div>
-                <img data-item="{clazz:'printSystem',size:'70*80',label:''}"
-                     :src="require('../assets/flow/printSystem.svg')" style="width: 70px;height:80px" />
+                <img data-item="{clazz:'printSystem',size:'50*60',label:''}"
+                     :src="require('../assets/flow/printSystem.svg')" style="width: 50px; height: 60px; padding: 5px 10px; border: 2px solid #c5c5c5; border-radius: 8px; " />
                 <div>{{i18n['print']}}</div>
             </el-collapse-item>
             <el-collapse-item :title="i18n['gateway']" name="5">

@@ -2,7 +2,7 @@
     <div class="container" id="approve">
         <ul class="nav nav-pills nav-justified mb-3" role="tablist">
             <li class="nav-item waves-effect waves-light" v-if="url != null && readonly == false">
-                <a class="nav-link" data-toggle="tab" href="#suggest" role="tab" aria-selected="false">Ký tên</a>
+                <a class="nav-link" data-toggle="tab" href="#approve-sign" role="tab" aria-selected="false">Ký tên</a>
             </li>
             <li class="nav-item waves-effect waves-light" v-if="url != null && readonly == true">
                 <a class="nav-link" data-toggle="tab" href="#viewer" role="tab" aria-selected="false">Xem file</a>
@@ -11,8 +11,8 @@
                 <a class="nav-link" data-toggle="tab" :href="'#tab-'+index" role="tab" aria-selected="false">{{element.label}}</a>
             </li>
         </ul>
-        <div class="tab-content" style="height: calc(100% - 53px);">
-            <div class="tab-pane h-100" id="suggest" role="tabpanel" v-if="url != null && readonly == false">
+        <div class="tab-content" style="height: calc(100% - 58px);">
+            <div class="tab-pane h-100" id="approve-sign" role="tabpanel" v-if="url != null && readonly == false">
                 <div class="card no-shadow border">
                     <div class="card-body">
                         <div class="row g-0">
@@ -104,7 +104,18 @@
                 return store.state.current_user;
             }
         },
+
+        activated() {
+
+        },
         mounted() {
+            $(document).on("click", "#sign .signature.disabled", function (e) {
+                var user_id = $(this).data("id");
+                var sign = $("#pdf-viewer .signature[data-id='" + user_id + "']");
+                $('#pdf-viewer').animate({
+                    scrollTop: sign.parent()[0].offsetTop + sign[0].offsetTop - 20
+                }, 'slow');
+            });
             var model = this.model;
             var that = this;
             var indexBlock = this.nodes.findIndex(function (item) {
@@ -129,6 +140,7 @@
                 return item.block_id == blocks_esign_id;
             });
             if (indexActivity != -1) {
+
                 var activity_esign = this.data_activity[indexActivity];
                 var esign = activity_esign.data_setting.esign || {};
                 //console.log(esign);
@@ -158,9 +170,40 @@
                             viewer.appendChild(div);
                             await that.renderPage(page, canvas);
                         }
+                        ///FIND SUGGEST
+                        var indexActivity = that.data_activity.findLastIndex(function (item) {
+                            return item.data_setting.blocks_esign_id == blocks_esign_id && item.clazz == 'suggestTask';
+                        });
+                        var activity_suggest = that.data_activity[indexActivity];
+                        var suggest = activity_suggest.data_setting.suggests[model.block_id];
+                        //console.log(suggest);
+                        if (suggest) {
+                            let parent = $(".box-canvas:eq(" + (suggest.page - 1) + ")");
+                            var sign = $("#sign .signature").clone()
+                            parent.append(sign);
+                            var height_page = $(".pdf-page-canvas", parent).height();
+                            $("#pdf-viewer .signature").css({
+                                'left': suggest.position_x + "px",
+                                'top': (height_page - (suggest.position_y + suggest.image_size_height + 40)) + "px"
+                            }).draggable({
+                                stop: function (event, ui) {
+                                    if (ui.position.left < 0) {
+                                        var user_id = $(ui.helper).data("id");
+                                        $("#sign .disabled.signature[data-id='" + user_id + "']").remove();
+                                        $(ui.helper).css({
+                                            "top": 0 + "px",
+                                            "left": 0 + "px"
+                                        }).appendTo($("#sign"));
+                                    }
+                                }
+                            });
+                            $("#pdf-viewer .signature .sign_image").resizable();
+                            $("#sign .signature").addClass("disabled");
+                        }
+                        ////
                         // Fetch the first page
                         $("#pdf-viewer").data("activity_esign", activity_esign.id);
-                        $("#sign .signature").draggable({
+                        $("#sign .signature").not(".disabled").draggable({
                             stop: function (event, ui) {
                                 if (ui.position.left < 0) {
                                     var user_id = $(ui.helper).data("id");
@@ -173,7 +216,7 @@
                             }
                         });
 
-                        $("#sign .sign_image").resizable();
+                        $("#sign .sign_image").not(".disabled").resizable();
                         $('.box-canvas').droppable({
                             // only accept elements matching this CSS selector
                             accept: '.signature',
@@ -209,6 +252,8 @@
                             }
                         });
 
+
+
                     }, function (reason) {
                         // PDF loading error
                         console.error(reason);
@@ -221,8 +266,8 @@
                         $("#viewer").addClass("active");
                         $("[href='#viewer']").addClass("active");
                     } else {
-                        $("#suggest").addClass("active");
-                        $("[href='#suggest']").addClass("active");
+                        $("#approve-sign").addClass("active");
+                        $("[href='#approve-sign']").addClass("active");
                     }
                 }, 100)
 
@@ -251,7 +296,7 @@
             async getsign() {
                 var email = this.current_user.email;
                 var sign = await $.ajax({
-                    url: "https://esign.pymepharco.com/api/userinfo?email=" + email,
+                    url: path_esign + "/api/userinfo?email=" + email,
                     dataType: "JSON",
                     type: "GET",
                 });
@@ -260,7 +305,7 @@
                     alert("Bạn chưa có chữ ký điện tử. Vui lòng liên hệ Phòng IT!");
                     return
                 }
-                sign.image_sign = "https://esign.pymepharco.com" + sign.image_sign + "?token=sdfxvbdfgertewrkvcbgyrewbnfgsdfwetyrtrgdgweqfvqqazqhjkuiyort";
+                sign.image_sign = path_esign + sign.image_sign + "?token=sdfxvbdfgertewrkvcbgyrewbnfgsdfwetyrtrgdgweqfvqqazqhjkuiyort";
                 this.sign = sign;
 
             }

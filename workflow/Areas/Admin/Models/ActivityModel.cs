@@ -20,6 +20,7 @@ namespace it.Areas.Admin.Models
 		public bool? blocking { get; set; }
 
 		public int stt { get; set; }
+		public string? note { get; set; }
 
 		public List<ExecutionFieldModel>? fields { get; set; }
 

@@ -606,6 +606,36 @@ namespace it.Areas.Admin.Controllers
 				TransitionModel.created_by = user_id;
 				_context.Add(TransitionModel);
 				_context.SaveChanges();
+
+				if (TransitionModel.reverse == true)
+				{
+					var execution = _context.ExecutionModel.Where(d => d.id == TransitionModel.execution_id).Include(d => d.process_version).FirstOrDefault();
+					var process_version = execution.process_version;
+					var process = process_version.process;
+					var blocks = process.blocks;
+					var links = process.links;
+
+					var to_block_id = TransitionModel.to_block_id;
+					var to_activity_id = TransitionModel.to_activity_id;
+					var to_block = blocks.Where(d => d.id == to_block_id).FirstOrDefault();
+					var stt_to_block = to_block.stt;
+					var next_all_block = blocks.Where(d => d.stt >= stt_to_block).ToList();
+
+					foreach (var block in next_all_block)
+					{
+						var activities = _context.ActivityModel.Where(d => d.block_id == block.id && d.id != to_activity_id && d.execution_id == TransitionModel.execution_id).ToList();
+						if (activities != null)
+						{
+							_context.RemoveRange(activities);
+						}
+						var transitions = _context.TransitionModel.Where(d => d.from_block_id == block.id && d.execution_id == TransitionModel.execution_id).ToList();
+						if (transitions != null)
+						{
+							_context.RemoveRange(transitions);
+						}
+					}
+					await _context.SaveChangesAsync();
+				}
 			}
 			catch (DbUpdateConcurrencyException)
 			{
@@ -635,6 +665,10 @@ namespace it.Areas.Admin.Controllers
 					ActivityModel.created_at = null;
 					ActivityModel.created_by = null;
 				}
+				if (ActivityModel.failed == true)
+				{
+					ActivityModel.fields = null;
+				}
 				_context.Add(ActivityModel);
 				_context.SaveChanges();
 
@@ -650,7 +684,8 @@ namespace it.Areas.Admin.Controllers
 					EventModel EventModel = new EventModel
 					{
 						execution_id = ActivityModel.execution_id,
-						event_content = "Đã hoàn thành",
+						event_content = "Đã thất bại",
+						type = 2,
 						created_at = DateTime.Now,
 					};
 					_context.Add(EventModel);
@@ -667,7 +702,7 @@ namespace it.Areas.Admin.Controllers
 					EventModel EventModel = new EventModel
 					{
 						execution_id = ActivityModel.execution_id,
-						event_content = "Đã thất bại",
+						event_content = "Đã hoàn thành",
 						created_at = DateTime.Now,
 					};
 					_context.Add(EventModel);
@@ -704,8 +739,10 @@ namespace it.Areas.Admin.Controllers
 		{
 			System.Security.Claims.ClaimsPrincipal currentUser = this.User;
 			string user_id = UserManager.GetUserId(currentUser); // Get user id:
-
+			ActivityModel.user_created_by = null;
 			var ActivityModel_old = await _context.ActivityModel.FindAsync(id);
+			if (ActivityModel_old == null)
+				return Json(new { success = 0 });
 			var is_change_blocking = ActivityModel_old.blocking != ActivityModel.blocking;
 			if (ActivityModel_old != null)
 			{
@@ -724,6 +761,10 @@ namespace it.Areas.Admin.Controllers
 						ActivityModel_old.created_at = null;
 						ActivityModel_old.created_by = null;
 					}
+					if (ActivityModel.failed == true)
+					{
+						ActivityModel.fields = null;
+					}
 				}
 
 				_context.Update(ActivityModel_old);
@@ -732,16 +773,34 @@ namespace it.Areas.Admin.Controllers
 				if (is_change_blocking && ActivityModel.blocking == false)
 				{
 					/////create event
-					var user = _context.UserModel.Find(user_id);
-					EventModel EventModel = new EventModel
+					if (ActivityModel.failed == true)
 					{
-						execution_id = ActivityModel.execution_id,
-						event_content = "<b>" + user.FullName + "</b> đã thực hiện <b>" + ActivityModel.label + "</b>",
-						created_at = DateTime.Now,
-					};
-					_context.Add(EventModel);
-					await _context.SaveChangesAsync();
+						var user = _context.UserModel.Find(user_id);
+						EventModel EventModel = new EventModel
+						{
+							execution_id = ActivityModel.execution_id,
+							event_content = "<b>" + user.FullName + "</b> đã thực hiện <b>" + ActivityModel.label + "</b> <div><span>Lý do: " + ActivityModel.note + "</span></div>",
+							type = 2,
+							created_at = DateTime.Now,
+						};
+						_context.Add(EventModel);
+						await _context.SaveChangesAsync();
+					}
+					else
+					{
+						var user = _context.UserModel.Find(user_id);
+						EventModel EventModel = new EventModel
+						{
+							execution_id = ActivityModel.execution_id,
+							event_content = "<b>" + user.FullName + "</b> đã thực hiện <b>" + ActivityModel.label + "</b>",
+							created_at = DateTime.Now,
+						};
+						_context.Add(EventModel);
+						await _context.SaveChangesAsync();
+					}
 				}
+
+
 			}
 			return Json(new { success = 1 });
 
@@ -850,7 +909,7 @@ namespace it.Areas.Admin.Controllers
 			var from_activity = _context.ActivityModel.Where(d => d.id == from_activity_id).Include(d => d.fields).FirstOrDefault();
 			if (from_activity != null)
 			{
-				if (from_activity.clazz == "approveTask" || from_activity.clazz == "formTask")
+				if (from_activity.clazz == "approveTask" || from_activity.clazz == "formTask" || from_activity.clazz == "suggestTask")
 				{
 					from_activity.created_by = null;
 					from_activity.created_at = null;

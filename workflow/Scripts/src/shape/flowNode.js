@@ -176,6 +176,41 @@ export default function (G6) {
 
         }),
     }, 'task-node');
+    G6.registerNode('suggest-task-node', {
+        shapeType: 'rect',
+        labelPosition: 'bottom',
+        options: $.extendext(true, 'replace', {}, taskDefaultOptions, {
+            icon: require('../assets/icons/flow/suggest-task.svg'),
+            iconStyle: {
+                width: 20,
+                height: 22,
+                left: 20,
+                top: 10,
+            },
+            style: {
+                fill: 'white',
+                stroke: '#0000009e',
+            },
+            stateStyles: {
+                selected: {
+                    fill: '#E9E9E9',
+                },
+            }
+        }),
+        getShapeStyle(cfg) {
+            cfg.size = [60, 44];
+            const width = cfg.size[0];
+            const height = cfg.size[1];
+            const style = {
+                x: 0 - width / 2,
+                y: 0 - height / 2,
+                width,
+                height,
+                ...this.options.style,
+            };
+            return style;
+        },
+    }, 'base-node');
 
     G6.registerNode('gateway-node', {
         shapeType: 'path',

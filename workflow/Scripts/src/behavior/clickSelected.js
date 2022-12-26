@@ -40,7 +40,7 @@ export default function (G6) {
                 this.graph.setItemState(e.item, 'hover', false);
         },
         onCanvasClick() {
-            return;
+            //return;
             this._clearSelected();
             this.graph.emit('afteritemselected', []);
         },
