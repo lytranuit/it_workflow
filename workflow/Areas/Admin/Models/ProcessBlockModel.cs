@@ -58,8 +58,22 @@ namespace it.Areas.Admin.Models
 		public int minutes { get; set; }
 		public FileUp file_template { get; set; }
 
+		/// <summary>
+		/// (printTask)
+		/// </summary>
 		public Esign esign { get; set; }
+		/// <summary>
+		/// Gợi ý vị trí ký (suggestTask)
+		/// </summary>
 		public Dictionary<string, Signature> suggests { get; set; }
+
+		/// <summary>
+		/// Ký nháy (approveTask)
+		/// </summary>
+		public List<Signature> listusersign { get; set; }
+		/// <summary>
+		/// (mailTask)
+		/// </summary>
 		public MailSetting mail { get; set; }
 		public List<string> listuser { get; set; }
 
@@ -68,11 +82,7 @@ namespace it.Areas.Admin.Models
 		public List<string> blocks_approve_id { get; set; }
 		public string blocks_esign_id { get; set; }
 
-		public virtual List<ProcessBlockModel> blocks_approve
-		{
-			get;
-			set;
-		}
+		public virtual List<ProcessBlockModel> blocks_approve { get; set; }
 		public List<int> listdepartment { get; set; }
 	}
 	public class MailSetting
@@ -100,6 +110,7 @@ namespace it.Areas.Admin.Models
 		public DateTime date { get; set; }
 		public string reason { get; set; }
 		//public string image_sign { get; set; }
+		public int status { get; set; } = 1;
 
 
 		public double position_image_x { get; set; }

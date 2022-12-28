@@ -389,6 +389,18 @@
                             var sign = item.sign;
                             var resp = await $.ajax({ url: path + "/admin/api/SaveSign", data: sign, type: "POST", dataType: "JSON" });
                             delete item.sign;
+                            if (resp.success == 1) {
+                                var resp_sign = resp.sign;
+                                var data_setting = item.data_setting || {};
+                                var listusersign = data_setting.listusersign || [];
+                                if (listusersign.length > 0) {
+                                    var findindex = listusersign.findLastIndex(function (item) {
+                                        return item.user_sign == resp_sign.user_sign;
+                                    });
+                                    listusersign[findindex] = resp_sign;
+                                    item.data_setting.listusersign = listusersign;
+                                }
+                            }
                         }
                     }
                     if (item.is_new) {

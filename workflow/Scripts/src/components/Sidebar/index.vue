@@ -18,9 +18,9 @@
                                 <i class="fas fa-share font-16"></i>
                                 <div class="ml-2"> Phân công lại</div>
                             </a>
-                            <a class="nav-link cursor-pointer flex-m items-center font-13" href="#" @click="sign(model.block_id)" v-if="model.blocking && hasPermission() && model.clazz == 'approveTask'">
+                            <a class="nav-link cursor-pointer flex-m items-center font-13" href="#" @click="require_sign(model)" v-if="model.blocking && hasPermission() && model.clazz == 'approveTask'">
                                 <i class="fas fa-signature"></i>
-                                <div class="ml-2"> Yêu cầu ký nháy</div>
+                                <div class="ml-2"> Yêu cầu phê duyệt</div>
                             </a>
                             <a class="nav-link cursor-pointer flex-m items-center font-13" href="#" v-if="isPopup == false" @click="setIsPopup(true)">
                                 <i class="fas fa-expand font-16"></i>
@@ -40,16 +40,25 @@
                     {{item.label}}
                 </button>
             </div>
-            <div class="box_transition" v-if="model.blocking && !hasPermission()">
-               <span class="text-danger">Bạn không có quyền thực hiện bước này.</span>
+            <div class="box_transition" v-if="model.blocking && !hasPermission() && !hasRequireSign()">
+                <span class="text-danger">Bạn không có quyền thực hiện bước này.</span>
+            </div>
+            <div class="box_transition" v-if="model.blocking && !hasPermission() && hasRequireSign()">
+                <button class="mr-2 btn-reverse" type="button" name="button" @click="disagree()">
+                    Không đồng ý
+                </button>
+                <button class="mr-2 btn-next" type="button" name="button" @click="agree()">
+                    Đồng ý
+                </button>
             </div>
         </div>
-        <div class="body" v-if="(model.blocking && hasPermission()) || model.executed">
+        <div class="body" v-if="(model.blocking && hasPermission()) || model.executed || hasRequireSign()">
             <FormTask :departments="departments" :users="users" :fields="fields" :readonly="readonly" v-if="model.clazz == 'formTask'"></FormTask>
             <ApproveTask :departments="departments" :users="users" :nodes="nodes" :readonly="readonly" v-if="model.clazz == 'approveTask'" :model="model"></ApproveTask>
             <SuggestTask :departments="departments" :users="users" :nodes="nodes" :readonly="readonly" v-if="model.clazz == 'suggestTask'" :model="model"></SuggestTask>
             <PrintSystem v-if="model.clazz == 'printSystem'" :nodes="nodes" :model="model"></PrintSystem>
         </div>
+
     </form>
 </template>
 <script>
@@ -126,12 +135,102 @@
                 var that = this;
                 that.$emit('execute_transition', from_activity_id, edge_id);
             },
+            async agree() {
+                var that = this;
+                $("#approve-sign").addClass("active");
+                let sign = $(".signature");
+                var sign_x = sign[0].offsetLeft;
+                var sign_y = sign[0].offsetTop;
+                var parent = sign.closest(".box-canvas");
+                if (!parent.length) {
+                    alert("Kéo chữ ký vào văn bản để ký!");
+                    return;
+                }
+                var reason_b = $(".reason", sign).text();
+                var explode = reason_b.split("Ý kiến:");
+                var reason;
+                if (explode.length > 1) {
+                    reason = explode[1];
+                }
+                var page = parent.index() + 1;
+                var height_page = $(".pdf-page-canvas", parent).height();
+                var sign_image = $(".sign_image", sign);
+                var sign_info = $(".sign_info", sign);
+                //var sign_info_x = sign_info[0].offsetLeft;
+                //var sign_info_y = sign_info[0].offsetTop;
+                var sign_image_x = sign_image[0].offsetLeft;
+                var sign_image_y = sign_image[0].offsetTop;
+                var image_size_width = sign_image.width();
+                var image_size_height = sign_image.height();
+                var position_image_x = sign_image_x + sign_x;
+                var position_image_y = height_page - (image_size_height + sign_y);
+                var position_x = sign_x;
+                var position_y = height_page - (image_size_height + sign_y + 40);
+                if (reason) {
+                    position_y -= 30;
+                }
+                if (!sign_info.length) {
+                    position_y = position_image_y;
+                }
+                var url = $("#pdf-viewer").data("url");
+                var activity_esign_id = $("#pdf-viewer").data("activity_esign");
+                var user_esign = sign.data("id");
+                var sign_data = {
+                    block_id: that.model.block_id,
+                    page: page,
+                    position_x: position_x,
+                    position_y: position_y,
+                    position_image_x: position_image_x,
+                    position_image_y: position_image_y,
+                    image_size_width: image_size_width,
+                    image_size_height: image_size_height,
+                    url: url,
+                    reason: reason,
+                    user_sign: that.current_user.id,
+                    user_esign: user_esign,
+                    activity_esign_id: activity_esign_id,
+                    activity_id: that.model.id
+                }
+                $(".preloader").fadeIn();
+                var resp = await $.ajax({ url: path + "/admin/api/SaveSign", data: sign_data, type: "POST", dataType: "JSON" });
+                if (resp.success == 1) {
+                    var resp_sign = resp.sign;
+                    var data_setting = this.model.data_setting || {};
+                    var listusersign = data_setting.listusersign || [];
+                    var findindex = listusersign.findLastIndex(function (item) {
+                        return item.user_sign == that.current_user.id;
+                    });
+
+                    listusersign[findindex] = resp_sign;
+                    this.model.data_setting.listusersign = listusersign;
+                    this.model.is_update = true;
+                    //console.log(this.model);
+                    this.$emit("save_data");
+                }
+            },
+            disagree() {
+                var that = this;
+                var data_setting = this.model.data_setting || {};
+                var listusersign = data_setting.listusersign || [];
+                var findindex = listusersign.findLastIndex(function (item) {
+                    return item.user_sign == that.current_user.id;
+                });
+
+                listusersign[findindex].status = 3;
+                this.model.data_setting.listusersign = listusersign;
+                this.model.is_update = true;
+                //console.log(this.model);
+                this.$emit("save_data");
+            },
             close() {
                 this.$emit("close");
             },
             assign_again(block_id) {
                 var that = this;
                 that.$emit('assign_again', block_id);
+            },
+            require_sign(activity) {
+                this.$emit("require_sign", activity);
             },
             getAll(departments) {
                 var that = this;
@@ -242,6 +341,18 @@
                         return true;
                 }
                 return false;
+            },
+            hasRequireSign() {
+                var that = this;
+                var data_setting = this.model.data_setting || {};
+                var listusersign = data_setting.listusersign || [];
+                var findIndex = listusersign.findLastIndex(function (item) {
+                    return item.user_sign == that.current_user.id && item.status == 1;
+                })
+                if (findIndex != -1) {
+                    return true;
+                }
+                return false;
             }
         }
     }
@@ -260,10 +371,10 @@
         box-shadow: -3px 3px 10px -4px #a5a5a5;
 
         &.centered {
-            left: 50%;
-            top: 50%;
-            -webkit-transform: translate(-50%, -50%);
-            transform: translate(-50%, -50%);
+/*            //left: 50%;
+            //top: 50%;
+            //-webkit-transform: translate(-50%, -50%);
+            //transform: translate(-50%, -50%);*/
             width: 100%;
             height: 100%;
         }

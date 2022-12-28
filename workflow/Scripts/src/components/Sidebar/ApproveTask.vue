@@ -1,11 +1,15 @@
 ﻿<template>
     <div class="container" id="approve">
+       
         <ul class="nav nav-pills nav-justified mb-3" role="tablist">
             <li class="nav-item waves-effect waves-light" v-if="url != null && readonly == false">
                 <a class="nav-link" data-toggle="tab" href="#approve-sign" role="tab" aria-selected="false">Ký tên</a>
             </li>
             <li class="nav-item waves-effect waves-light" v-if="url != null && readonly == true">
                 <a class="nav-link" data-toggle="tab" href="#viewer" role="tab" aria-selected="false">Xem file</a>
+            </li>
+            <li class="nav-item waves-effect waves-light" v-if="listusersign.length > 0">
+                <a class="nav-link" data-toggle="tab" href="#require_sign" role="tab" aria-selected="false">Yêu cầu phê duyệt</a>
             </li>
             <li class="nav-item waves-effect waves-light" v-for="(element,index) in blocks_approve">
                 <a class="nav-link" data-toggle="tab" :href="'#tab-'+index" role="tab" aria-selected="false">{{element.label}}</a>
@@ -19,7 +23,7 @@
                             <div class="col-9" style="border: 5px solid #d7d7d7;border-left: 0;">
                                 <div id='pdf-viewer' style="height:620px;" :data-url="file"></div>
                                 <!--<PDFViewer :source="url"
-                                   style="height: 620px;/>-->
+                        style="height: 620px;/>-->
                             </div>
                             <div class="col-3 order-first" style="border: 5px solid #d7d7d7; height: 640px; display: inline-block; padding: 10px">
                                 <div class="base-title">Chữ ký</div>
@@ -43,6 +47,52 @@
             <div class="tab-pane h-100" id="viewer" role="tabpanel" v-if="url != null && readonly == true">
                 <embed :src="url" style="width: 100%;height: 100%;" type="application/pdf">
             </div>
+            <div class="tab-pane h-100" id="require_sign" role="tabpanel" v-if="listusersign.length > 0">
+                <div class="card no-shadow border">
+                    <div class="card-body">
+                        <div class="activity">
+                            <template v-for="(user,index) in listusersign">
+                                <div v-if="user.status == 1">
+                                    <i class="icon-warning">
+                                        <span class="fas fa-spinner fa-spin" style="transform: rotate(-45deg);"></span>
+                                    </i>
+                                    <div class="user_signature time-item" data-id="5a375cd2-1908-4784-9b7b-d470e2d63376">
+                                        <div class="item-info" style="min-height:50px">
+                                            <h5 class="mt-0">
+                                                <b>{{user.user.name}}</b> đã được yêu cầu phê duyệt
+                                            </h5>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div v-if="user.status == 2">
+                                    <i class="icon-success">
+                                        <span class="fas fa-check-circle" style="transform: rotate(-45deg);"></span>
+                                    </i>
+                                    <div class="user_signature time-item" data-id="5a375cd2-1908-4784-9b7b-d470e2d63376">
+                                        <div class="item-info" style="min-height:50px">
+                                            <h5 class="mt-0">
+                                                <b>{{user.user.name}}</b> đã <strong class="text-success">đồng ý</strong> phê duyệt
+                                            </h5>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div v-if="user.status == 3">
+                                    <i class="text-white bg-danger">
+                                        <span class="fas fa-ban" style="transform: rotate(-45deg);"></span>
+                                    </i>
+                                    <div class="user_signature time-item" data-id="5a375cd2-1908-4784-9b7b-d470e2d63376">
+                                        <div class="item-info" style="min-height:50px">
+                                            <h5 class="mt-0">
+                                                <b>{{user.user.name}}</b> đã <strong class="text-danger">không đồng ý</strong> phê duyệt
+                                            </h5>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="tab-pane h-100" :id="'tab-'+index" role="tabpanel" v-for="(element,index) in blocks_approve">
                 <div class="bg-white py-3">
                     <FormTask :departments="departments" :users="users" :fields="element.fields" readonly></FormTask>
@@ -61,7 +111,7 @@
     export default {
         inject: ['i18n'],
         components: {
-            FormTask,
+            FormTask
             //PDFViewer
         },
         props: {
@@ -89,11 +139,10 @@
         data() {
             return {
                 blocks_approve: [],
-                activeName: '1',
                 thePdf: null,
                 url: null,
                 file: null,
-                sign: null
+                sign: null,
             }
         },
         computed: {
@@ -102,9 +151,19 @@
             },
             current_user() {
                 return store.state.current_user;
+            },
+            listusersign() {
+                var listusersign = this.model.data_setting.listusersign || [];
+                for (var user of listusersign) {
+                    var user_id = user.user_sign;
+                    var findIndex = this.users.findLastIndex(function (item) {
+                        return item.id == user_id;
+                    });
+                    user.user = this.users[findIndex];
+                }
+                return listusersign;
             }
         },
-
         activated() {
 
         },
@@ -320,5 +379,9 @@
 
     .sign_image {
         background: transparent
+    }
+
+    .activity {
+        border-left: none;
     }
 </style>

@@ -626,12 +626,20 @@ namespace it.Areas.Admin.Controllers
 						var activities = _context.ActivityModel.Where(d => d.block_id == block.id && d.id != to_activity_id && d.execution_id == TransitionModel.execution_id).ToList();
 						if (activities != null)
 						{
-							_context.RemoveRange(activities);
+							foreach (var ac in activities)
+							{
+								ac.deleted_at = DateTime.Now;
+							}
+							_context.UpdateRange(activities);
 						}
 						var transitions = _context.TransitionModel.Where(d => d.from_block_id == block.id && d.execution_id == TransitionModel.execution_id).ToList();
 						if (transitions != null)
 						{
-							_context.RemoveRange(transitions);
+							foreach (var ac in transitions)
+							{
+								ac.deleted_at = DateTime.Now;
+							}
+							_context.UpdateRange(transitions);
 						}
 					}
 					await _context.SaveChangesAsync();
@@ -998,7 +1006,7 @@ namespace it.Areas.Admin.Controllers
 			}
 		}
 		[HttpPost]
-		public async Task<JsonResult> SaveSign(Signature sign, string activity_esign_id)
+		public async Task<JsonResult> SaveSign(Signature sign, string activity_esign_id, string activity_id)
 		{
 			var user_local = _context.UserModel.Where(d => d.Id == sign.user_sign).FirstOrDefault();
 			if (user_local == null)
@@ -1147,12 +1155,18 @@ namespace it.Areas.Admin.Controllers
 
 			dest.Close();
 			sign.date = DateTime.Now;
+			sign.status = 2;
 
 			///Save DB
 			///// Cap nhat user_sign
 			var activity_esign = _context.ActivityModel.Where(d => d.id == activity_esign_id).FirstOrDefault();
 			var data_setting = activity_esign.data_setting;
 			var files = data_setting.esign.files;
+			var signatures = data_setting.esign.signatures;
+			if (signatures == null)
+			{
+				signatures = new List<Signature>();
+			}
 			files.Add(new FileUp()
 			{
 				name = files[0].name,
@@ -1160,14 +1174,34 @@ namespace it.Areas.Admin.Controllers
 				ext = ".pdf",
 				mimeType = "application/pdf"
 			});
+			signatures.Add(sign);
 			data_setting.esign.files = files;
-
+			data_setting.esign.signatures = signatures;
 			activity_esign.data_setting = data_setting;
 			_context.Update(activity_esign);
-
 			_context.SaveChanges();
+			/////Cập nhật activity
+			//if (activity_id != null)
+			//{
+			//	var activity = _context.ActivityModel.Where(d => d.id == activity_id).FirstOrDefault();
+			//	var data_setting1 = activity.data_setting;
+			//	var listusersign = data_setting1.listusersign;
+			//	if (listusersign != null)
+			//	{
+			//		var findIndex = listusersign.FindIndex(d => d.user_sign == user_local.Id);
+			//		if (findIndex != -1)
+			//		{
+			//			listusersign[findIndex] = sign;
+			//			data_setting1.listusersign = listusersign;
+			//			activity.data_setting = data_setting1;
+			//			_context.Update(activity);
+			//			_context.SaveChanges();
+			//		}
+			//	}
 
-			return Json(new { success = 1 });
+			//}
+
+			return Json(new { success = 1, sign = sign });
 		}
 	}
 	public class SelectResponse

@@ -21,79 +21,85 @@
 								</div>
 							</div>
 						</div>
-						<div class="form-input-control-left w-100" v-if="element.type != 'table' && !readonly">
-							<div v-if="element.type == 'number'">
-								<input class="form-control form-control-sm number" type='number' v-model="element.values.value" :required="element.is_require" :name="element.id" />
-							</div>
-							<div v-if="element.type == 'currency'">
-								<CurrencyInput :name="element.id" :required="element.is_require" v-model="element.values.value"
-											   :options="{
+                        <div class="form-input-control-left w-100" v-if="element.type != 'table' && !readonly">
+                            <div v-if="element.type == 'number'">
+                                <input class="form-control form-control-sm number" type='number' v-model="element.values.value" :required="element.is_require" :name="element.id" />
+                            </div>
+                            <div v-if="element.type == 'currency'">
+                                <CurrencyInput :name="element.id" :required="element.is_require" v-model="element.values.value"
+                                               :options="{
                                                         locale:'de-DE',
                                                         currency: element.data_setting.currency || 'VND',
                                                         hideCurrencySymbolOnFocus: false,
                                                         hideGroupingSeparatorOnFocus: false,
                                                         hideNegligibleDecimalDigitsOnFocus: false,
                                                     }" />
-							</div>
+                            </div>
 
-							<div v-if="element.type == 'text'">
-								<input class="form-control form-control-sm text" type='text' v-model="element.values.value" :required="element.is_require" :name="element.id" />
-							</div>
-							<div v-if="element.type == 'email'">
-								<input class="form-control form-control-sm email" type='email' v-model="element.values.value" :required="element.is_require" :name="element.id" />
-							</div>
-							<div v-if="element.type == 'file'">
-								<input class="form-control form-control-sm file" type='file' :required="element.is_require" :name="element.id" />
-							</div>
-							<div v-if="element.type == 'file_multiple'">
-								<input class="form-control form-control-sm file" type='file' :required="element.is_require" :name="element.id" multiple />
-							</div>
-							<div v-if="element.type == 'date'">
-								<datetime type="datetime" format="yyyy-MM-dd" :flow="['date']" input-class="form-control form-control-sm" v-model="element.values.value" :required="element.is_require" :name="element.id"></datetime>
-							</div>
-							<div v-if="element.type == 'date_month'">
-								<datetime type="datetime" format="yyyy-MM" :flow="['year','month']" input-class="form-control form-control-sm" v-model="element.values.value" :required="element.is_require" :name="element.id"></datetime>
-							</div>
+                            <div v-if="element.type == 'text'">
+                                <input class="form-control form-control-sm text" type='text' v-model="element.values.value" :required="element.is_require" :name="element.id" />
+                            </div>
+                            <div v-if="element.type == 'yesno'">
+                                <div class="custom-control custom-switch switch-success">
+                                    <input type="checkbox" class="custom-control-input" :id="'customSwitch_'+element.id" v-model="element.values.value" :name="element.id" value="1">
+                                    <label class="custom-control-label" :for="'customSwitch_'+element.id"></label>
+                                </div>
+                            </div>
+                            <div v-if="element.type == 'email'">
+                                <input class="form-control form-control-sm email" type='email' v-model="element.values.value" :required="element.is_require" :name="element.id" />
+                            </div>
+                            <div v-if="element.type == 'file'">
+                                <input class="form-control form-control-sm file" type='file' :required="element.is_require" :name="element.id" />
+                            </div>
+                            <div v-if="element.type == 'file_multiple'">
+                                <input class="form-control form-control-sm file" type='file' :required="element.is_require" :name="element.id" multiple />
+                            </div>
+                            <div v-if="element.type == 'date'">
+                                <datetime type="datetime" format="yyyy-MM-dd" :flow="['date']" input-class="form-control form-control-sm" v-model="element.values.value" :required="element.is_require" :name="element.id"></datetime>
+                            </div>
+                            <div v-if="element.type == 'date_month'">
+                                <datetime type="datetime" format="yyyy-MM" :flow="['year','month']" input-class="form-control form-control-sm" v-model="element.values.value" :required="element.is_require" :name="element.id"></datetime>
+                            </div>
 
-							<div v-if="element.type == 'date_time'">
-								<datetime type="datetime" format="yyyy-MM-dd HH:mm:ss" input-class="form-control form-control-sm" v-model="element.values.value" :required="element.is_require" :name="element.id"></datetime>
-							</div>
+                            <div v-if="element.type == 'date_time'">
+                                <datetime type="datetime" format="yyyy-MM-dd HH:mm:ss" input-class="form-control form-control-sm" v-model="element.values.value" :required="element.is_require" :name="element.id"></datetime>
+                            </div>
 
-							<div v-if="element.type == 'textarea'">
-								<textarea class="form-control form-control-sm textarea" v-model="element.values.value" :required="element.is_require" :name="element.id"></textarea>
-							</div>
+                            <div v-if="element.type == 'textarea'">
+                                <textarea class="form-control form-control-sm textarea" v-model="element.values.value" :required="element.is_require" :name="element.id"></textarea>
+                            </div>
 
-							<div v-if="element.type == 'select'">
-								<treeselect :options="get_options(element.data_setting.options)" v-model="element.values.value" :required="element.is_require" name="tran"></treeselect>
-							</div>
+                            <div v-if="element.type == 'select'">
+                                <treeselect :options="get_options(element.data_setting.options)" v-model="element.values.value" :required="element.is_require" name="tran"></treeselect>
+                            </div>
 
-							<div v-if="element.type == 'select_multiple'">
-								<treeselect :options="get_options(element.data_setting.options)" v-model="element.values.value_array" multiple :required="element.is_require" name="tran2"></treeselect>
-							</div>
-							<div v-if="element.type == 'employee'">
-								<treeselect :options="users" v-model="element.values.value" :required="element.is_require" :name="element.id"></treeselect>
-							</div>
+                            <div v-if="element.type == 'select_multiple'">
+                                <treeselect :options="get_options(element.data_setting.options)" v-model="element.values.value_array" multiple :required="element.is_require" name="tran2"></treeselect>
+                            </div>
+                            <div v-if="element.type == 'employee'">
+                                <treeselect :options="users" v-model="element.values.value" :required="element.is_require" :name="element.id"></treeselect>
+                            </div>
 
-							<div v-if="element.type == 'employee_multiple'">
-								<treeselect :options="users" v-model="element.values.value_array" multiple :required="element.is_require" :name="element.id"></treeselect>
-							</div>
+                            <div v-if="element.type == 'employee_multiple'">
+                                <treeselect :options="users" v-model="element.values.value_array" multiple :required="element.is_require" :name="element.id"></treeselect>
+                            </div>
 
-							<div v-if="element.type == 'department'">
-								<treeselect :options="departments" v-model="element.values.value" :required="element.is_require" :name="element.id"></treeselect>
-							</div>
+                            <div v-if="element.type == 'department'">
+                                <treeselect :options="departments" v-model="element.values.value" :required="element.is_require" :name="element.id"></treeselect>
+                            </div>
 
-							<div v-if="element.type == 'department_multiple'">
-								<treeselect :options="departments" v-model="element.values.value_array" multiple :required="element.is_require" :name="element.id"></treeselect>
-							</div>
-							<div v-if="element.type == 'task'">
-								<div class="checkbox checkbox-success checkbox-circle" v-for="element in element.data_setting.options" :key="element.id">
-									<input :id="'task-' + element.id" type="checkbox">
-									<label :for="'task-' + element.id">
-										{{element.name}}
-									</label>
-								</div>
-							</div>
-						</div>
+                            <div v-if="element.type == 'department_multiple'">
+                                <treeselect :options="departments" v-model="element.values.value_array" multiple :required="element.is_require" :name="element.id"></treeselect>
+                            </div>
+                            <div v-if="element.type == 'task'">
+                                <div class="checkbox checkbox-success checkbox-circle" v-for="element in element.data_setting.options" :key="element.id">
+                                    <input :id="'task-' + element.id" type="checkbox">
+                                    <label :for="'task-' + element.id">
+                                        {{element.name}}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
 						<div class="w-100" v-else v-html="display(element)"></div>
 					</div>
 					<div v-if="element.type == 'table'">
@@ -110,43 +116,49 @@
 							</thead>
 							<tbody v-if="!readonly">
 								<tr v-for="(row,index1) in element.values.list_data" :key="index1">
-									<td v-for="(column,index2) in element.data_setting.columns" :key="column.id">
-										<div v-if="column.type == 'stt'">
-											{{row[column.id]}}
-										</div>
-										<div v-if="column.type == 'number'">
-											<input class="form-control form-control-sm number" type='number' v-model="row[column.id]" :name="column.id + '_' + index1" :required="column.is_require" />
-										</div>
-										<div v-if="column.type == 'currency'">
-											<CurrencyInput :name="column.id + '_' + index1" :required="column.is_require" v-model="row[column.id]"
-														   :options="{
+                                    <td v-for="(column,index2) in element.data_setting.columns" :key="column.id">
+                                        <div v-if="column.type == 'stt'">
+                                            {{row[column.id]}}
+                                        </div>
+                                        <div v-if="column.type == 'number'">
+                                            <input class="form-control form-control-sm number" type='number' v-model="row[column.id]" :name="column.id + '_' + index1" :required="column.is_require" />
+                                        </div>
+                                        <div v-if="column.type == 'currency'">
+                                            <CurrencyInput :name="column.id + '_' + index1" :required="column.is_require" v-model="row[column.id]"
+                                                           :options="{
                                                         locale:'de-DE',
                                                         currency: column.currency || 'VND',
                                                         hideCurrencySymbolOnFocus: false,
                                                         hideGroupingSeparatorOnFocus: false,
                                                         hideNegligibleDecimalDigitsOnFocus: false,
                                                     }" />
-										</div>
-										<div v-if="column.type == 'text'">
-											<input class="form-control form-control-sm text" type='text' v-model="row[column.id]" :name="column.id + '_' + index1" :required="column.is_require" />
-										</div>
-										<div v-if="column.type == 'email'">
-											<input class="form-control form-control-sm email" type='email' v-model="row[column.id]" :name="column.id + '_' + index1" :required="column.is_require" />
-										</div>
-										<div v-if="column.type == 'date'">
-											<input class="form-control form-control-sm date" type='text' v-model="row[column.id]" :name="column.id + '_' + index1" :required="column.is_require" />
-										</div>
-										<div v-if="column.type == 'date_month'">
-											<input class="form-control form-control-sm date_month" type='text' v-model="row[column.id]" :name="column.id + '_' + index1" :required="column.is_require" />
-										</div>
+                                        </div>
+                                        <div v-if="column.type == 'text'">
+                                            <input class="form-control form-control-sm text" type='text' v-model="row[column.id]" :name="column.id + '_' + index1" :required="column.is_require" />
+                                        </div>
+                                        <div v-if="column.type == 'yesno'">
+                                            <div class="custom-control custom-switch switch-success">
+                                                <input type="checkbox" class="custom-control-input" :id="'customSwitch_'+column.id" v-model="row[column.id]" :name="column.id + '_' + index1" value="1">
+                                                <label class="custom-control-label" :for="'customSwitch_'+column.id"></label>
+                                            </div>
+                                        </div>
+                                        <div v-if="column.type == 'email'">
+                                            <input class="form-control form-control-sm email" type='email' v-model="row[column.id]" :name="column.id + '_' + index1" :required="column.is_require" />
+                                        </div>
+                                        <div v-if="column.type == 'date'">
+                                            <input class="form-control form-control-sm date" type='text' v-model="row[column.id]" :name="column.id + '_' + index1" :required="column.is_require" />
+                                        </div>
+                                        <div v-if="column.type == 'date_month'">
+                                            <input class="form-control form-control-sm date_month" type='text' v-model="row[column.id]" :name="column.id + '_' + index1" :required="column.is_require" />
+                                        </div>
 
-										<div v-if="column.type == 'date_time'">
-											<input class="form-control form-control-sm date_time" type='text' v-model="row[column.id]" :name="column.id + '_' + index1" :required="column.is_require" />
-										</div>
-										<div v-if="column.type == 'textarea'">
-											<textarea class="form-control form-control-sm textarea" v-model="row[column.id]" :name="column.id + '_' + index1" :required="column.is_require"></textarea>
-										</div>
-									</td>
+                                        <div v-if="column.type == 'date_time'">
+                                            <input class="form-control form-control-sm date_time" type='text' v-model="row[column.id]" :name="column.id + '_' + index1" :required="column.is_require" />
+                                        </div>
+                                        <div v-if="column.type == 'textarea'">
+                                            <textarea class="form-control form-control-sm textarea" v-model="row[column.id]" :name="column.id + '_' + index1" :required="column.is_require"></textarea>
+                                        </div>
+                                    </td>
 									<td v-if="element.values.list_data.length > 1">
 										<div class="ml-2 text-danger" style="cursor:pointer;" @click="remove_row(element,index1)"><i class="fas fa-trash-alt"></i></div>
 									</td>
@@ -159,10 +171,14 @@
 							</tbody>
 							<tbody v-else>
 								<tr v-for="(row,index1) in element.values.list_data" :key="index1">
-									<td v-for="(column,index2) in element.data_setting.columns" :key="column.id">
-										<div v-if="column.type == 'currency'">{{format_currency(row[column.id],column.currency)}}</div>
-										<div v-else>{{row[column.id]}}</div>
-									</td>
+                                    <td v-for="(column,index2) in element.data_setting.columns" :key="column.id">
+                                        <div v-if="column.type == 'currency'">{{format_currency(row[column.id],column.currency)}}</div>
+                                        <div v-if="column.type == 'yesno'">
+                                            <i v-if="row[column.id] == 'true'" class="far fa-check-circle text-success"></i>
+                                            <i v-if="row[column.id] != 'true'" class="fas fa-ban text-danger"></i>
+                                        </div>
+                                        <div v-else>{{row[column.id]}}</div>
+                                    </td>
 								</tr>
 							</tbody>
 						</table>
@@ -284,14 +300,16 @@
                     }
                 } else if (field.type == 'file' || field.type == 'file_multiple') {
                     text = "";
-                    for (var file of field.values.files) {
-                        text += `
-                    <div class="flex-m mb-1">
-                        <div class="file-icon" data-type="`+ file.ext + `"></div>
-                        <a href="`+ file.url + `" download="` + file.name + `" style="margin-left: 5px;">
-							`+ file.name + `
-						</a>
-                    </div>`;
+                    if (field.values.files) {
+                        for (var file of field.values.files) {
+                            text += `
+                                <div class="flex-m mb-1">
+                                    <div class="file-icon" data-type="`+ file.ext + `"></div>
+                                    <a href="`+ file.url + `" download="` + file.name + `" style="margin-left: 5px;">
+							            `+ file.name + `
+						            </a>
+                                </div>`;
+                        }
                     }
                 } else if (field.type == 'department') {
                     var index = this.departments.findIndex(function (item) {
@@ -344,6 +362,9 @@
                     text = field.values.value ? moment(field.values.value).format("YYYY-MM-DD HH:mm") : "";
                 } else if (field.type == 'currency') {
                     text = field.values.value ? new Intl.NumberFormat('de-DE', { style: 'currency', currency: data_setting.currency }).format(field.values.value) : "";
+                } else if (field.type == 'yesno') {
+                    console.log(field.values.value);
+                    text = field.values.value && field.values.value == "true" ? "<span class='text-success'><i class='far fa-check-circle'></i> Chọn</span>" : "<span class='text-danger'><i class='fas fa-ban'></i> Không chọn</span>";
                 }
                 return text
             },

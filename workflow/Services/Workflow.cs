@@ -6,9 +6,7 @@ using Spire.Doc.Documents;
 using Spire.Doc;
 using System.Diagnostics;
 using System.Globalization;
-using System.Xml.Linq;
 using Spire.Doc.Fields;
-using System.Net.WebSockets;
 
 namespace it.Services
 {
@@ -228,6 +226,7 @@ namespace it.Services
 			//Loads the word document
 			document.LoadFromFile("." + file_template.url, Spire.Doc.FileFormat.Docx);
 			Section section = document.Sections[0];
+			string[] MergeFieldNames = document.MailMerge.GetMergeFieldNames();
 
 
 			Dictionary<string, string> replacements = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
@@ -257,7 +256,8 @@ namespace it.Services
 
 				foreach (var field in activity.fields)
 				{
-
+					if (!MergeFieldNames.Contains(field.variable))
+						continue;
 					var data_setting = field.data_setting;
 					var values = field.values;
 					var text = values.value;
@@ -352,6 +352,13 @@ namespace it.Services
 						replacements.Add(field.variable, text);
 
 					}
+					else if (field.type == "yesno")
+					{
+						if (text == "true")
+						{
+							text = "√";
+						}
+					}
 					else if (field.type == "table")
 					{
 						var columns = data_setting.columns;
@@ -403,11 +410,18 @@ namespace it.Services
 
 								Paragraph p2 = DataRow.Cells[c].AddParagraph();
 
-								var value_column = list_data[r][column.id] ?? "";
+								string value_column = list_data[r][column.id] ?? "";
 								if (column.type == "currency")
 								{
 									CultureInfo cul = CultureInfo.GetCultureInfo("vi-VN");   // try with "en-US"
 									value_column = double.Parse(value_column).ToString("#,###", cul.NumberFormat);
+								}
+								else if (column.type == "yesno")
+								{
+									if (value_column == "true")
+									{
+										value_column = "√";
+									}
 								}
 								TextRange TR2 = p2.AppendText(value_column);
 
@@ -425,33 +439,6 @@ namespace it.Services
 							}
 						}
 						replacements_table.Add(text, table);
-						//text = $"<table style='width:100%;border:1px solid #eaf0f7;border-collapse:collapse;'><thead style='background:aliceblue;'><tr>";
-						//foreach (var column in columns)
-						//{
-						//	text += $"<td style='padding: 10px;border:1px solid white;'>{column.name}</td>";
-						//}
-						//text += "</thead></tr>";
-						//text += "<tbody>";
-						//foreach (var data in list_data)
-						//{
-						//	text += "<tr>";
-						//	foreach (var column in columns)
-						//	{
-						//		var value_column = data[column.id] ?? "";
-
-
-						//		if (column.type == "currency")
-						//		{
-						//			CultureInfo cul = CultureInfo.GetCultureInfo("vi-VN");   // try with "en-US"
-						//			value_column = double.Parse(value_column).ToString("#,###", cul.NumberFormat);
-						//		}
-						//		text += $"<td style='padding: 10px;border:1px solid #eaf0f7;'>{value_column}</td>";
-
-						//	}
-						//	text += "</tr>";
-						//}
-						//text += "</tbody>";
-						//text += "</table>";
 						replacements.Add(field.variable, text);
 					}
 					else
@@ -467,13 +454,18 @@ namespace it.Services
 
 			string[] fieldName = replacements.Keys.ToArray();
 			string[] fieldValue = replacements.Values.ToArray();
-			//string[] MergeFieldNames = document.MailMerge.GetMergeFieldNames();
 
 			document.MailMerge.Execute(fieldName, fieldValue);
 
 			foreach (KeyValuePair<string, Table> entry in replacements_table)
 			{
 				TextSelection selection = document.FindString(entry.Key, true, true);
+				if (selection == null)
+				{
+					var table = entry.Value;
+					//table
+					continue;
+				}
 				TextRange range = selection.GetAsOneRange();
 				Paragraph paragraph = range.OwnerParagraph;
 				Body body = paragraph.OwnerTextBody;

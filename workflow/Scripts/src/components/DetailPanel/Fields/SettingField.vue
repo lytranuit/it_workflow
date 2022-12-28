@@ -87,6 +87,12 @@
                                             </label>
                                         </div>
                                     </div>
+                                    <div v-if="element.type == 'yesno'">
+                                        <div class="custom-control custom-switch switch-success">
+                                            <input type="checkbox" class="custom-control-input" :id="'customSwitch_'+element.id" checked="">
+                                            <label class="custom-control-label" :for="'customSwitch_'+element.id"></label>
+                                        </div>
+                                    </div>
                                     <div v-if="element.type == 'textarea'">
                                         <textarea class="form-control form-control-sm textarea" :value="element.has_default ? element.data_setting.default_value : ''"></textarea>
                                     </div>
@@ -163,6 +169,12 @@
                                             </div>
                                             <div v-if="column.type == 'textarea'">
                                                 <textarea class="form-control form-control-sm textarea"></textarea>
+                                            </div>
+                                            <div v-if="column.type == 'yesno'">
+                                                <div class="custom-control custom-switch switch-success">
+                                                    <input type="checkbox" class="custom-control-input" :id="'customSwitch_'+column.id" checked="">
+                                                    <label class="custom-control-label" :for="'customSwitch_'+column.id"></label>
+                                                </div>
                                             </div>
                                         </td>
                                     </tr>
@@ -341,6 +353,7 @@
                                                         <option value="number">Số</option>
                                                         <option value="currency">Tiền tệ</option>
                                                         <option value="email">Email</option>
+                                                        <option value="yesno">Yes/no</option>
                                                     </select>
                                                     <select class="form-control form-control-sm" v-if="column.type == 'currency'" v-model="column.currency" required>
                                                         <option value="VND" selected>VND</option>
@@ -369,7 +382,7 @@
                                     <textarea class="form-control form-control-sm" type='text' name="guide" v-model="temp_add.guide" placeholder="Nhập nội dung hướng dẫn"></textarea>
                                 </div>
                             </div>
-                            <template v-if="temp_add.type != 'table' && temp_add.type != 'task'">
+                            <template v-if="temp_add.type != 'table' && temp_add.type != 'task' && temp_add.type !='yesno'">
                                 <div class="col-lg-12 mt-2">
                                     <div class="checkbox checkbox-primary">
                                         <input id="checkbox2" type="checkbox" v-model="temp_add.is_require">
@@ -495,6 +508,11 @@
                         name: "Chọn giá trị",
                         icon: '<i class="far fa-check-square"></i>',
                         type: "select"
+                    },
+                    {
+                        name: "Yes/No",
+                        icon: '<i class="fas fa-check-circle"></i>',
+                        type: "yesno"
                     },
                     {
                         name: "Thời gian",

@@ -4,10 +4,11 @@
         <div ref="canvas" class="canvasPanel" :style="{'height':height+'px','width':'100%'}"></div>
         <Transition>
             <div v-if="selectedModel != null">
-                <sidebar :model="selectedModel" ref="sidebar" @execute_transition="execute_transition" @assign_again="assign_again" @close="close" :departments="departments" :users="users" :nodes="data.nodes"></sidebar>
+                <sidebar :model="selectedModel" ref="sidebar" @save_data="save_data" @execute_transition="execute_transition" @assign_again="assign_again" @require_sign="require_sign" @close="close" :departments="departments" :users="users" :nodes="data.nodes"></sidebar>
             </div>
         </Transition>
         <assign :departments="departments" :users="users" :data_custom_block="custom_block" v-if="custom_block.length > 0" @save_data="save_data" :required="required" @close="close"></assign>
+        <RequireSign :users="users" v-if="is_require_sign" @save_data="save_data" @close="close" :activity="activity_require"></RequireSign>
     </div>
 </template>
 <script>
@@ -18,6 +19,7 @@
     import CanvasPanel from '../plugins/canvasPanel'
     import ToolbarPanel from '../components/ToolbarPanel'
     import Assign from '../components/Assign'
+    import RequireSign from '../components/RequireSign'
     import Sidebar from '../components/Sidebar'
     import i18n from '../locales'
     import registerShape from '../shape'
@@ -32,7 +34,8 @@
         components: {
             ToolbarPanel,
             Sidebar,
-            Assign
+            Assign,
+            RequireSign
         },
         provide() {
             return {
@@ -100,6 +103,8 @@
                 cmdPlugin: null,
                 custom_block: [],
                 required: true,
+                is_require_sign: false,
+                activity_require: null
             };
         },
         watch: {
@@ -155,7 +160,7 @@
                             return item.block_id == block.id;
                         });
                         if (findCustomBlock != -1) {
-                            activity.data_setting = $.extendext(true, 'replace', node.get("model").data_setting, data_custom_block[findCustomBlock].data_setting);
+                            activity.data_setting = $.extendext(true, 'replace', node.get("model").data_setting, activity.data_setting, data_custom_block[findCustomBlock].data_setting);
                         }
                         var fields = block.fields || [];
                         fields = fields.map(function (i) {
@@ -439,6 +444,7 @@
                     });
                     //////
                     if ($("#approve").length) {
+                        $("#approve-sign").addClass("active");
                         let sign = $(".signature");
                         var sign_x = sign[0].offsetLeft;
                         var sign_y = sign[0].offsetTop;
@@ -489,7 +495,8 @@
                             reason: reason,
                             user_sign: that.current_user.id,
                             user_esign: user_esign,
-                            activity_esign_id: activity_esign_id
+                            activity_esign_id: activity_esign_id,
+                            activity_id: activity.id
                         }
                     }
                     if ($("#suggest").length) {
@@ -871,7 +878,7 @@
                     block_id: block_id,
                     block: node
                 }
-                //custom_block.push(custom);
+                custom_block.push(custom);
                 var findCustom = data_custom_block.findIndex(function (item) {
                     return item.block_id == block_id;
                 });
@@ -896,10 +903,17 @@
             save_data() {
                 this.$emit("save_data");
             },
-
+            require_sign(activity) {
+                this.custom_block = [];
+                this.selectedModel = null;
+                this.is_require_sign = true;
+                this.activity_require = activity;
+            },
             close() {
                 this.custom_block = [];
                 this.selectedModel = null;
+                this.is_require_sign = false;
+                this.activity_require = null;
             }
         },
         destroyed() {

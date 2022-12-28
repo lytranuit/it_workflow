@@ -307,16 +307,19 @@ namespace it.Areas.Admin.Controllers
 							else if (field.type == "file" || field.type == "file_multiple")
 							{
 								CellRange cell = row.Cells[(start_col_field - 1)];
-								foreach (var file in values.files)
+								if (values.files != null && values.files.Count > 0)
 								{
-									HyperLink urlLink = newSheet.HyperLinks.Add(cell);
+									foreach (var file in values.files)
+									{
+										HyperLink urlLink = newSheet.HyperLinks.Add(cell);
 
-									urlLink.Type = HyperLinkType.Url;
+										urlLink.Type = HyperLinkType.Url;
 
-									urlLink.TextToDisplay = file.name;
+										urlLink.TextToDisplay = file.name;
 
-									urlLink.Address = Domain + file.url;
+										urlLink.Address = Domain + file.url;
 
+									}
 								}
 								//var files = values.files.Select(d => d.name).ToList();
 								//text = String.Join(", ", files);

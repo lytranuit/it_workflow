@@ -25,7 +25,7 @@ namespace it.Areas.Admin.Controllers
 		{
 			UserManager = UserMgr;
 		}
-		public async Task<IActionResult> Index()
+		public IActionResult Index()
 		{
 			//System.Security.Claims.ClaimsPrincipal currentUser = this.User;
 
