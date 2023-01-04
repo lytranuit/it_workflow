@@ -4,6 +4,7 @@ import PopupExecution from './PopupExecution.vue';
 import Execution from './Execution.vue';
 import User from './User.vue';
 import store from "./store";
+
 ////ElementUI
 import ElementUI from 'element-ui'
 Vue.use(ElementUI);
@@ -19,35 +20,32 @@ import 'vue-datetime/dist/vue-datetime.css'
 Vue.use(Datetime)
 Vue.use(require('vue-moment'));
 Vue.component("datetime", Datetime);
-//file-upload
-const VueUploadComponent = require('vue-upload-component')
-Vue.component('file-upload', VueUploadComponent)
 //// Dragger
 import draggable from 'vuedraggable'
 Vue.component('draggable', draggable);
 Vue.config.productionTip = false;
 if ($("#app").length) {
-	new Vue({
-		store,
-		render: h => h(App)
-	}).$mount('#app');
+    new Vue({
+        store,
+        render: h => h(App)
+    }).$mount('#app');
 }
 if ($("#popup-execution").length) {
-	new Vue({
-		store,
-		render: h => h(PopupExecution)
-	}).$mount('#popup-execution');
+    new Vue({
+        store,
+        render: h => h(PopupExecution)
+    }).$mount('#popup-execution');
 }
 if ($("#execution").length) {
-	new Vue({
-		store,
-		render: h => h(Execution)
-	}).$mount('#execution');
+    new Vue({
+        store,
+        render: h => h(Execution)
+    }).$mount('#execution');
 }
 
 if ($("#user").length) {
-	new Vue({
-		store,
-		render: h => h(User)
-	}).$mount('#user');
+    new Vue({
+        store,
+        render: h => h(User)
+    }).$mount('#user');
 }

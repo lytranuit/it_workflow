@@ -122,7 +122,6 @@ namespace it.Areas.Admin.Controllers
             else
                 return Ok(result);
 
-            return View("Index", UserManager.Users);
         }
 
         // GET: UserController/Delete/5

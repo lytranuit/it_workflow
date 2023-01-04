@@ -8,9 +8,6 @@
             <li class="nav-item waves-effect waves-light" v-if="url != null && readonly == true">
                 <a class="nav-link" data-toggle="tab" href="#viewer" role="tab" aria-selected="false">Xem file</a>
             </li>
-            <li class="nav-item waves-effect waves-light" v-if="listusersign.length > 0">
-                <a class="nav-link" data-toggle="tab" href="#require_sign" role="tab" aria-selected="false">Yêu cầu phê duyệt</a>
-            </li>
             <li class="nav-item waves-effect waves-light" v-for="(element,index) in blocks_approve">
                 <a class="nav-link" data-toggle="tab" :href="'#tab-'+index" role="tab" aria-selected="false">{{element.label}}</a>
             </li>
@@ -39,6 +36,54 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="acti mt-2" v-if="listusersign.length > 0">
+                                    <div data-v-0eb0921e="" class="base-title">Yêu cầu phê duyệt</div>
+                                    <template v-for="(user,index) in listusersign">
+                                        <div class="flex-m mt-2" v-if="user.status == 1">
+
+                                            <i class="icon-warning">
+                                                <span class="fas fa-spinner fa-spin" style="transform: rotate(-45deg);"></span>
+                                            </i>
+                                            <div class="user_signature time-item" data-id="5a375cd2-1908-4784-9b7b-d470e2d63376">
+                                                <div class="item-info" style="min-height:50px">
+                                                    <div class="mt-0">
+                                                        <b>{{user.user.name}}</b> đã được yêu cầu phê duyệt
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="flex-m mt-2" v-if="user.status == 2">
+                                            <i class="icon-success">
+                                                <span class="fas fa-check-circle" style="transform: rotate(-45deg);"></span>
+                                            </i>
+                                            <div class="user_signature time-item" data-id="5a375cd2-1908-4784-9b7b-d470e2d63376">
+                                                <div class="item-info" style="min-height:50px">
+                                                    <div class="mt-0">
+                                                        <b>{{user.user.name}}</b> đã <strong class="text-success">đồng ý</strong> phê duyệt
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="flex-m mt-2" v-if="user.status == 3">
+                                            <i class="text-white bg-danger">
+                                                <span class="fas fa-ban" style="transform: rotate(-45deg);"></span>
+                                            </i>
+                                            <div class="user_signature time-item" data-id="5a375cd2-1908-4784-9b7b-d470e2d63376">
+                                                <div class="item-info" style="min-height:50px">
+                                                    <div class="mt-0">
+                                                        <b>{{user.user.name}}</b> đã <strong class="text-danger">không đồng ý</strong> phê duyệt
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                                <div class="text-center mt-2">
+                                    <a class="btn btn-success btn-sm" type="button" href="#" @click="require_sign(model)">
+                                        <i class="fas fa-plus mr-1"></i>
+                                        Yêu cầu ký nháy
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -46,52 +91,6 @@
             </div>
             <div class="tab-pane h-100" id="viewer" role="tabpanel" v-if="url != null && readonly == true">
                 <embed :src="url" style="width: 100%;height: 100%;" type="application/pdf">
-            </div>
-            <div class="tab-pane h-100" id="require_sign" role="tabpanel" v-if="listusersign.length > 0">
-                <div class="card no-shadow border">
-                    <div class="card-body">
-                        <div class="activity">
-                            <template v-for="(user,index) in listusersign">
-                                <div v-if="user.status == 1">
-                                    <i class="icon-warning">
-                                        <span class="fas fa-spinner fa-spin" style="transform: rotate(-45deg);"></span>
-                                    </i>
-                                    <div class="user_signature time-item" data-id="5a375cd2-1908-4784-9b7b-d470e2d63376">
-                                        <div class="item-info" style="min-height:50px">
-                                            <h5 class="mt-0">
-                                                <b>{{user.user.name}}</b> đã được yêu cầu phê duyệt
-                                            </h5>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div v-if="user.status == 2">
-                                    <i class="icon-success">
-                                        <span class="fas fa-check-circle" style="transform: rotate(-45deg);"></span>
-                                    </i>
-                                    <div class="user_signature time-item" data-id="5a375cd2-1908-4784-9b7b-d470e2d63376">
-                                        <div class="item-info" style="min-height:50px">
-                                            <h5 class="mt-0">
-                                                <b>{{user.user.name}}</b> đã <strong class="text-success">đồng ý</strong> phê duyệt
-                                            </h5>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div v-if="user.status == 3">
-                                    <i class="text-white bg-danger">
-                                        <span class="fas fa-ban" style="transform: rotate(-45deg);"></span>
-                                    </i>
-                                    <div class="user_signature time-item" data-id="5a375cd2-1908-4784-9b7b-d470e2d63376">
-                                        <div class="item-info" style="min-height:50px">
-                                            <h5 class="mt-0">
-                                                <b>{{user.user.name}}</b> đã <strong class="text-danger">không đồng ý</strong> phê duyệt
-                                            </h5>
-                                        </div>
-                                    </div>
-                                </div>
-                            </template>
-                        </div>
-                    </div>
-                </div>
             </div>
             <div class="tab-pane h-100" :id="'tab-'+index" role="tabpanel" v-for="(element,index) in blocks_approve">
                 <div class="bg-white py-3">
@@ -339,6 +338,10 @@
 
         },
         methods: {
+            require_sign(activity) {
+                //console.log(activity)
+                this.$emit("require_sign", activity);
+            },
             async renderPage(pageNumber, canvas) {
                 return this.thePdf.getPage(pageNumber).then(function (page) {
                     var viewport = page.getViewport({
@@ -383,5 +386,36 @@
 
     .activity {
         border-left: none;
+    }
+
+    .acti {
+        i {
+            flex: 0 0 36px;
+            margin-right: 10px;
+            /* width: 44px; */
+            /* height: 36px; */
+            text-align: center;
+            line-height: 36px;
+            border-radius: 12%;
+            left: -19px;
+            color: #0656ff;
+            background-color: #f3f6f7;
+            font-size: 20px;
+            /* margin-top: -10px; */
+            -webkit-box-shadow: 0 0 0 0.5px #f3f6f7;
+            box-shadow: 0 0 0 0.5px #f3f6f7;
+            -webkit-transform: rotate(45deg);
+            transform: rotate(45deg);
+
+            &.icon-warning {
+                color: #fff;
+                background-color: #ffb822;
+            }
+
+            &.icon-success {
+                color: #fff;
+                background-color: #1ecab8;
+            }
+        }
     }
 </style>

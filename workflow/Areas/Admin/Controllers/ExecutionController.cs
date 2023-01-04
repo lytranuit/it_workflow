@@ -78,8 +78,7 @@ namespace it.Areas.Admin.Controllers
 			if (user_id == null || user_id == "")
 				user_id = UserManager.GetUserId(currentUser); // Get user id:
 			var user_current = await UserManager.GetUserAsync(currentUser); // Get user id:
-			var customerData = (from tempcustomer in _context.ExecutionModel.Where(u => u.deleted_at == null) select tempcustomer);
-			customerData = customerData.Where(m => m.deleted_at == null);
+			var customerData = _context.ExecutionModel.Where(m => m.deleted_at == null);
 			//
 			if (type == "wait")
 			{

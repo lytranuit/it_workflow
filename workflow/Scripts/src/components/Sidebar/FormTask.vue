@@ -107,7 +107,7 @@
 						<table class="table table-bordered mb-0 bg-white" style="outline: 1px solid #dee2e6 !important">
 							<thead class="">
 								<tr>
-									<th class="border-top-0" v-for="(column,index1) in element.data_setting.columns" :key="column.id">
+									<th class="border-top-0 text-center"" v-for="(column,index1) in element.data_setting.columns" :key="column.id">
 										{{column.name}}
 										<span class="text-danger" v-if="column.is_require">*</span>
 									</th>
@@ -116,15 +116,19 @@
 							</thead>
 							<tbody v-if="!readonly">
 								<tr v-for="(row,index1) in element.values.list_data" :key="index1">
-                                    <td v-for="(column,index2) in element.data_setting.columns" :key="column.id">
+                                    <td v-for="(column,index2) in element.data_setting.columns" :key="column.id" class="text-center">
                                         <div v-if="column.type == 'stt'">
                                             {{row[column.id]}}
                                         </div>
+                                        <div v-if="column.type == 'formular'">
+                                            <VueNumberFormat class="form-control form-control-sm" v-model="row[column.id]"
+                                                             :options="options_formular(column)" :name="column.id + '_' + index1" :required="column.is_require" readonly></VueNumberFormat>
+                                        </div>
                                         <div v-if="column.type == 'number'">
-                                            <input class="form-control form-control-sm number" type='number' v-model="row[column.id]" :name="column.id + '_' + index1" :required="column.is_require" />
+                                            <input class="form-control form-control-sm number" type='number' v-model="row[column.id]" :name="column.id + '_' + index1" :required="column.is_require" @change="signalChange(column.id,row,element.data_setting.columns)"/>
                                         </div>
                                         <div v-if="column.type == 'currency'">
-                                            <CurrencyInput :name="column.id + '_' + index1" :required="column.is_require" v-model="row[column.id]"
+                                            <CurrencyInput @change="signalChange(column.id,row,element.data_setting.columns)" :name="column.id + '_' + index1" :required="column.is_require" v-model="row[column.id]"
                                                            :options="{
                                                         locale:'de-DE',
                                                         currency: column.currency || 'VND',
@@ -138,8 +142,8 @@
                                         </div>
                                         <div v-if="column.type == 'yesno'">
                                             <div class="custom-control custom-switch switch-success">
-                                                <input type="checkbox" class="custom-control-input" :id="'customSwitch_'+column.id" v-model="row[column.id]" :name="column.id + '_' + index1" value="1">
-                                                <label class="custom-control-label" :for="'customSwitch_'+column.id"></label>
+                                                <input type="checkbox" class="custom-control-input" :id="'customSwitch_' + column.id + '_' + index1" v-model="row[column.id]" :name="column.id + '_' + index1" value="1">
+                                                <label class="custom-control-label" :for="'customSwitch_' + column.id + '_' + index1"></label>
                                             </div>
                                         </div>
                                         <div v-if="column.type == 'email'">
@@ -171,9 +175,9 @@
 							</tbody>
 							<tbody v-else>
 								<tr v-for="(row,index1) in element.values.list_data" :key="index1">
-                                    <td v-for="(column,index2) in element.data_setting.columns" :key="column.id">
+                                    <td v-for="(column,index2) in element.data_setting.columns" :key="column.id" class="text-center">
                                         <div v-if="column.type == 'currency'">{{format_currency(row[column.id],column.currency)}}</div>
-                                        <div v-if="column.type == 'yesno'">
+                                        <div v-else-if="column.type == 'yesno'">
                                             <i v-if="row[column.id] == 'true'" class="far fa-check-circle text-success"></i>
                                             <i v-if="row[column.id] != 'true'" class="fas fa-ban text-danger"></i>
                                         </div>
@@ -189,12 +193,17 @@
 	</div>
 </template>
 <script>
+    import mitt from 'mitt'
 
+    var stringMath = require('string-math');
+    const emitter = mitt()
     import CurrencyInput from "../CurrencyInput.vue";
+    import VueNumberFormat from '@igortrindade/vue-number-format'
     export default {
         inject: ['i18n'],
         components: {
-            CurrencyInput
+            CurrencyInput,
+            VueNumberFormat
         },
         props: {
             fields: {
@@ -231,8 +240,76 @@
 
                 })
             }
+            var firstvariable = "!#"; //first input;
+            var secondvariable = "#"; //first in
+            var fields = this.fields;
+            if (fields) {
+                for (var field of fields) {
+                    if (field.type == 'table' && field.data_setting.columns) {
+                        var columns = field.data_setting.columns;
+                        for (var column of columns) {
+                            if (column.type == 'formular') {
+                                var text = column.formular.text;
+                                var list_id = text.match(new RegExp("(?<=" + firstvariable + ")(.*?)(?=" + secondvariable + ")", "g"));
+                                //console.log(text);
+                                //console.log(list_id);
+                                for (var id of list_id) {
+                                    emitter.on(id, e => {
+                                        console.log(e);
+                                    })
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         },
         methods: {
+            options_formular(column) {
+                var suffix = "";
+                if (column.formular.type_return == 'percent') {
+                    suffix = " %";
+                } else if (column.formular.type_return == 'currency') {
+                    suffix = " VND";
+                }
+                return { precision: column.formular.decimal_number, prefix: '', suffix: suffix, decimal: ',', thousand: '.', acceptNegative: false, isInteger: false };
+            },
+            signalChange: function (id, row, columns) {
+                //console.log(evt.target);
+                //var name = $(evt.target).attr("name");
+                //var list = name.split("_");
+                //var id = list[0];
+                //var index = list[1];
+
+                var firstvariable = "!#"; //first input;
+                var secondvariable = "#"; //first in
+                //console.log(id);
+                console.log(columns);
+                for (var column of columns) {
+                    if (column.type == 'formular') {
+                        var column_id = column.id;
+                        var text = column.formular.text;
+                        var list_id = text.match(new RegExp("(?<=" + firstvariable + ")(.*?)(?=" + secondvariable + ")", "g"));
+                        console.log(list_id)
+                        console.log(text)
+                        if (list_id.indexOf(id) == -1) {
+                            continue;
+                        }
+                        for (var id of list_id) {
+                            var value = row[id] ? row[id] : 0;
+                            text = text.replace(new RegExp("!#" + id + "#", "g"), value);
+                        }
+                        var result = stringMath(text, function (err) {
+                            return 0;
+                        });
+                        row[column_id] = result;
+                        console.log(text);
+                        console.log(row[column_id]);
+                    }
+                }
+                this.$forceUpdate();
+            },
+
             get_options(options) {
                 return options.map(function (item) {
                     item.label = item.name;
@@ -363,7 +440,7 @@
                 } else if (field.type == 'currency') {
                     text = field.values.value ? new Intl.NumberFormat('de-DE', { style: 'currency', currency: data_setting.currency }).format(field.values.value) : "";
                 } else if (field.type == 'yesno') {
-                    console.log(field.values.value);
+                    //console.log(field.values.value);
                     text = field.values.value && field.values.value == "true" ? "<span class='text-success'><i class='far fa-check-circle'></i> Chọn</span>" : "<span class='text-danger'><i class='fas fa-ban'></i> Không chọn</span>";
                 }
                 return text

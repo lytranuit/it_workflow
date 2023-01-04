@@ -8968,7 +8968,7 @@ body.dark-sidenav .left-sidenav {
 }
 
 .signature.disabled .sign_image {
-    filter: grayscale(100%);
+    filter: grayscale(100%) blur(1px);
 }
 
 .signature {
@@ -11969,4 +11969,8 @@ label.medium.m-b-8 {
 .e_activity_blocking {
     background: #d8f4ff;
     border: 1px double #dbdbdb;
+}
+
+.overFlowHidden {
+    overflow: hidden;
 }

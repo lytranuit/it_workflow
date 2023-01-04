@@ -68,11 +68,20 @@ namespace it.Areas.Admin.Models
 		public string id { get; set; }
 		public string name { get; set; }
 		public string type { get; set; }
-
+		public string formular_text { get; set; }
+		public Formular formular { get; set; }
 		public string? currency { get; set; }
 		public int? stt { get; set; }
 		public bool is_require { get; set; }
 		[NotMapped]
 		public int? start_c { set; get; }
+	}
+	public class Formular
+	{
+		public int type { get; set; }
+
+		public string text { get; set; }
+		public int decimal_number { get; set; }
+		public string type_return { get; set; }
 	}
 }

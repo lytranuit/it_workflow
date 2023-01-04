@@ -1,7 +1,8 @@
 ﻿@using Microsoft.AspNetCore.Identity
-@using it
 @using it.Areas.Admin.Models
-@addTagHelper *, it
+@using workflow
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@addTagHelper *, workflow
 @inject it.Data.ItContext _context
 @inject UserManager<UserModel> userManager;
 @{
@@ -21,6 +22,7 @@
             <a href="/admin/execution/wait">
                 <i class="fas fa-spinner"></i>
                 <span>Cần thực hiện</span>
+                <count></count>
             </a>
         </li>
         <li>

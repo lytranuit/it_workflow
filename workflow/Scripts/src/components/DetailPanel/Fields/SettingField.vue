@@ -167,13 +167,16 @@
                                             <div v-if="column.type == 'date_time'">
                                                 <input class="form-control form-control-sm date_time" type='text' />
                                             </div>
+                                            <div v-if="column.type == 'formular'">
+                                                <input class="form-control form-control-sm number" type='number' readonly />
+                                            </div>
                                             <div v-if="column.type == 'textarea'">
                                                 <textarea class="form-control form-control-sm textarea"></textarea>
                                             </div>
                                             <div v-if="column.type == 'yesno'">
                                                 <div class="custom-control custom-switch switch-success">
-                                                    <input type="checkbox" class="custom-control-input" :id="'customSwitch_'+column.id" checked="">
-                                                    <label class="custom-control-label" :for="'customSwitch_'+column.id"></label>
+                                                    <input type="checkbox" class="custom-control-input" :id="'customSwitch_'+column.id + '_' + index1" checked="">
+                                                    <label class="custom-control-label" :for="'customSwitch_' + column.id + '_' + index1"></label>
                                                 </div>
                                             </div>
                                         </td>
@@ -346,7 +349,7 @@
 
                                                 <input class="form-control form-control-sm mr-2" v-model="column.name" />
                                                 <div class="mr-5 flex-m" style="width: 700px;">
-                                                    <select class="form-control form-control-sm mr-1" v-model="column.type">
+                                                    <select class="form-control form-control-sm mr-1" v-model="column.type" @change="change_column_type(column)">
                                                         <option value="stt">STT tăng dần</option>
                                                         <option value="text">Một dòng</option>
                                                         <option value="textarea">Nhiều dòng</option>
@@ -354,12 +357,46 @@
                                                         <option value="currency">Tiền tệ</option>
                                                         <option value="email">Email</option>
                                                         <option value="yesno">Yes/no</option>
+                                                        <option value="formular">Công thức</option>
                                                     </select>
                                                     <select class="form-control form-control-sm" v-if="column.type == 'currency'" v-model="column.currency" required>
                                                         <option value="VND" selected>VND</option>
                                                         <option value="USD">DOLLAR</option>
                                                         <option value="EUR">EURO</option>
                                                     </select>
+                                                    <div class="keepopen dropdown" v-if="column.type == 'formular'">
+                                                        <a class="btn btn-sm btn-setting dropdown-toggle" data-toggle="dropdown" :id="'dropdown_' + index" aria-haspopup="true" aria-expanded="false">
+                                                            <i class="fas fa-cog"></i>
+                                                        </a>
+                                                        <div class="dropdown-menu" style="width:500px;z-index:1051" :aria-labelledby="'dropdown_' + index" role="menu">
+                                                            <div class="p-3">
+                                                                <b class="col-form-label">Thiết lập công thức:<span class="text-danger">*</span></b>
+                                                                <DxHtmlEditor @value-changed="change_formular($event,column)" :value="column.formular.text" :mentions="mentions_table(temp_add.data_setting.columns)" style="min-height:100px;">
+                                                                    <DxValidator>
+                                                                        <DxCustomRule message="Công thức không hợp lệ, vui lòng kiểm tra lại!" :validation-callback="validateFormular" />
+                                                                    </DxValidator>
+                                                                </DxHtmlEditor>
+                                                                <div class="description-formular">
+                                                                    <div> Gõ <b class="text-secondary">#</b> để chọn trường thông tin. </div>
+                                                                    <div> Các phép toán có thể thực hiện: Cộng (+), Trừ (-), Nhân (*), Chia (/), Đóng mở ngoặc (). </div>
+                                                                </div>
+                                                                <div class="row">
+                                                                    <div class="col-6">
+                                                                        <b class="col-form-label">Kiểu dữ liệu trả về:<span class="text-danger">*</span></b>
+                                                                        <select class="form-control form-control-sm" v-model="column.formular.type_return">
+                                                                            <option value="decimal">Số thập phân</option>
+                                                                            <option value="percent">Số phần trăm</option>
+                                                                            <option value="currency">Tiền tệ</option>
+                                                                        </select>
+                                                                    </div>
+                                                                    <div class="col-6">
+                                                                        <b class="col-form-label">Số chữ số phần thập phân:<span class="text-danger">*</span></b>
+                                                                        <input class="form-control form-control-sm" type='number' v-model="column.formular.decimal_number" />
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                                 <div class="custom-control custom-switch switch-primary mr-2">
                                                     <input type="checkbox" class="custom-control-input" :id="column.id" v-model="column.is_require">
@@ -469,13 +506,29 @@
     </div>
 </template>
 <script>
-
+    var stringMath = require('string-math');
     import CurrencyInput from "../../CurrencyInput.vue";
 
+    import {
+        DxHtmlEditor,
+        DxToolbar,
+        DxItem,
+        DxVariables
+    } from 'devextreme-vue/html-editor';
+    import {
+        DxValidator,
+        DxCustomRule
+    } from 'devextreme-vue/validator';
     export default {
         inject: ['i18n'],
         components: {
             CurrencyInput,
+            DxHtmlEditor,
+            DxToolbar,
+            DxItem,
+            DxVariables,
+            DxValidator,
+            DxCustomRule
         },
         props: {
             model: {
@@ -529,6 +582,13 @@
                         icon: '<i class="fas fa-dollar-sign"></i>',
                         type: "currency"
                     },
+
+                    //{
+                    //    name: "Công thức",
+                    //    icon: '<i class="fas fa-calculator"></i>',
+                    //    type: "formular"
+                    //},
+
                     {
                         name: "Bảng",
                         icon: '<i class="fas fa-table"></i>',
@@ -563,11 +623,68 @@
                 temps: [],
                 active_box: false,
                 temp_add: {},
-                drag: false
+                drag: false,
+                formular: "",
             }
         },
+        mounted() {
+
+        },
         methods: {
+            validateFormular(e) {
+                var value = e.value;
+                var $content = $("<div>" + value + "</div>");
+                var mention = $(".dx-mention", $content);
+                mention.replaceWith(function () {
+                    return 2
+                });
+                var text = $content.text();
+                var result = stringMath(text, function (err) {
+                    return null;
+                });
+                if (result)
+                    return true;
+                else
+                    return false;
+            },
+            change_formular(e, column) {
+                var value = e.value;
+                column.formular.temp = value;
+                //console.log(e, column);
+            },
+            mentions_table(columns) {
+                var data = [];
+                for (var column of columns) {
+                    if (column.type != "currency" && column.type != "number") {
+                        continue;
+                    }
+                    data.push({
+                        text: column.name,
+                        id: column.id
+                    })
+                }
+                return [{
+                    dataSource: data,
+                    searchExpr: 'text',
+                    displayExpr: 'text',
+                    valueExpr: 'id',
+                    marker: "#",
+                }]
+            },
             edit(item) {
+                if (item.data_setting.columns) {
+                    var columns = item.data_setting.columns;
+                    var mention = this.mentions_table(item.data_setting.columns);
+                    for (var column of columns) {
+                        if (column.type == 'formular') {
+                            for (var d of mention[0].dataSource) {
+                                var id = d.id;
+                                var html = `<span class="dx-mention" spellcheck="false" data-marker="#" data-mention-value="` + d.text + `" data-id="` + d.id + `">﻿<span contenteditable="false"><span>#</span>` + d.text + `</span>﻿</span>`;
+                                column.formular.text = column.formular.text.replace(new RegExp("!#" + id + "#", "g"), html);
+                            }
+                        }
+                    }
+                }
                 this.temp_add = $.extendext(true, 'replace', {}, item);
                 $('#myModal').modal("show");
             },
@@ -685,12 +802,31 @@
                 evt.preventDefault();
                 this.temp_add.data_setting.columns.push({ id: rand(), name: "" });
             },
+            change_column_type(column) {
+                if (column.type == "formular") {
+                    column.formular = { type: 1, text: "" };
+                    column.formular_text = "";
+                }
+            },
             remove_column(index) {
                 this.temp_add.data_setting.columns.splice(index, 1);
             },
-
             save_field(evt) {
                 $("#myModal").modal("hide");
+                if (this.temp_add.data_setting.columns)
+                    for (var column of this.temp_add.data_setting.columns) {
+                        if (column.type == 'formular' && column.formular.temp) {
+                            var firstvariable = "!#"; //first input;
+                            var secondvariable = "#"; //first in
+                            var $content = $("<div>" + column.formular.temp + "</div>");
+                            var mention = $(".dx-mention", $content);
+                            mention.replaceWith(function () {
+                                var id = $(this).data("id");
+                                return firstvariable + id + secondvariable
+                            });
+                            column.formular.text = $content.text();
+                        }
+                    }
                 var item = $.extendext(true, 'replace', {}, this.temp_add);
                 if (!this.model.fields) {
                     this.model.fields = [];
@@ -709,3 +845,20 @@
         }
     }
 </script>
+<style scoped>
+    .btn-setting {
+        font-size: 18px;
+        padding: 6px 10px;
+        margin-left: 5px;
+        box-shadow: none;
+        border: 1px solid #dfdfdf;
+    }
+
+    .dropdown-menu-center {
+        right: auto;
+        left: 50%;
+        -webkit-transform: translate(-50%, 0);
+        -o-transform: translate(-50%, 0);
+        transform: translate(-50%, 0);
+    }
+</style>

@@ -54,7 +54,7 @@
         </div>
         <div class="body" v-if="(model.blocking && hasPermission()) || model.executed || hasRequireSign()">
             <FormTask :departments="departments" :users="users" :fields="fields" :readonly="readonly" v-if="model.clazz == 'formTask'"></FormTask>
-            <ApproveTask :departments="departments" :users="users" :nodes="nodes" :readonly="readonly" v-if="model.clazz == 'approveTask'" :model="model"></ApproveTask>
+            <ApproveTask :departments="departments" :users="users" :nodes="nodes" :readonly="readonly" v-if="model.clazz == 'approveTask'" :model="model" @require_sign="require_sign"></ApproveTask>
             <SuggestTask :departments="departments" :users="users" :nodes="nodes" :readonly="readonly" v-if="model.clazz == 'suggestTask'" :model="model"></SuggestTask>
             <PrintSystem v-if="model.clazz == 'printSystem'" :nodes="nodes" :model="model"></PrintSystem>
         </div>
@@ -110,7 +110,20 @@
                 },
                 immediate: true,
                 deep: true
+            },
+            isPopup: {
+                handler(newData, oldData) {
+                    //console.log(this.isPopup);
+                    if (this.isPopup) {
+                        $("body").addClass("overFlowHidden");
+                    } else {
+                        $("body").removeClass("overFlowHidden");
+                    }
+                }
             }
+        },
+        destroyed() {
+            $("body").removeClass("overFlowHidden");
         },
         computed: {
             fields() {
