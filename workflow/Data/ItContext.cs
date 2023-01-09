@@ -20,6 +20,7 @@ namespace it.Data
 
 		}
 
+		public DbSet<EmailModel> EmailModel { get; set; }
 		public DbSet<UserModel> UserModel { get; set; }
 		public DbSet<AuditTrailsModel> AuditTrailsModel { get; set; }
 		public DbSet<ProcessGroupModel> ProcessGroupModel { get; set; }

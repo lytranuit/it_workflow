@@ -624,6 +624,7 @@
                         execution_id: null,
                         label: target.get("model").label,
                         block_id: target.get("model").id,
+                        variable: target.get("model").variable,
                         stt: data_activity[data_activity.length - 1].stt + 1,
                         clazz: target.get("model").clazz,
                         is_new: true,
@@ -765,6 +766,7 @@
                                 execution_id: null,
                                 label: target.get("model").label,
                                 block_id: target.get("model").id,
+                                variable: target.get("model").variable,
                                 stt: data_activity[data_activity.length - 1].stt + 1,
                                 clazz: target.get("model").clazz,
                                 is_new: true,
@@ -884,7 +886,6 @@
                 });
                 if (findCustom != -1) {
                     if (data_custom_block[findCustom].id) {
-                        0
                         custom.is_update = true;
                         custom.id = data_custom_block[findCustom].id;
                     } else {

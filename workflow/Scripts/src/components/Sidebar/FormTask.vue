@@ -23,10 +23,14 @@
 						</div>
                         <div class="form-input-control-left w-100" v-if="element.type != 'table' && !readonly">
                             <div v-if="element.type == 'number'">
-                                <input class="form-control form-control-sm number" type='number' v-model="element.values.value" :required="element.is_require" :name="element.id" />
+                                <input @change="signalChange(element.id)" class="form-control form-control-sm number" type='number' v-model="element.values.value" :required="element.is_require" :name="element.id" />
+                            </div>
+                            <div v-if="element.type == 'formular'">
+                                <VueNumberFormat class="form-control form-control-sm" v-model="element.values.value"
+                                                 :options="options_formular(element.data_setting)" :name="element.id" :required="element.is_require" readonly></VueNumberFormat>
                             </div>
                             <div v-if="element.type == 'currency'">
-                                <CurrencyInput :name="element.id" :required="element.is_require" v-model="element.values.value"
+                                <CurrencyInput @change="signalChange(element.id)" :name="element.id" :required="element.is_require" v-model="element.values.value"
                                                :options="{
                                                         locale:'de-DE',
                                                         currency: element.data_setting.currency || 'VND',
@@ -125,10 +129,10 @@
                                                              :options="options_formular(column)" :name="column.id + '_' + index1" :required="column.is_require" readonly></VueNumberFormat>
                                         </div>
                                         <div v-if="column.type == 'number'">
-                                            <input class="form-control form-control-sm number" type='number' v-model="row[column.id]" :name="column.id + '_' + index1" :required="column.is_require" @change="signalChange(column.id,row,element.data_setting.columns)"/>
+                                            <input class="form-control form-control-sm number" type='number' v-model="row[column.id]" :name="column.id + '_' + index1" :required="column.is_require" @change="signalChange(column.id,index1,element.data_setting.columns,element.values.list_data)"/>
                                         </div>
                                         <div v-if="column.type == 'currency'">
-                                            <CurrencyInput @change="signalChange(column.id,row,element.data_setting.columns)" :name="column.id + '_' + index1" :required="column.is_require" v-model="row[column.id]"
+                                            <CurrencyInput @change="signalChange(column.id,index1,element.data_setting.columns,element.values.list_data)" :name="column.id + '_' + index1" :required="column.is_require" v-model="row[column.id]"
                                                            :options="{
                                                         locale:'de-DE',
                                                         currency: column.currency || 'VND',
@@ -177,6 +181,7 @@
 								<tr v-for="(row,index1) in element.values.list_data" :key="index1">
                                     <td v-for="(column,index2) in element.data_setting.columns" :key="column.id" class="text-center">
                                         <div v-if="column.type == 'currency'">{{format_currency(row[column.id],column.currency)}}</div>
+                                        <div v-else-if="column.type == 'formular'">{{format_formular(row[column.id],options_formular(column))}}</div>
                                         <div v-else-if="column.type == 'yesno'">
                                             <i v-if="row[column.id] == 'true'" class="far fa-check-circle text-success"></i>
                                             <i v-if="row[column.id] != 'true'" class="fas fa-ban text-danger"></i>
@@ -274,37 +279,89 @@
                 }
                 return { precision: column.formular.decimal_number, prefix: '', suffix: suffix, decimal: ',', thousand: '.', acceptNegative: false, isInteger: false };
             },
-            signalChange: function (id, row, columns) {
+            signalChange: function (id, index = null, columns = [], list_data = []) {
                 //console.log(evt.target);
                 //var name = $(evt.target).attr("name");
                 //var list = name.split("_");
                 //var id = list[0];
                 //var index = list[1];
-
                 var firstvariable = "!#"; //first input;
                 var secondvariable = "#"; //first in
-                //console.log(id);
-                console.log(columns);
-                for (var column of columns) {
-                    if (column.type == 'formular') {
-                        var column_id = column.id;
-                        var text = column.formular.text;
-                        var list_id = text.match(new RegExp("(?<=" + firstvariable + ")(.*?)(?=" + secondvariable + ")", "g"));
-                        console.log(list_id)
-                        console.log(text)
-                        if (list_id.indexOf(id) == -1) {
-                            continue;
+                if (index != null) {
+
+                    //// CHANGE IN TABLE
+                    var row = list_data[index];
+                    for (var column of columns) {
+                        if (column.type == 'formular') {
+                            var column_id = column.id;
+                            var text = column.formular.text;
+                            var list_id = text.match(new RegExp("(?<=" + firstvariable + ")(.*?)(?=" + secondvariable + ")", "g"));
+                            //console.log(list_id)
+                            //console.log(text)
+                            if (list_id.indexOf(id) == -1) {
+                                continue;
+                            }
+                            for (var _id of list_id) {
+                                var value = row[_id] ? row[_id] : 0;
+                                text = text.replace(new RegExp("!#" + _id + "#", "g"), value);
+                            }
+                            var result = stringMath(text, function (err) {
+                                return 0;
+                            });
+                            row[column_id] = result;
+                            this.signalChange(column_id, index, columns, list_data)
+                            //console.log(text);
+                            //console.log(row[column_id]);
                         }
-                        for (var id of list_id) {
-                            var value = row[id] ? row[id] : 0;
-                            text = text.replace(new RegExp("!#" + id + "#", "g"), value);
+                    }
+                }
+                //// CHANGE IN FIELD
+                var field_formular = this.fields.filter(function (item) {
+                    return item.type == 'formular';
+                });
+                if (field_formular) {
+                    for (var field of field_formular) {
+                        if (field.data_setting.formular.type == 2 && id == field.data_setting.formular.operator_column) {
+                            var operator_type = field.data_setting.formular.operator_type;
+                            var arr = list_data.map(function (item) {
+                                return item[id];
+                            })
+                            switch (operator_type) {
+                                case "sum":
+                                    field.values.value = arr.reduce((a, b) => a + b, 0)
+                                    //console.log(arr);
+                                    break;
+                                case "avg":
+                                    field.values.value = arr.length > 0 ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
+                                    break;
+                                case "min":
+                                    field.values.value = Math.min(...arr);
+                                    break;
+                                case "max":
+                                    field.values.value = Math.max(...arr);
+                                    break;
+                            }
                         }
-                        var result = stringMath(text, function (err) {
-                            return 0;
-                        });
-                        row[column_id] = result;
-                        console.log(text);
-                        console.log(row[column_id]);
+                        if (field.data_setting.formular.type == 1) {
+
+                            var text = field.data_setting.formular.text;
+                            var list_id = text.match(new RegExp("(?<=" + firstvariable + ")(.*?)(?=" + secondvariable + ")", "g"));
+                            if (list_id.indexOf(id) == -1) {
+                                continue;
+                            }
+                            for (var _id of list_id) {
+                                var findindex = this.fields.findIndex(function (item) {
+                                    return item.id == _id;
+                                });
+                                var findField = this.fields[findindex];
+                                var value = findField.values.value ? findField.values.value : 0;
+                                text = text.replace(new RegExp("!#" + _id + "#", "g"), value);
+                            }
+                            var result = stringMath(text, function (err) {
+                                return 0;
+                            });
+                            field.values.value = result;
+                        }
                     }
                 }
                 this.$forceUpdate();
@@ -439,6 +496,8 @@
                     text = field.values.value ? moment(field.values.value).format("YYYY-MM-DD HH:mm") : "";
                 } else if (field.type == 'currency') {
                     text = field.values.value ? new Intl.NumberFormat('de-DE', { style: 'currency', currency: data_setting.currency }).format(field.values.value) : "";
+                } else if (field.type == 'formular') {
+                    text = field.values.value ? VueNumberFormat.format(field.values.value, this.options_formular(field.data_setting)) : "";
                 } else if (field.type == 'yesno') {
                     //console.log(field.values.value);
                     text = field.values.value && field.values.value == "true" ? "<span class='text-success'><i class='far fa-check-circle'></i> Chọn</span>" : "<span class='text-danger'><i class='fas fa-ban'></i> Không chọn</span>";
@@ -447,6 +506,10 @@
             },
             format_currency(value, currency) {
                 return new Intl.NumberFormat('de-DE', { style: 'currency', currency: currency }).format(value)
+            },
+
+            format_formular(value, option) {
+                return VueNumberFormat.format(value, option);
             }
         }
     }

@@ -354,6 +354,14 @@ namespace it.Areas.Admin.Controllers
 								row.Cells[(start_col_field - 1)].NumberFormat = "#,##0.00";
 
 							}
+							else if (field.type == "formular")
+							{
+								if (text == null)
+									continue;
+								row.Cells[(start_col_field - 1)].NumberValue = double.Parse(text.ToString());
+								row.Cells[(start_col_field - 1)].NumberFormat = "#,##0.00";
+
+							}
 							else if (field.type == "table")
 							{
 								var columns = data_setting.columns;
@@ -384,6 +392,19 @@ namespace it.Areas.Admin.Controllers
 										if (value_column == null)
 											continue;
 										if (column.type == "currency")
+										{
+											if (i != 0)
+											{
+												new_row.Cells[(start_col_table - 1)].NumberValue = double.Parse(value_column.ToString());
+												new_row.Cells[(start_col_table - 1)].NumberFormat = "#,##0.00";
+											}
+											else
+											{
+												row.Cells[(start_col_table - 1)].NumberValue = double.Parse(value_column.ToString());
+												row.Cells[(start_col_table - 1)].NumberFormat = "#,##0.00";
+											}
+										}
+										else if (column.type == "formular")
 										{
 											if (i != 0)
 											{
@@ -427,13 +448,14 @@ namespace it.Areas.Admin.Controllers
 							{
 								var columnName = GetExcelLetter(i + 1);
 								//Console.WriteLine(columnName);
-								//Console.WriteLine("Columns: " + columnName + first_r + ":" + columnName + end_row);
+								Console.WriteLine("Columns: " + columnName + first_r + ":" + columnName + end_row);
 								newSheet.Range[columnName + (first_r + 1) + ":" + columnName + (end_row + 1)].Merge();
 							}
 
 						}
 					}
-					start_r++;
+
+					start_r = start_r + (end_row - first_r) + 1;
 				}
 
 				////STYLE
@@ -746,13 +768,14 @@ namespace it.Areas.Admin.Controllers
 								{
 									var columnName = GetExcelLetter(i + 1);
 									//Console.WriteLine(columnName);
-									//Console.WriteLine("Columns: " + columnName + first_r + ":" + columnName + end_row);
+									Console.WriteLine("Columns: " + columnName + first_r + ":" + columnName + end_row);
 									newSheet.Range[columnName + (first_r + 1) + ":" + columnName + (end_row + 1)].Merge();
 								}
 
 							}
 						}
-						start_r++;
+
+						start_r = start_r + (end_row - first_r) + 1;
 					}
 
 					////STYLE

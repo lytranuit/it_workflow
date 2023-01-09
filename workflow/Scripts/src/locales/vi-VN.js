@@ -1,6 +1,7 @@
 ﻿export default {
     'label': 'Tên',
     'guide': 'Hướng dẫn thực hiện',
+    'variable': 'Tên biến',
     'stt': 'Số thứ tự',
     'hideIcon': 'Ẩn Icon',
     'userTask': 'User Task',

@@ -56,6 +56,8 @@ namespace it.Areas.Admin.Models
 		public List<string>? default_value_array { get; set; }
 		public List<Option>? options { get; set; }
 		public List<Column>? columns { get; set; }
+
+		public Formular formular { get; set; }
 	}
 	public class Option
 	{
@@ -73,6 +75,7 @@ namespace it.Areas.Admin.Models
 		public string? currency { get; set; }
 		public int? stt { get; set; }
 		public bool is_require { get; set; }
+		public string variable { get; set; }
 		[NotMapped]
 		public int? start_c { set; get; }
 	}
@@ -83,5 +86,7 @@ namespace it.Areas.Admin.Models
 		public string text { get; set; }
 		public int decimal_number { get; set; }
 		public string type_return { get; set; }
+		public string operator_type { get; set; }
+		public string operator_column { get; set; }
 	}
 }

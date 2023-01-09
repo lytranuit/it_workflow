@@ -138,7 +138,9 @@
                     //console.log(node);
                     var model = node.model;
                     var type = node.type;
-                    model.id = rand();
+                    var random = rand();
+                    model.id = random;
+                    model.variable = random;
                     if (type == "node") {
                         model.data_setting = {};
                         if (model.clazz == "mailSystem") {

@@ -30,6 +30,8 @@
                             <b>Bộ phận:</b>
                             <treeselect multiple v-model="model.data_setting.listdepartment" :options="departments" append-to-body />
                         </div>
+
+                        <SettingMail :model="model" :nodes="nodes"></SettingMail>
                     </div>
                 </el-collapse-item>
                 <el-collapse-item :title="i18n['detail.time']" name="3">
@@ -86,10 +88,12 @@
 </template>
 <script>
     import DefaultDetail from "./DefaultDetail";
+    import SettingMail from "./SettingMail";
     export default {
         inject: ['i18n'],
         components: {
-            DefaultDetail
+            DefaultDetail,
+            SettingMail
         },
         data() {
             return {

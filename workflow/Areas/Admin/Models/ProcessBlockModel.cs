@@ -19,6 +19,7 @@ namespace it.Areas.Admin.Models
 		public int? type_performer { get; set; }
 		public bool? has_deadline { get; set; }
 		public string? guide { get; set; }
+		public string? variable { get; set; }
 
 		[ForeignKey("process_id")]
 		public ProcessModel process { get; set; }

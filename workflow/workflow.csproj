@@ -7,49 +7,6 @@
 		<UserSecretsId>8b1239b0-a3a5-47c7-9fd1-76ee40d53a94</UserSecretsId>
 	</PropertyGroup>
 
-	<ItemGroup>
-		<Compile Remove="Scripts\example\fonts\**" />
-		<Compile Remove="Scripts\public\el-ui\fonts\**" />
-		<Compile Remove="wwwroot\lib\el-ui\fonts\**" />
-		<Content Remove="Scripts\example\fonts\**" />
-		<Content Remove="Scripts\public\el-ui\fonts\**" />
-		<Content Remove="wwwroot\lib\el-ui\fonts\**" />
-		<EmbeddedResource Remove="Scripts\example\fonts\**" />
-		<EmbeddedResource Remove="Scripts\public\el-ui\fonts\**" />
-		<EmbeddedResource Remove="wwwroot\lib\el-ui\fonts\**" />
-		<None Remove="Scripts\example\fonts\**" />
-		<None Remove="Scripts\public\el-ui\fonts\**" />
-		<None Remove="wwwroot\lib\el-ui\fonts\**" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Content Remove="wwwroot\lib\el-ui\index.css" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<None Remove="Scripts\public\admin.min.css" />
-		<None Remove="Scripts\public\admin.min.css.map" />
-		<None Remove="Scripts\public\admin.min.js" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<_WebToolingArtifacts Remove="Properties\PublishProfiles\WEB.pubxml" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Content Include="Scripts\public\admin.min.css">
-			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-		</Content>
-		<Content Include="Scripts\public\admin.min.css.map">
-			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-		</Content>
-		<Content Include="Scripts\public\admin.min.js">
-			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-		</Content>
-	</ItemGroup>
 
 
 	<ItemGroup>
@@ -81,21 +38,5 @@
 	</ItemGroup>
 
 
-	<ItemGroup>
-		<Folder Include="wwwroot\bundle\" />
-	</ItemGroup>
-
-
-	<ItemGroup>
-		<None Include="wwwroot\admin\fonts\dropify.svg" />
-		<None Include="wwwroot\lib\chartjs\chart.min.js" />
-		<None Include="wwwroot\lib\el-ui\index.css" />
-		<None Include="wwwroot\lib\pdfview\pdf.js" />
-		<None Include="wwwroot\lib\pdfview\pdf.js.map" />
-		<None Include="wwwroot\lib\pdfview\pdf.sandbox.js" />
-		<None Include="wwwroot\lib\pdfview\pdf.sandbox.js.map" />
-		<None Include="wwwroot\lib\pdfview\pdf.worker.js" />
-		<None Include="wwwroot\lib\pdfview\pdf.worker.js.map" />
-	</ItemGroup>
 
 </Project>

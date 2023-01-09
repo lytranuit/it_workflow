@@ -28,15 +28,11 @@
                                     <div v-if="element.type == 'number'">
                                         <input class="form-control form-control-sm number" type='number' :value="element.has_default ? element.data_setting.default_value : ''" />
                                     </div>
+                                    <div v-if="element.type == 'formular'">
+                                        <input class="form-control form-control-sm" type='number' readonly />
+                                    </div>
                                     <div v-if="element.type == 'currency'">
-                                        <CurrencyInput :value="element.has_default ? element.data_setting.default_value : ''"
-                                                       :options="{
-                                                        locale:'de-DE',
-                                                        currency: element.data_setting.currency,
-                                                        hideCurrencySymbolOnFocus: false,
-                                                        hideGroupingSeparatorOnFocus: false,
-                                                        hideNegligibleDecimalDigitsOnFocus: false,
-                                                    }" />
+                                        <input class="form-control form-control-sm number" type='number' :value="element.has_default ? element.data_setting.default_value : ''" />
                                     </div>
                                     <div v-if="element.type == 'text'">
                                         <input class="form-control form-control-sm text" type='text' :value="element.has_default ? element.data_setting.default_value : ''" />
@@ -143,13 +139,7 @@
                                                 <input class="form-control form-control-sm number" type='number' />
                                             </div>
                                             <div v-if="column.type == 'currency'">
-                                                <CurrencyInput :options="{
-                                                        locale:'de-DE',
-                                                        currency: column.currency || 'VND',
-                                                        hideCurrencySymbolOnFocus: false,
-                                                        hideGroupingSeparatorOnFocus: false,
-                                                        hideNegligibleDecimalDigitsOnFocus: false,
-                                                    }" />
+                                                <input class="form-control form-control-sm number" type='number' />
                                             </div>
                                             <div v-if="column.type == 'text'">
                                                 <input class="form-control form-control-sm text" type='text' />
@@ -334,6 +324,61 @@
                                     <label class="mb-0" for="inlineRadio2"> Chọn nhiều </label>
                                 </div>
                             </div>
+                            <div class="col-lg-12 mt-2" v-if="temp_add.type == 'formular'">
+                                <b class="col-form-label mr-3">Lấy thông tin từ:</b>
+                                <div class="radio radio-primary form-check-inline">
+                                    <input type="radio" id="inlineRadio1" value="1" name="radioInline" v-model="temp_add.data_setting.formular.type">
+                                    <label class="mb-0" for="inlineRadio1"> Trường dữ liệu </label>
+                                </div>
+                                <div class="radio radio-primary form-check-inline">
+                                    <input type="radio" id="inlineRadio2" value="2" name="radioInline" v-model="temp_add.data_setting.formular.type">
+                                    <label class="mb-0" for="inlineRadio2"> Bảng </label>
+                                </div>
+                                <div class="mt-2" v-if="temp_add.data_setting.formular.type == 1">
+                                    <DxHtmlEditor @value-changed="change_formular($event,temp_add.data_setting)" :value="temp_add.data_setting.formular.temp2" :mentions="mentions(model.fields)" style="min-height:100px;">
+                                        <DxValidator>
+                                            <DxCustomRule message="Công thức không hợp lệ, vui lòng kiểm tra lại!" :validation-callback="validateFormular" />
+                                        </DxValidator>
+                                    </DxHtmlEditor>
+                                    <div class="description-formular">
+                                        <div> Gõ <b class="text-secondary">#</b> để chọn trường thông tin. </div>
+                                        <div> Các phép toán có thể thực hiện: Cộng (+), Trừ (-), Nhân (*), Chia (/), Đóng mở ngoặc (). </div>
+                                    </div>
+                                </div>
+                                <div class="row mt-2" v-if="temp_add.data_setting.formular.type == 2">
+                                    <div class="col-6">
+                                        <b class="col-form-label">Toán tử<span class="text-danger">*</span></b>
+                                        <select class="form-control form-control-sm" v-model="temp_add.data_setting.formular.operator_type">
+                                            <option value="sum">Tính tổng</option>
+                                            <option value="avg">Tính trung bình</option>
+                                            <option value="min">Tính Min</option>
+                                            <option value="max">Tính Max</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-6">
+                                        <b class="col-form-label">Cột dữ liệu:<span class="text-danger">*</span></b>
+                                        <select class="form-control form-control-sm" v-model="temp_add.data_setting.formular.operator_column">
+                                            <option v-for="(column,index) in table_column(model.fields)" :value="column.id">
+                                                {{column.text}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <b class="col-form-label">Kiểu dữ liệu trả về:<span class="text-danger">*</span></b>
+                                        <select class="form-control form-control-sm" v-model="temp_add.data_setting.formular.type_return">
+                                            <option value="decimal">Số thập phân</option>
+                                            <option value="percent">Số phần trăm</option>
+                                            <option value="currency">Tiền tệ</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-6">
+                                        <b class="col-form-label">Số chữ số phần thập phân:<span class="text-danger">*</span></b>
+                                        <input class="form-control form-control-sm" type='number' v-model="temp_add.data_setting.formular.decimal_number" />
+                                    </div>
+                                </div>
+                            </div>
                             <div class="col-lg-12 mt-2" v-if="temp_add.type == 'table'">
                                 <div class="col-form-label mr-3">Thiết lập cột:</div>
                                 <div class="list-group-item">
@@ -364,34 +409,40 @@
                                                         <option value="USD">DOLLAR</option>
                                                         <option value="EUR">EURO</option>
                                                     </select>
-                                                    <div class="keepopen dropdown" v-if="column.type == 'formular'">
+                                                    <div class="keepopen dropdown">
                                                         <a class="btn btn-sm btn-setting dropdown-toggle" data-toggle="dropdown" :id="'dropdown_' + index" aria-haspopup="true" aria-expanded="false">
                                                             <i class="fas fa-cog"></i>
                                                         </a>
                                                         <div class="dropdown-menu" style="width:500px;z-index:1051" :aria-labelledby="'dropdown_' + index" role="menu">
                                                             <div class="p-3">
-                                                                <b class="col-form-label">Thiết lập công thức:<span class="text-danger">*</span></b>
-                                                                <DxHtmlEditor @value-changed="change_formular($event,column)" :value="column.formular.text" :mentions="mentions_table(temp_add.data_setting.columns)" style="min-height:100px;">
-                                                                    <DxValidator>
-                                                                        <DxCustomRule message="Công thức không hợp lệ, vui lòng kiểm tra lại!" :validation-callback="validateFormular" />
-                                                                    </DxValidator>
-                                                                </DxHtmlEditor>
-                                                                <div class="description-formular">
-                                                                    <div> Gõ <b class="text-secondary">#</b> để chọn trường thông tin. </div>
-                                                                    <div> Các phép toán có thể thực hiện: Cộng (+), Trừ (-), Nhân (*), Chia (/), Đóng mở ngoặc (). </div>
+                                                                <b class="col-form-label">Tên biến:<span class="text-danger">*</span></b>
+                                                                <div class="pt-1">
+                                                                    <input class="form-control form-control-sm" type='text' v-model="column.variable" />
                                                                 </div>
-                                                                <div class="row">
-                                                                    <div class="col-6">
-                                                                        <b class="col-form-label">Kiểu dữ liệu trả về:<span class="text-danger">*</span></b>
-                                                                        <select class="form-control form-control-sm" v-model="column.formular.type_return">
-                                                                            <option value="decimal">Số thập phân</option>
-                                                                            <option value="percent">Số phần trăm</option>
-                                                                            <option value="currency">Tiền tệ</option>
-                                                                        </select>
+                                                                <div v-if="column.type == 'formular'">
+                                                                    <b class="col-form-label">Thiết lập công thức:<span class="text-danger">*</span></b>
+                                                                    <DxHtmlEditor @value-changed="change_formular($event,column)" :value="column.formular.temp2" :mentions="mentions_table(temp_add.data_setting.columns)" style="min-height:100px;">
+                                                                        <DxValidator>
+                                                                            <DxCustomRule message="Công thức không hợp lệ, vui lòng kiểm tra lại!" :validation-callback="validateFormular" />
+                                                                        </DxValidator>
+                                                                    </DxHtmlEditor>
+                                                                    <div class="description-formular">
+                                                                        <div> Gõ <b class="text-secondary">#</b> để chọn trường thông tin. </div>
+                                                                        <div> Các phép toán có thể thực hiện: Cộng (+), Trừ (-), Nhân (*), Chia (/), Đóng mở ngoặc (). </div>
                                                                     </div>
-                                                                    <div class="col-6">
-                                                                        <b class="col-form-label">Số chữ số phần thập phân:<span class="text-danger">*</span></b>
-                                                                        <input class="form-control form-control-sm" type='number' v-model="column.formular.decimal_number" />
+                                                                    <div class="row">
+                                                                        <div class="col-6">
+                                                                            <b class="col-form-label">Kiểu dữ liệu trả về:<span class="text-danger">*</span></b>
+                                                                            <select class="form-control form-control-sm" v-model="column.formular.type_return">
+                                                                                <option value="decimal">Số thập phân</option>
+                                                                                <option value="percent">Số phần trăm</option>
+                                                                                <option value="currency">Tiền tệ</option>
+                                                                            </select>
+                                                                        </div>
+                                                                        <div class="col-6">
+                                                                            <b class="col-form-label">Số chữ số phần thập phân:<span class="text-danger">*</span></b>
+                                                                            <input class="form-control form-control-sm" type='number' v-model="column.formular.decimal_number" />
+                                                                        </div>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -419,7 +470,7 @@
                                     <textarea class="form-control form-control-sm" type='text' name="guide" v-model="temp_add.guide" placeholder="Nhập nội dung hướng dẫn"></textarea>
                                 </div>
                             </div>
-                            <template v-if="temp_add.type != 'table' && temp_add.type != 'task' && temp_add.type !='yesno'">
+                            <template v-if="temp_add.type != 'table' && temp_add.type != 'task' && temp_add.type !='yesno' && temp_add.type !='formular'">
                                 <div class="col-lg-12 mt-2">
                                     <div class="checkbox checkbox-primary">
                                         <input id="checkbox2" type="checkbox" v-model="temp_add.is_require">
@@ -453,14 +504,7 @@
                             </div>
 
                             <div class="col-lg-12 mt-2" v-if="temp_add.type == 'currency' && temp_add.has_default">
-                                <CurrencyInput v-model="temp_add.data_setting.default_value"
-                                               :options="{
-                                                        locale:'de-DE',
-                                                        currency: temp_add.data_setting.currency,
-                                                        hideCurrencySymbolOnFocus: false,
-                                                        hideGroupingSeparatorOnFocus: false,
-                                                        hideNegligibleDecimalDigitsOnFocus: false,
-                                                    }" />
+                                <input class="form-control form-control-sm" type='number' v-model="temp_add.data_setting.default_value" placeholder="Mặc định" />
                             </div>
                             <div class="col-lg-12 mt-2" v-if="temp_add.type == 'email' && temp_add.has_default">
                                 <input class="form-control form-control-sm" type='email' v-model="temp_add.data_setting.default_value" placeholder="Mặc định" />
@@ -507,7 +551,6 @@
 </template>
 <script>
     var stringMath = require('string-math');
-    import CurrencyInput from "../../CurrencyInput.vue";
 
     import {
         DxHtmlEditor,
@@ -522,7 +565,6 @@
     export default {
         inject: ['i18n'],
         components: {
-            CurrencyInput,
             DxHtmlEditor,
             DxToolbar,
             DxItem,
@@ -583,11 +625,11 @@
                         type: "currency"
                     },
 
-                    //{
-                    //    name: "Công thức",
-                    //    icon: '<i class="fas fa-calculator"></i>',
-                    //    type: "formular"
-                    //},
+                    {
+                        name: "Công thức",
+                        icon: '<i class="fas fa-calculator"></i>',
+                        type: "formular"
+                    },
 
                     {
                         name: "Bảng",
@@ -652,6 +694,48 @@
                 column.formular.temp = value;
                 //console.log(e, column);
             },
+            table_column(fields) {
+                console.log(fields);
+                var data = [];
+                var fields = fields.filter(function (item) {
+                    return item.type == 'table';
+                });
+
+                console.log(fields);
+                for (var field of fields) {
+                    var columns = field.data_setting.columns;
+                    columns = columns.filter(function (item) {
+                        return item.type == 'currency' || item.type == 'number' || item.type == 'formular'
+                    });
+                    console.log(columns);
+                    for (var column of columns) {
+                        data.push({
+                            text: column.name,
+                            id: column.id
+                        })
+                    }
+                }
+                return data;
+            },
+            mentions(fields) {
+                var data = [];
+                for (var field of fields) {
+                    if (field.type != "currency" && field.type != "number") {
+                        continue;
+                    }
+                    data.push({
+                        text: field.name,
+                        id: field.id
+                    })
+                }
+                return [{
+                    dataSource: data,
+                    searchExpr: 'text',
+                    displayExpr: 'text',
+                    valueExpr: 'id',
+                    marker: "#",
+                }]
+            },
             mentions_table(columns) {
                 var data = [];
                 for (var column of columns) {
@@ -677,12 +761,22 @@
                     var mention = this.mentions_table(item.data_setting.columns);
                     for (var column of columns) {
                         if (column.type == 'formular') {
+                            column.formular.temp2 = column.formular.text;
                             for (var d of mention[0].dataSource) {
                                 var id = d.id;
                                 var html = `<span class="dx-mention" spellcheck="false" data-marker="#" data-mention-value="` + d.text + `" data-id="` + d.id + `">﻿<span contenteditable="false"><span>#</span>` + d.text + `</span>﻿</span>`;
-                                column.formular.text = column.formular.text.replace(new RegExp("!#" + id + "#", "g"), html);
+                                column.formular.temp2 = column.formular.temp2.replace(new RegExp("!#" + id + "#", "g"), html);
                             }
                         }
+                    }
+                }
+                if (item.type == 'formular') {
+                    var mention = this.mentions(this.model.fields);
+                    item.data_setting.formular.temp2 = item.data_setting.formular.text;
+                    for (var d of mention[0].dataSource) {
+                        var id = d.id;
+                        var html = `<span class="dx-mention" spellcheck="false" data-marker="#" data-mention-value="` + d.text + `" data-id="` + d.id + `">﻿<span contenteditable="false"><span>#</span>` + d.text + `</span>﻿</span>`;
+                        item.data_setting.formular.temp2 = item.data_setting.formular.temp2.replace(new RegExp("!#" + id + "#", "g"), html);
                     }
                 }
                 this.temp_add = $.extendext(true, 'replace', {}, item);
@@ -745,6 +839,16 @@
                         }
                     ];
                 }
+                if (temp.type == "formular") {
+                    default1.data_setting.formular = {
+                        type: 1,
+                        text: "",
+                        type_return: "decimal",
+                        decimal_number: 0,
+                        operator_type: "sum",
+                        operator_column: "",
+                    }
+                }
                 var new_item = $.extendext(true, 'replace', default1, temp);
                 this.temp_add = new_item;
                 $('#myModal').modal("show");
@@ -800,7 +904,8 @@
             },
             add_column(evt) {
                 evt.preventDefault();
-                this.temp_add.data_setting.columns.push({ id: rand(), name: "" });
+                var random = rand();
+                this.temp_add.data_setting.columns.push({ id: random, name: "", variable: random });
             },
             change_column_type(column) {
                 if (column.type == "formular") {
@@ -813,7 +918,7 @@
             },
             save_field(evt) {
                 $("#myModal").modal("hide");
-                if (this.temp_add.data_setting.columns)
+                if (this.temp_add.data_setting.columns) {
                     for (var column of this.temp_add.data_setting.columns) {
                         if (column.type == 'formular' && column.formular.temp) {
                             var firstvariable = "!#"; //first input;
@@ -827,6 +932,18 @@
                             column.formular.text = $content.text();
                         }
                     }
+                }
+                if (this.temp_add.type == 'formular' && this.temp_add.data_setting.formular.temp) {
+                    var firstvariable = "!#"; //first input;
+                    var secondvariable = "#"; //first in
+                    var $content = $("<div>" + this.temp_add.data_setting.formular.temp + "</div>");
+                    var mention = $(".dx-mention", $content);
+                    mention.replaceWith(function () {
+                        var id = $(this).data("id");
+                        return firstvariable + id + secondvariable
+                    });
+                    this.temp_add.data_setting.formular.text = $content.text();
+                }
                 var item = $.extendext(true, 'replace', {}, this.temp_add);
                 if (!this.model.fields) {
                     this.model.fields = [];

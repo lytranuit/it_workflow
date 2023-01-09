@@ -20,6 +20,15 @@
                 </div>
             </div>
             <div class="col-lg-12 mt-2">
+                <b class="col-form-label">{{i18n['variable']}}：</b>
+                <div class="pt-1">
+                    <input class="form-control form-control-sm"
+                           :disabled="readOnly"
+                           v-model="model.variable"
+                           @input="(value) => {onChange('variable', value)}"></input>
+                </div>
+            </div>
+            <div class="col-lg-12 mt-2">
                 <b class="col-form-label">{{i18n['stt']}}:</b>
                 <div class="pt-1">
                     <input class="form-control form-control-sm" type='number'

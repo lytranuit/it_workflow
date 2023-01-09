@@ -30,6 +30,7 @@ using System.Net.Http.Headers;
 using System.Net.Mime;
 using System.Text;
 using it.Services;
+using Spire.Doc;
 
 namespace it.Areas.Admin.Controllers
 {
@@ -661,6 +662,8 @@ namespace it.Areas.Admin.Controllers
 			{
 				System.Security.Claims.ClaimsPrincipal currentUser = this.User;
 				string user_id = UserManager.GetUserId(currentUser); // Get user id:
+				string user_id_current = user_id;
+
 				if (ActivityModel.clazz == "parallelGateway" || ActivityModel.clazz == "inclusiveGateway" || ActivityModel.clazz == "success" || ActivityModel.clazz == "fail")
 				{
 					user_id = "a76834c7-c4b7-48aa-bf95-05dbd33210ff";
@@ -733,6 +736,39 @@ namespace it.Areas.Admin.Controllers
 					_context.Add(EventModel);
 					await _context.SaveChangesAsync();
 				}
+
+
+				/////GỬI MAIL THEO MẪU
+				if (ActivityModel.blocking == true)
+				{
+					var data_setting = ActivityModel.data_setting;
+					var mail = data_setting.mail;
+					if (mail == null)
+					{
+						goto end;
+					}
+					mail = _workflow.fillMail(mail, ActivityModel);
+					data_setting.mail = mail;
+					ActivityModel.data_setting = data_setting;
+					_context.Update(ActivityModel);
+
+					var email = new EmailModel
+					{
+						email_to = mail.to,
+						subject = mail.title,
+						body = mail.content,
+						data_attachments = mail.filecontent.Split(",").ToList(),
+						email_type = "forward_step",
+						status = 1
+					};
+					_context.Add(email);
+					await _context.SaveChangesAsync();
+				}
+
+			/////
+
+			end:
+				Console.WriteLine("End");
 			}
 			catch (DbUpdateConcurrencyException)
 			{

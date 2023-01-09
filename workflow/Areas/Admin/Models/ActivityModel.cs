@@ -12,6 +12,7 @@ namespace it.Areas.Admin.Models
 		public string? label { get; set; }
 		public string? clazz { get; set; }
 		public string block_id { get; set; }
+		public string? variable { get; set; }
 
 		public bool? executed { get; set; }
 
