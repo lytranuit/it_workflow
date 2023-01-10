@@ -31,6 +31,7 @@ using System.Net.Mime;
 using System.Text;
 using it.Services;
 using Spire.Doc;
+using iText.Kernel.Pdf.Canvas.Parser;
 
 namespace it.Areas.Admin.Controllers
 {
@@ -563,7 +564,7 @@ namespace it.Areas.Admin.Controllers
 		}
 
 		[HttpPost]
-		public async Task<JsonResult> CreateCustomBlock(CustomBlockModel CustomBlockModel)
+		public async Task<JsonResult> CreateCustomBlock(CustomBlockModel CustomBlockModel, string event_type)
 		{
 			try
 			{
@@ -573,6 +574,69 @@ namespace it.Areas.Admin.Controllers
 				_context.Add(CustomBlockModel);
 				_context.SaveChanges();
 
+				if (event_type == "reassignment")
+				{
+					/////create event
+					var user = _context.UserModel.Find(user_id);
+					var event_content = "";
+					if (CustomBlockModel.data_setting.type_performer == 4)
+					{
+						var listuser = CustomBlockModel.data_setting.listuser;
+						var list = _context.UserModel.Where(d => listuser.Contains(d.Id)).Select(d => d.FullName).ToList();
+						event_content = "<b>" + user.FullName + "</b> đã phân công lại cho <b>" + String.Join(",", list) + "</b>";
+					}
+					else if (CustomBlockModel.data_setting.type_performer == 3)
+					{
+						var listdepartment = CustomBlockModel.data_setting.listdepartment;
+						var list = _context.DepartmentModel.Where(d => listdepartment.Contains(d.id)).Select(d => d.name).ToList();
+						event_content = "<b>" + user.FullName + "</b> đã phân công lại cho bộ phận <b>" + String.Join(",", list) + "</b>";
+
+					}
+					EventModel EventModel = new EventModel
+					{
+						execution_id = CustomBlockModel.execution_id,
+						event_content = event_content,
+						created_at = DateTime.Now,
+					};
+					_context.Add(EventModel);
+					await _context.SaveChangesAsync();
+
+
+
+
+					var block_id = CustomBlockModel.block_id;
+					var ActivityModel = _context.ActivityModel.Where(d => d.deleted_at == null && d.block_id == block_id && d.execution_id == CustomBlockModel.execution_id).FirstOrDefault();
+					if (ActivityModel == null)
+					{
+						goto end;
+					}
+					var data_setting = ActivityModel.data_setting;
+					var mail = data_setting.mail;
+					if (mail == null)
+					{
+						goto end;
+					}
+					mail = _workflow.fillMail(mail, ActivityModel);
+					//data_setting.mail = mail;
+					//ActivityModel.data_setting = data_setting;
+					//_context.Update(ActivityModel);
+
+					var email = new EmailModel
+					{
+						email_to = mail.to,
+						subject = mail.title,
+						body = mail.content,
+						data_attachments = mail.filecontent.Split(",").ToList(),
+						email_type = "forward_step",
+						status = 1
+					};
+					_context.Add(email);
+					await _context.SaveChangesAsync();
+
+				}
+
+			end:
+				Console.WriteLine("End");
 			}
 			catch (DbUpdateConcurrencyException)
 			{
@@ -582,15 +646,77 @@ namespace it.Areas.Admin.Controllers
 
 		}
 		[HttpPost]
-		public async Task<JsonResult> UpdateCustomBlock(int id, CustomBlockModel CustomBlockModel)
+		public async Task<JsonResult> UpdateCustomBlock(int id, CustomBlockModel CustomBlockModel, string event_type)
 		{
+			System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+			string user_id = UserManager.GetUserId(currentUser); // Get user id:
 			var CustomBlockModel_old = await _context.CustomBlockModel.FindAsync(id);
 			if (CustomBlockModel_old != null)
 			{
 				CopyValues<CustomBlockModel>(CustomBlockModel_old, CustomBlockModel);
 				_context.Update(CustomBlockModel_old);
 				_context.SaveChanges();
+				if (event_type == "reassignment")
+				{
+					/////create event
+					var user = _context.UserModel.Find(user_id);
+					var event_content = "";
+					if (CustomBlockModel_old.data_setting.type_performer == 4)
+					{
+						var listuser = CustomBlockModel_old.data_setting.listuser;
+						var list = _context.UserModel.Where(d => listuser.Contains(d.Id)).Select(d => d.FullName).ToList();
+						event_content = "<b>" + user.FullName + "</b> đã phân công lại cho <b>" + String.Join(",", list) + "</b>";
+					}
+					else if (CustomBlockModel_old.data_setting.type_performer == 3)
+					{
+						var listdepartment = CustomBlockModel_old.data_setting.listdepartment;
+						var list = _context.DepartmentModel.Where(d => listdepartment.Contains(d.id)).Select(d => d.name).ToList();
+						event_content = "<b>" + user.FullName + "</b> đã phân công lại cho bộ phận <b>" + String.Join(",", list) + "</b>";
+					}
+					EventModel EventModel = new EventModel
+					{
+						execution_id = CustomBlockModel_old.execution_id,
+						event_content = event_content,
+						created_at = DateTime.Now,
+					};
+					_context.Add(EventModel);
+					await _context.SaveChangesAsync();
+
+
+
+					var block_id = CustomBlockModel_old.block_id;
+					var ActivityModel = _context.ActivityModel.Where(d => d.deleted_at == null && d.block_id == block_id && d.execution_id == CustomBlockModel_old.execution_id).FirstOrDefault();
+					if (ActivityModel == null)
+					{
+						goto end;
+					}
+					var data_setting = ActivityModel.data_setting;
+					var mail = data_setting.mail;
+					if (mail == null)
+					{
+						goto end;
+					}
+					mail = _workflow.fillMail(mail, ActivityModel);
+					//data_setting.mail = mail;
+					//ActivityModel.data_setting = data_setting;
+					//_context.Update(ActivityModel);
+
+					var email = new EmailModel
+					{
+						email_to = mail.to,
+						subject = mail.title,
+						body = mail.content,
+						data_attachments = mail.filecontent.Split(",").ToList(),
+						email_type = "forward_step",
+						status = 1
+					};
+					_context.Add(email);
+
+					await _context.SaveChangesAsync();
+				}
 			}
+		end:
+			Console.WriteLine("End");
 			return Json(new { success = 1 });
 
 		}
@@ -656,7 +782,7 @@ namespace it.Areas.Admin.Controllers
 
 
 		[HttpPost]
-		public async Task<JsonResult> CreateActivity(ActivityModel ActivityModel)
+		public async Task<JsonResult> CreateActivity(ActivityModel ActivityModel, string event_type)
 		{
 			try
 			{
@@ -691,7 +817,7 @@ namespace it.Areas.Admin.Controllers
 					_context.Update(ExecutionModel);
 					_context.SaveChanges();
 					/////create event
-					var user = _context.UserModel.Find(user_id);
+					//var user = _context.UserModel.Find(user_id);
 					EventModel EventModel = new EventModel
 					{
 						execution_id = ActivityModel.execution_id,
@@ -709,7 +835,7 @@ namespace it.Areas.Admin.Controllers
 					_context.Update(ExecutionModel);
 					_context.SaveChanges();
 					/////create event
-					var user = _context.UserModel.Find(user_id);
+					//var user = _context.UserModel.Find(user_id);
 					EventModel EventModel = new EventModel
 					{
 						execution_id = ActivityModel.execution_id,
@@ -748,9 +874,9 @@ namespace it.Areas.Admin.Controllers
 						goto end;
 					}
 					mail = _workflow.fillMail(mail, ActivityModel);
-					data_setting.mail = mail;
-					ActivityModel.data_setting = data_setting;
-					_context.Update(ActivityModel);
+					//data_setting.mail = mail;
+					//ActivityModel.data_setting = data_setting;
+					//_context.Update(ActivityModel);
 
 					var email = new EmailModel
 					{
@@ -779,7 +905,7 @@ namespace it.Areas.Admin.Controllers
 		}
 
 		[HttpPost]
-		public async Task<JsonResult> UpdateActivity(string id, ActivityModel ActivityModel)
+		public async Task<JsonResult> UpdateActivity(string id, ActivityModel ActivityModel, string event_type)
 		{
 			System.Security.Claims.ClaimsPrincipal currentUser = this.User;
 			string user_id = UserManager.GetUserId(currentUser); // Get user id:
@@ -846,6 +972,52 @@ namespace it.Areas.Admin.Controllers
 
 
 			}
+
+			if (event_type == "require_sign")
+			{
+				/////create event
+				var user = _context.UserModel.Find(user_id);
+				var data_setting = ActivityModel_old.data_setting;
+
+				var event_content = "";
+				var listuser = data_setting.listusersign.Select(d => d.user_sign).ToList();
+				var list = _context.UserModel.Where(d => listuser.Contains(d.Id)).Select(d => d.FullName).ToList();
+				event_content = "<b>" + user.FullName + "</b> đã yêu cầu ký nháy <b>" + String.Join(",", list) + "</b>";
+
+				EventModel EventModel = new EventModel
+				{
+					execution_id = ActivityModel_old.execution_id,
+					event_content = event_content,
+					created_at = DateTime.Now,
+				};
+				_context.Add(EventModel);
+				await _context.SaveChangesAsync();
+
+
+				var mail = data_setting.mail;
+				if (mail == null)
+				{
+					goto end;
+				}
+
+				mail = _workflow.fillMail(mail, ActivityModel_old);
+
+				var list1 = _context.UserModel.Where(d => listuser.Contains(d.Id)).Select(d => d.Email).ToList();
+				var email = new EmailModel
+				{
+					email_to = String.Join(",", list1),
+					subject = "[Yêu cầu ký nháy]" + mail.title,
+					body = mail.content,
+					data_attachments = mail.filecontent.Split(",").ToList(),
+					email_type = "forward_step",
+					status = 1
+				};
+				_context.Add(email);
+
+				await _context.SaveChangesAsync();
+			}
+		end:
+			Console.WriteLine("End");
 			return Json(new { success = 1 });
 
 		}

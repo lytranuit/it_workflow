@@ -30,7 +30,7 @@
     </div>
 </template>
 <script>
-export default {
+    export default {
         components: {
         },
         props: {
@@ -80,6 +80,7 @@ export default {
                 }
                 this.activity.data_setting.listusersign = list;
                 this.activity.is_update = true;
+                this.activity.event_type = "require_sign";
                 this.$emit("save_data");
             },
             checkModal() {
@@ -89,7 +90,7 @@ export default {
                 return text
             }
         }
-}
+    }
 </script>
 
 <style lang="scss"></style>

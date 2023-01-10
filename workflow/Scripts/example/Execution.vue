@@ -366,7 +366,7 @@
                             for (var field of item.fields) {
                                 field.execution_id = model.id;
                                 field.id = rand();
-                                if (field.type == 'file' || field.type == 'file_multiple') {
+                                if ((field.type == 'file' || field.type == 'file_multiple') && field.files && field.files.length) {
                                     var formData = new FormData();
                                     for (var i = 0; i < field.files.length; i++) {
                                         formData.append("files", field.files[i]);

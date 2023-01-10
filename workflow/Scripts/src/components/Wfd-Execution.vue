@@ -887,6 +887,7 @@
                 if (findCustom != -1) {
                     if (data_custom_block[findCustom].id) {
                         custom.is_update = true;
+                        custom.event_type = "reassignment";
                         custom.id = data_custom_block[findCustom].id;
                     } else {
                         custom.is_new = true;
