@@ -80,6 +80,8 @@
                             <div v-if="element.type == 'select_multiple'">
                                 <treeselect :options="get_options(element.data_setting.options)" v-model="element.values.value_array" multiple :required="element.is_require" name="tran2"></treeselect>
                             </div>
+
+
                             <div v-if="element.type == 'employee'">
                                 <treeselect :options="users" v-model="element.values.value" :required="element.is_require" :name="element.id"></treeselect>
                             </div>
@@ -87,7 +89,23 @@
                             <div v-if="element.type == 'employee_multiple'">
                                 <treeselect :options="users" v-model="element.values.value_array" multiple :required="element.is_require" :name="element.id"></treeselect>
                             </div>
+                            <div v-if="element.type == 'radio'">
+                                <div class="radio radio-success radio-circle" v-for="option in element.data_setting.options" :key="option.id">
+                                    <input :id="'radio-' + option.id" type="radio" :name="'radio-' + element.id" :value="option.id" v-model="element.values.value">
+                                    <label :for="'radio-' + option.id">
+                                        {{option.name}}
+                                    </label>
+                                </div>
+                            </div>
 
+                            <div v-if="element.type == 'checkbox'">
+                                <div class="checkbox checkbox-success" v-for="option in element.data_setting.options" :key="option.id">
+                                    <input :id="'checkbox-' + option.id" type="checkbox" :value="option.id" v-model="element.values.value_array">
+                                    <label :for="'checkbox-' + option.id">
+                                        {{option.name}}
+                                    </label>
+                                </div>
+                            </div>
                             <div v-if="element.type == 'department'">
                                 <treeselect :options="departments" v-model="element.values.value" :required="element.is_require" :name="element.id"></treeselect>
                             </div>
@@ -198,321 +216,321 @@
 	</div>
 </template>
 <script>
-    import mitt from 'mitt'
+	import mitt from 'mitt'
 
-    var stringMath = require('string-math');
-    const emitter = mitt()
-    import CurrencyInput from "../CurrencyInput.vue";
-    import VueNumberFormat from '@igortrindade/vue-number-format'
-    export default {
-        inject: ['i18n'],
-        components: {
-            CurrencyInput,
-            VueNumberFormat
-        },
-        props: {
-            fields: {
-                type: Array,
-                default: () => ([]),
-            },
-            users: {
-                type: Array,
-                default: () => ([]),
-            },
-            nodes: {
-                type: Array,
-                default: () => ([]),
-            },
-            departments: {
-                type: Array,
-                default: () => ([]),
-            },
-            readonly: {
-                type: Boolean,
-                default: () => (false),
-            },
-        },
-        mounted() {
-            var index = 0;
-            $(".vue-treeselect__input").each(function () {
-                $(this).attr("name", "index_" + index++);
-            });
-            if (this.$refs.addRowTable) {
-                this.$refs.addRowTable.map(function (item) {
-                    if ($(item).data("count") == 0) {
-                        item.click();
-                    }
+	var stringMath = require('string-math');
+	const emitter = mitt()
+	import CurrencyInput from "../CurrencyInput.vue";
+	import VueNumberFormat from '@igortrindade/vue-number-format'
+	export default {
+		inject: ['i18n'],
+		components: {
+			CurrencyInput,
+			VueNumberFormat
+		},
+		props: {
+			fields: {
+				type: Array,
+				default: () => ([]),
+			},
+			users: {
+				type: Array,
+				default: () => ([]),
+			},
+			nodes: {
+				type: Array,
+				default: () => ([]),
+			},
+			departments: {
+				type: Array,
+				default: () => ([]),
+			},
+			readonly: {
+				type: Boolean,
+				default: () => (false),
+			},
+		},
+		mounted() {
+			var index = 0;
+			$(".vue-treeselect__input").each(function () {
+				$(this).attr("name", "index_" + index++);
+			});
+			if (this.$refs.addRowTable) {
+				this.$refs.addRowTable.map(function (item) {
+					if ($(item).data("count") == 0) {
+						item.click();
+					}
 
-                })
-            }
-            var firstvariable = "!#"; //first input;
-            var secondvariable = "#"; //first in
-            var fields = this.fields;
-            if (fields) {
-                for (var field of fields) {
-                    if (field.type == 'table' && field.data_setting.columns) {
-                        var columns = field.data_setting.columns;
-                        for (var column of columns) {
-                            if (column.type == 'formular') {
-                                var text = column.formular.text;
-                                var list_id = text.match(new RegExp("(?<=" + firstvariable + ")(.*?)(?=" + secondvariable + ")", "g"));
-                                //console.log(text);
-                                //console.log(list_id);
-                                for (var id of list_id) {
-                                    emitter.on(id, e => {
-                                        console.log(e);
-                                    })
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        methods: {
-            options_formular(column) {
-                var suffix = "";
-                if (column.formular.type_return == 'percent') {
-                    suffix = " %";
-                } else if (column.formular.type_return == 'currency') {
-                    suffix = " VND";
-                }
-                return { precision: column.formular.decimal_number, prefix: '', suffix: suffix, decimal: ',', thousand: '.', acceptNegative: false, isInteger: false };
-            },
-            signalChange: function (id, index = null, columns = [], list_data = []) {
-                //console.log(evt.target);
-                //var name = $(evt.target).attr("name");
-                //var list = name.split("_");
-                //var id = list[0];
-                //var index = list[1];
-                var firstvariable = "!#"; //first input;
-                var secondvariable = "#"; //first in
-                if (index != null) {
+				})
+			}
+			var firstvariable = "!#"; //first input;
+			var secondvariable = "#"; //first in
+			var fields = this.fields;
+			if (fields) {
+				for (var field of fields) {
+					if (field.type == 'table' && field.data_setting.columns) {
+						var columns = field.data_setting.columns;
+						for (var column of columns) {
+							if (column.type == 'formular') {
+								var text = column.formular.text;
+								var list_id = text.match(new RegExp("(?<=" + firstvariable + ")(.*?)(?=" + secondvariable + ")", "g"));
+								//console.log(text);
+								//console.log(list_id);
+								for (var id of list_id) {
+									emitter.on(id, e => {
+										console.log(e);
+									})
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		methods: {
+			options_formular(column) {
+				var suffix = "";
+				if (column.formular.type_return == 'percent') {
+					suffix = " %";
+				} else if (column.formular.type_return == 'currency') {
+					suffix = " VND";
+				}
+				return { precision: column.formular.decimal_number, prefix: '', suffix: suffix, decimal: ',', thousand: '.', acceptNegative: false, isInteger: false };
+			},
+			signalChange: function (id, index = null, columns = [], list_data = []) {
+				//console.log(evt.target);
+				//var name = $(evt.target).attr("name");
+				//var list = name.split("_");
+				//var id = list[0];
+				//var index = list[1];
+				var firstvariable = "!#"; //first input;
+				var secondvariable = "#"; //first in
+				if (index != null) {
 
-                    //// CHANGE IN TABLE
-                    var row = list_data[index];
-                    for (var column of columns) {
-                        if (column.type == 'formular') {
-                            var column_id = column.id;
-                            var text = column.formular.text;
-                            var list_id = text.match(new RegExp("(?<=" + firstvariable + ")(.*?)(?=" + secondvariable + ")", "g"));
-                            //console.log(list_id)
-                            //console.log(text)
-                            if (list_id.indexOf(id) == -1) {
-                                continue;
-                            }
-                            for (var _id of list_id) {
-                                var value = row[_id] ? row[_id] : 0;
-                                text = text.replace(new RegExp("!#" + _id + "#", "g"), value);
-                            }
-                            var result = stringMath(text, function (err) {
-                                return 0;
-                            });
-                            row[column_id] = result;
-                            this.signalChange(column_id, index, columns, list_data)
-                            //console.log(text);
-                            //console.log(row[column_id]);
-                        }
-                    }
-                }
-                //// CHANGE IN FIELD
-                var field_formular = this.fields.filter(function (item) {
-                    return item.type == 'formular';
-                });
-                if (field_formular) {
-                    for (var field of field_formular) {
-                        if (field.data_setting.formular.type == 2 && id == field.data_setting.formular.operator_column) {
-                            var operator_type = field.data_setting.formular.operator_type;
-                            var arr = list_data.map(function (item) {
-                                return item[id];
-                            })
-                            switch (operator_type) {
-                                case "sum":
-                                    field.values.value = arr.reduce((a, b) => a + b, 0)
-                                    //console.log(arr);
-                                    break;
-                                case "avg":
-                                    field.values.value = arr.length > 0 ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
-                                    break;
-                                case "min":
-                                    field.values.value = Math.min(...arr);
-                                    break;
-                                case "max":
-                                    field.values.value = Math.max(...arr);
-                                    break;
-                            }
-                        }
-                        if (field.data_setting.formular.type == 1) {
+					//// CHANGE IN TABLE
+					var row = list_data[index];
+					for (var column of columns) {
+						if (column.type == 'formular') {
+							var column_id = column.id;
+							var text = column.formular.text;
+							var list_id = text.match(new RegExp("(?<=" + firstvariable + ")(.*?)(?=" + secondvariable + ")", "g"));
+							//console.log(list_id)
+							//console.log(text)
+							if (list_id.indexOf(id) == -1) {
+								continue;
+							}
+							for (var _id of list_id) {
+								var value = row[_id] ? row[_id] : 0;
+								text = text.replace(new RegExp("!#" + _id + "#", "g"), value);
+							}
+							var result = stringMath(text, function (err) {
+								return 0;
+							});
+							row[column_id] = result;
+							this.signalChange(column_id, index, columns, list_data)
+							//console.log(text);
+							//console.log(row[column_id]);
+						}
+					}
+				}
+				//// CHANGE IN FIELD
+				var field_formular = this.fields.filter(function (item) {
+					return item.type == 'formular';
+				});
+				if (field_formular) {
+					for (var field of field_formular) {
+						if (field.data_setting.formular.type == 2 && id == field.data_setting.formular.operator_column) {
+							var operator_type = field.data_setting.formular.operator_type;
+							var arr = list_data.map(function (item) {
+								return item[id];
+							})
+							switch (operator_type) {
+								case "sum":
+									field.values.value = arr.reduce((a, b) => a + b, 0)
+									//console.log(arr);
+									break;
+								case "avg":
+									field.values.value = arr.length > 0 ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
+									break;
+								case "min":
+									field.values.value = Math.min(...arr);
+									break;
+								case "max":
+									field.values.value = Math.max(...arr);
+									break;
+							}
+						}
+						if (field.data_setting.formular.type == 1) {
 
-                            var text = field.data_setting.formular.text;
-                            var list_id = text.match(new RegExp("(?<=" + firstvariable + ")(.*?)(?=" + secondvariable + ")", "g"));
-                            if (list_id.indexOf(id) == -1) {
-                                continue;
-                            }
-                            for (var _id of list_id) {
-                                var findindex = this.fields.findIndex(function (item) {
-                                    return item.id == _id;
-                                });
-                                var findField = this.fields[findindex];
-                                var value = findField.values.value ? findField.values.value : 0;
-                                text = text.replace(new RegExp("!#" + _id + "#", "g"), value);
-                            }
-                            var result = stringMath(text, function (err) {
-                                return 0;
-                            });
-                            field.values.value = result;
-                        }
-                    }
-                }
-                this.$forceUpdate();
-            },
+							var text = field.data_setting.formular.text;
+							var list_id = text.match(new RegExp("(?<=" + firstvariable + ")(.*?)(?=" + secondvariable + ")", "g"));
+							if (list_id.indexOf(id) == -1) {
+								continue;
+							}
+							for (var _id of list_id) {
+								var findindex = this.fields.findIndex(function (item) {
+									return item.id == _id;
+								});
+								var findField = this.fields[findindex];
+								var value = findField.values.value ? findField.values.value : 0;
+								text = text.replace(new RegExp("!#" + _id + "#", "g"), value);
+							}
+							var result = stringMath(text, function (err) {
+								return 0;
+							});
+							field.values.value = result;
+						}
+					}
+				}
+				this.$forceUpdate();
+			},
 
-            get_options(options) {
-                return options.map(function (item) {
-                    item.label = item.name;
-                    return item;
-                });
-            },
-            add_row_table(field) {
-                var columns = field.data_setting.columns;
-                var data = {};
-                var column_stt = null;
-                for (var column of columns) {
-                    if (column.type == 'stt') {
-                        column_stt = column.id;
-                    } else {
-                        data[column.id] = null;
-                    }
+			get_options(options) {
+				return options.map(function (item) {
+					item.label = item.name;
+					return item;
+				});
+			},
+			add_row_table(field) {
+				var columns = field.data_setting.columns;
+				var data = {};
+				var column_stt = null;
+				for (var column of columns) {
+					if (column.type == 'stt') {
+						column_stt = column.id;
+					} else {
+						data[column.id] = null;
+					}
 
-                }
-                field.values.list_data.push(data);
-                if (column_stt) {
-                    field.values.list_data = field.values.list_data.map(function (item, key) {
-                        item[column_stt] = key + 1;
-                        return item;
-                    });
-                }
-                var name = field.name
-                field.name = rand();
-                field.name = name;
-            },
-            remove_row(element, index) {
+				}
+				field.values.list_data.push(data);
+				if (column_stt) {
+					field.values.list_data = field.values.list_data.map(function (item, key) {
+						item[column_stt] = key + 1;
+						return item;
+					});
+				}
+				var name = field.name
+				field.name = rand();
+				field.name = name;
+			},
+			remove_row(element, index) {
 
-                element.values.list_data.splice(index, 1);
-
-
+				element.values.list_data.splice(index, 1);
 
 
-                var columns = element.data_setting.columns;
-                var column_stt = null;
-                for (var column of columns) {
-                    if (column.type == 'stt') {
-                        column_stt = column.id;
-                    }
-                }
-                if (column_stt) {
-                    element.values.list_data = element.values.list_data.map(function (item, key) {
-                        item[column_stt] = key + 1;
-                        return item;
-                    });
-                }
-                var name = element.name
-                element.name = rand();
-                element.name = name;
-            },
-            display(field) {
-                var text = field.values.value;
-                var data_setting = field.data_setting;
-                if (field.type == 'select') {
-                    var options = data_setting.options;
-                    var index = options.findIndex(function (item) {
-                        return item.id == field.values.value;
-                    })
-                    if (index != -1) {
-                        var option = options[index];
-                        text = option.name;
-                    }
-                } else if (field.type == 'file' || field.type == 'file_multiple') {
-                    text = "";
-                    if (field.values.files) {
-                        for (var file of field.values.files) {
-                            text += `
+
+
+				var columns = element.data_setting.columns;
+				var column_stt = null;
+				for (var column of columns) {
+					if (column.type == 'stt') {
+						column_stt = column.id;
+					}
+				}
+				if (column_stt) {
+					element.values.list_data = element.values.list_data.map(function (item, key) {
+						item[column_stt] = key + 1;
+						return item;
+					});
+				}
+				var name = element.name
+				element.name = rand();
+				element.name = name;
+			},
+			display(field) {
+				var text = field.values.value;
+				var data_setting = field.data_setting;
+				if (field.type == 'select' || field.type == 'radio') {
+					var options = data_setting.options;
+					var index = options.findIndex(function (item) {
+						return item.id == field.values.value;
+					})
+					if (index != -1) {
+						var option = options[index];
+						text = option.name;
+					}
+				} else if (field.type == 'file' || field.type == 'file_multiple') {
+					text = "";
+					if (field.values.files) {
+						for (var file of field.values.files) {
+							text += `
                                 <div class="flex-m mb-1">
                                     <div class="file-icon" data-type="`+ file.ext + `"></div>
                                     <a href="`+ file.url + `" download="` + file.name + `" style="margin-left: 5px;">
 							            `+ file.name + `
 						            </a>
                                 </div>`;
-                        }
-                    }
-                } else if (field.type == 'department') {
-                    var index = this.departments.findIndex(function (item) {
-                        return item.id == field.values.value;
-                    })
-                    if (index != -1) {
-                        var option = this.departments[index];
-                        text = option.label;
-                    }
-                } else if (field.type == 'employee') {
-                    var index = this.users.findIndex(function (item) {
-                        return item.id == field.values.value;
-                    })
-                    if (index != -1) {
-                        var option = this.users[index];
-                        text = option.label;
-                    }
-                } else if (field.type == 'select_multiple') {
-                    var value_array = field.values.value_array || [];
-                    var options = data_setting.options;
-                    var list = options.filter(function (item) {
-                        return value_array.indexOf(item.id) != -1;
-                    }).map(function (item) {
-                        return item.name;
-                    });
-                    text = list.join(", ");
-                }
-                else if (field.type == 'select_department') {
-                    var value_array = field.values.value_array || [];
-                    var list = this.departments.filter(function (item) {
-                        return value_array.indexOf(item.id) != -1;
-                    }).map(function (item) {
-                        return item.label;
-                    });
-                    text = list.join(", ");
-                }
-                else if (field.type == 'select_employee') {
-                    var value_array = field.values.value_array || [];
-                    var list = this.users.filter(function (item) {
-                        return value_array.indexOf(item.id) != -1;
-                    }).map(function (item) {
-                        return item.label;
-                    });
-                    text = list.join(", ");
-                } else if (field.type == 'date') {
-                    text = field.values.value ? moment(field.values.value).format("YYYY-MM-DD") : "";
-                } else if (field.type == 'date_month') {
-                    text = field.values.value ? moment(field.values.value).format("YYYY-MM") : "";
-                } else if (field.type == 'date_time') {
-                    text = field.values.value ? moment(field.values.value).format("YYYY-MM-DD HH:mm") : "";
-                } else if (field.type == 'currency') {
-                    text = field.values.value ? new Intl.NumberFormat('de-DE', { style: 'currency', currency: data_setting.currency }).format(field.values.value) : "";
-                } else if (field.type == 'formular') {
-                    text = field.values.value ? VueNumberFormat.format(field.values.value, this.options_formular(field.data_setting)) : "";
-                } else if (field.type == 'yesno') {
-                    //console.log(field.values.value);
-                    text = field.values.value && field.values.value == "true" ? "<span class='text-success'><i class='far fa-check-circle'></i> Chọn</span>" : "<span class='text-danger'><i class='fas fa-ban'></i> Không chọn</span>";
-                }
-                return text
-            },
-            format_currency(value, currency) {
-                return new Intl.NumberFormat('de-DE', { style: 'currency', currency: currency }).format(value)
-            },
+						}
+					}
+				} else if (field.type == 'department') {
+					var index = this.departments.findIndex(function (item) {
+						return item.id == field.values.value;
+					})
+					if (index != -1) {
+						var option = this.departments[index];
+						text = option.label;
+					}
+				} else if (field.type == 'employee') {
+					var index = this.users.findIndex(function (item) {
+						return item.id == field.values.value;
+					})
+					if (index != -1) {
+						var option = this.users[index];
+						text = option.label;
+					}
+				} else if (field.type == 'select_multiple' || field.type == 'checkbox') {
+					var value_array = field.values.value_array || [];
+					var options = data_setting.options;
+					var list = options.filter(function (item) {
+						return value_array.indexOf(item.id) != -1;
+					}).map(function (item) {
+						return item.name;
+					});
+					text = list.join(", ");
+				}
+				else if (field.type == 'select_department') {
+					var value_array = field.values.value_array || [];
+					var list = this.departments.filter(function (item) {
+						return value_array.indexOf(item.id) != -1;
+					}).map(function (item) {
+						return item.label;
+					});
+					text = list.join(", ");
+				}
+				else if (field.type == 'select_employee') {
+					var value_array = field.values.value_array || [];
+					var list = this.users.filter(function (item) {
+						return value_array.indexOf(item.id) != -1;
+					}).map(function (item) {
+						return item.label;
+					});
+					text = list.join(", ");
+				} else if (field.type == 'date') {
+					text = field.values.value ? moment(field.values.value).format("YYYY-MM-DD") : "";
+				} else if (field.type == 'date_month') {
+					text = field.values.value ? moment(field.values.value).format("YYYY-MM") : "";
+				} else if (field.type == 'date_time') {
+					text = field.values.value ? moment(field.values.value).format("YYYY-MM-DD HH:mm") : "";
+				} else if (field.type == 'currency') {
+					text = field.values.value ? new Intl.NumberFormat('de-DE', { style: 'currency', currency: data_setting.currency }).format(field.values.value) : "";
+				} else if (field.type == 'formular') {
+					text = field.values.value ? VueNumberFormat.format(field.values.value, this.options_formular(field.data_setting)) : "";
+				} else if (field.type == 'yesno') {
+					//console.log(field.values.value);
+					text = field.values.value && field.values.value == "true" ? "<span class='text-success'><i class='far fa-check-circle'></i> Chọn</span>" : "<span class='text-danger'><i class='fas fa-ban'></i> Không chọn</span>";
+				}
+				return text
+			},
+			format_currency(value, currency) {
+				return new Intl.NumberFormat('de-DE', { style: 'currency', currency: currency }).format(value)
+			},
 
-            format_formular(value, option) {
-                return VueNumberFormat.format(value, option);
-            }
-        }
-    }
+			format_formular(value, option) {
+				return VueNumberFormat.format(value, option);
+			}
+		}
+	}
 </script>
 <style lang="scss" scoped>
 	

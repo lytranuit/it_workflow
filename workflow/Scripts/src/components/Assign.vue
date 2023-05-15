@@ -94,7 +94,7 @@
                 }
                 ////VAILD TIEU DE
                 if (!$(".tieu_de").val()) {
-                    alert("Bạn chưa nhập tiêu đề!");
+                    //alert("Bạn chưa nhập tiêu đề!");
                     $(".tieu_de").focus();
                     return;
                 }
