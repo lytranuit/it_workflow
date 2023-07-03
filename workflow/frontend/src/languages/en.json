@@ -1,0 +1,26 @@
+
+{
+    "version":"Version",
+    "name_program":"Program Name",
+    "name_program_value":"Material Management Program",
+    "data":"Data",
+    "goods_receipt":"Goods receipt note",
+    "import_material":"Input materials",
+    "export_material":"Output materials",
+    "transfer_material":"Transfer materials",
+    "calc_inventory":"Calculate inventory",
+    "inventory":"Inventory",
+    "print_report":"Print report",
+    "report1":"Check status inventory",
+    "report2":"Inventory report",
+    "can_han":"Material coming end of expiration",
+    "retest":"Material coming retest date",
+    "het_han":"Material out of expiration",
+    "category":"Desclare the list",
+    "material":"Materials",
+    "supplier":"Supplier",
+    "producer":"Manufacturer",
+    "warehouse":"Warehouse",
+    "system":"System",
+    "user":"Users"
+}

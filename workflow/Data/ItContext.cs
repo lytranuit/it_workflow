@@ -1,13 +1,15 @@
-﻿using it.Models;
+﻿
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
-using it.Areas.Admin.Models;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Newtonsoft.Json;
+using workflow.Areas.V1.Models;
+using Vue.Models;
+using workflow.Models;
+using System.ComponentModel.DataAnnotations;
 
-namespace it.Data
+namespace Vue.Data
 {
 	public class ItContext : DbContext
 	{
@@ -19,50 +21,47 @@ namespace it.Data
 			UserManager = UserMgr;
 
 		}
-
-		public DbSet<EmailModel> EmailModel { get; set; }
-		public DbSet<UserModel> UserModel { get; set; }
-		public DbSet<AuditTrailsModel> AuditTrailsModel { get; set; }
 		public DbSet<ProcessGroupModel> ProcessGroupModel { get; set; }
 		public DbSet<ProcessModel> ProcessModel { get; set; }
 		public DbSet<ProcessBlockModel> ProcessBlockModel { get; set; }
 		public DbSet<ProcessLinkModel> ProcessLinkModel { get; set; }
 		public DbSet<ProcessFieldModel> ProcessFieldModel { get; set; }
-		public DbSet<DepartmentModel> DepartmentModel { get; set; }
 		public DbSet<ExecutionModel> ExecutionModel { get; set; }
 		public DbSet<ExecutionFieldModel> ExecutionFieldModel { get; set; }
 		public DbSet<ActivityModel> ActivityModel { get; set; }
 		public DbSet<CustomBlockModel> CustomBlockModel { get; set; }
 		public DbSet<TransitionModel> TransitionModel { get; set; }
 		public DbSet<ProcessVersionModel> ProcessVersionModel { get; set; }
-		public DbSet<UserDepartmentModel> UserDepartmentModel { get; set; }
 
 		public DbSet<CommentModel> CommentModel { get; set; }
 		public DbSet<CommentFileModel> CommentFileModel { get; set; }
 		public DbSet<EventModel> EventModel { get; set; }
 		public DbSet<UserReadModel> UserReadModel { get; set; }
 		public DbSet<UserUnreadModel> UserUnreadModel { get; set; }
-		//public override int SaveChanges()
-		//{
-		//    var audit = new Audit();
-		//    audit.PreSaveChanges(this);
-		//    var rowAffecteds = base.SaveChanges();
-		//    audit.PostSaveChanges();
+		public DbSet<AuditTrailsModel> AuditTrailsModel { get; set; }
 
-		//    base.SaveChanges();
+		public DbSet<UserModel> UserModel { get; set; }
+		public DbSet<UserRoleModel> UserRoleModel { get; set; }
 
-		//    return rowAffecteds;
-		//}
 		//public DbSet<User2Model> User2Model { get; set; }
-		//public virtual async Task<int> SaveChangesAsync()
-		//{
-		//    var audit = new Audit();
-		//    audit.CreatedBy = "ZZZ Projects"; // Optional
-		//    //OnBeforeSaveChanges();
-		//    var result = await base.SaveChangesAsync();
-		//    var entries = audit.Entries;
-		//    return result;
-		//}
+		public DbSet<EmailModel> EmailModel { get; set; }
+		public DbSet<TokenModel> TokenModel { get; set; }
+		public DbSet<DepartmentModel> DepartmentModel { get; set; }
+		public DbSet<UserDepartmentModel> UserDepartmentModel { get; set; }
+
+		public DbSet<LibraryPermissionModel> LibraryPermissionModel { get; set; }
+		public DbSet<LibraryModel> LibraryModel { get; set; }
+		public DbSet<FilterIdRaw> FilterIdRaw { get; set; }
+		public DbSet<SizeRaw> SizeRaw { get; set; }
+		protected override void OnModelCreating(ModelBuilder modelBuilder)
+		{
+			modelBuilder.Entity<UserRoleModel>().ToTable("AspNetUserRoles").HasKey(table => new
+			{
+				table.RoleId,
+				table.UserId
+			});
+
+		}
 		public override int SaveChanges()
 		{
 			OnBeforeSaveChanges();
@@ -127,15 +126,39 @@ namespace it.Data
 			}
 		}
 
-		protected override void OnModelCreating(ModelBuilder modelBuilder)
-		{
-			//modelBuilder.Entity<IdentityUser>().ToTable("AspNetUsers");
-
-			//modelBuilder.Entity<DocumentModel>().HasMany(l => l.Teams).WithOne().HasForeignKey("LeagueId");
-
-		}
 		protected override void ConfigureConventions(ModelConfigurationBuilder builder)
 		{
 		}
+		public List<int> ChildFolder(List<int>? parents)
+		{
+			try
+			{
+				if (parents == null)
+					return new List<int>();
+
+				var selectList = string.Join(", ", parents);
+
+				string query = $@"WITH cte AS(SELECT a.ItemID, a.ParentID, a.Name FROM Library a WHERE ItemID IN({selectList}) UNION ALL SELECT a.ItemID, a.ParentID, a.Name FROM Library a JOIN cte c ON a.ParentID = c.ItemID where a.Type = 'Folder') 
+								SELECT  ItemID, name FROM cte";
+
+				var folder = FilterIdRaw.FromSqlRaw(query).AsEnumerable().Select(d => (int)d.ItemId).ToList();
+				return folder;
+			}
+			catch (Exception e)
+			{
+				return new List<int>();
+			}
+		}
+	}
+	public class FilterIdRaw
+	{
+		[Key]
+		public int ItemId { get; set; }
+		public string Name { get; set; }
+	}
+	public class SizeRaw
+	{
+		[Key]
+		public long Size { get; set; }
 	}
 }

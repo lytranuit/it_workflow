@@ -1,7 +1,4 @@
-﻿
-using it.Areas.Admin.Models;
-using it.Data;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Spire.Doc.Documents;
 using Spire.Doc;
 using System.Diagnostics;
@@ -11,10 +8,13 @@ using System.Data;
 using System.Collections;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using System.Linq;
+using workflow.Areas.V1.Models;
+using Vue.Models;
+using Vue.Data;
 
 namespace it.Services
 {
-	public class Workflow
+    public class Workflow
 	{
 		protected readonly ItContext _context;
 		private IActionContextAccessor actionAccessor;

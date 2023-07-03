@@ -1,0 +1,22 @@
+.layout-main-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  justify-content: space-between;
+  padding: 7rem 2rem 0rem 2rem;
+  transition: margin-left $transitionDuration;
+}
+
+.layout-main {
+  flex: 1 1 auto;
+}
+
+.date-custom {
+  width: 100%;
+  .p-inputtext {
+    padding: 6px 10px;
+  }
+  .p-button {
+    padding: 0px;
+  }
+}

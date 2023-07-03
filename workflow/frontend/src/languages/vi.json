@@ -1,0 +1,26 @@
+
+{
+    "version":"Phiên bản",
+    "name_program":"Tên phần mềm",
+    "name_program_value":"Chương trình quản lý nguyên vật liệu",
+    "data":"Dữ liệu",
+    "goods_receipt":"Phiếu tiếp nhận",
+    "import_material":"Nhập nguyên vật liệu",
+    "export_material":"Xuất nguyên vật liệu",
+    "transfer_material":"Chuyển kho bảo quản",
+    "calc_inventory":"Tính tồn kho",
+    "inventory":"Tồn kho",
+    "print_report":"In báo cáo",
+    "report1":"Kiểm tra tình trạng tồn kho",
+    "report2":"Báo cáo tồn kho",
+    "can_han":"Nguyên vật liệu cận hạn dùng",
+    "retest":"Nguyên vật liệu cận hạn tái kiểm",
+    "het_han":"Nguyên vật liệu hết hạn",
+    "category":"Khai báo danh mục",
+    "material":"Nguyên vật liệu",
+    "supplier":"Nhà cung cấp",
+    "producer":"Nhà sản xuất",
+    "warehouse":"Kho",
+    "system":"Hệ thống",
+    "user":"Tài khoản"
+}

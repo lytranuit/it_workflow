@@ -1,21 +1,10 @@
 ﻿
-using it.Models;
 using Microsoft.AspNetCore.Mvc;
-using it.Data;
-using Microsoft.EntityFrameworkCore;
 using System.Net.Mail;
 using System.Net.Mime;
-using System.Globalization;
 using it.Services;
-using it.Areas.Admin.Models;
-using System.Reflection;
-using System.Diagnostics;
-using System.Xml.Linq;
-using elFinder.NetCore.Models;
-//using Microsoft.
-//using System.Runtime.InteropServices;
-//using System.IO;
-//using Microsoft.Office.Core;
+using Vue.Data;
+
 namespace it.Controllers
 {
 	public class HomeController : Controller
