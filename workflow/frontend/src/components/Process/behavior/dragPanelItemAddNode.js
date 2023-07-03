@@ -8,9 +8,9 @@ export default function (G6) {
     },
     getEvents() {
       return {
-        "canvas:mousemove": "onMouseMove",
-        "canvas:mouseup": "onMouseUp",
-        "canvas:mouseleave": "onMouseLeave",
+        mousemove: "onMouseMove",
+        mouseup: "onMouseUp",
+        mouseleave: "onMouseLeave",
       };
     },
     onMouseMove(e) {

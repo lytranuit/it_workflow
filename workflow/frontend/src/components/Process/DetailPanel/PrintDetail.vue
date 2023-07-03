@@ -96,7 +96,7 @@ export default {
       formData.append("files", files[0]);
       var resp = await $.ajax({
         type: "POST",
-        url: path + "/admin/api/uploadFileTemplate",
+        url: "/v1/api/uploadFileTemplate",
         data: formData,
         dataType: "json",
         contentType: false, // Not to set any content header

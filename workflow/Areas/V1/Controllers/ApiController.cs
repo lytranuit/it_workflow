@@ -141,7 +141,7 @@ namespace workflow.Areas.V1.Controllers
 
             if (files != null && files.Count > 0)
             {
-                var pathroot = "private\\executions\\" + CommentModel.execution_id + "\\";
+                var pathroot = _configuration["Source:Path_Private"] + "\\executions\\" + CommentModel.execution_id + "\\";
                 bool exists = Directory.Exists(pathroot);
 
                 if (!exists)
@@ -161,7 +161,7 @@ namespace workflow.Areas.V1.Controllers
                     newName = newName.Replace("+", "_");
                     newName = newName.Replace("%", "_");
                     newName = newName.Replace(",", "_");
-                    var filePath = "private\\executions\\" + CommentModel.execution_id + "\\" + newName;
+                    var filePath = _configuration["Source:Path_Private"] + "\\executions\\" + CommentModel.execution_id + "\\" + newName;
                     string url = "/private/executions/" + CommentModel.execution_id + "/" + newName;
                     items_comment.Add(new CommentFileModel
                     {
@@ -1019,7 +1019,7 @@ namespace workflow.Areas.V1.Controllers
             var items = new List<FileUp>();
             if (files != null && files.Count > 0)
             {
-                var pathroot = "private\\executions\\" + execution_id + "\\";
+                var pathroot = _configuration["Source:Path_Private"] + "\\executions\\" + execution_id + "\\";
                 bool exists = Directory.Exists(pathroot);
 
                 if (!exists)
@@ -1038,7 +1038,7 @@ namespace workflow.Areas.V1.Controllers
                     newName = newName.Replace("+", "_");
                     newName = newName.Replace("%", "_");
                     newName = newName.Replace(",", "_");
-                    var filePath = "private\\executions\\" + execution_id + "\\" + newName;
+                    var filePath = _configuration["Source:Path_Private"] + "\\executions\\" + execution_id + "\\" + newName;
                     string url = "/private/executions/" + execution_id + "/" + newName;
                     items.Add(new FileUp
                     {
@@ -1062,7 +1062,7 @@ namespace workflow.Areas.V1.Controllers
 
             var files = Request.Form.Files;
             var file = files[0];
-            var pathroot = "private\\templates\\";
+            var pathroot = _configuration["Source:Path_Private"] + "\\templates\\";
             bool exists = Directory.Exists(pathroot);
 
             if (!exists)
@@ -1079,7 +1079,7 @@ namespace workflow.Areas.V1.Controllers
             newName = newName.Replace("+", "_");
             newName = newName.Replace("%", "_");
             newName = newName.Replace(",", "_");
-            var filePath = "private\\templates\\" + newName;
+            var filePath = _configuration["Source:Path_Private"] + "\\templates\\" + newName;
             string url = "/private/templates/" + newName;
             var item = new FileUp
             {
@@ -1142,7 +1142,7 @@ namespace workflow.Areas.V1.Controllers
             await _context.SaveChangesAsync();
             return Json(new { success = 1 });
         }
-        
+
         public void CopyValues<T>(T target, T source)
         {
             Type t = typeof(T);
@@ -1176,9 +1176,7 @@ namespace workflow.Areas.V1.Controllers
             string ext = Path.GetExtension(user.image_sign);
             string save = forlder.Substring(1) + "\\" + timeStamp + ".pdf";
             string Domain = (HttpContext.Request.IsHttps ? "https://" : "http://") + HttpContext.Request.Host.Value + "/";
-            var dir = "../../it/it";
-            if (Domain.Contains("workflow.pymepharco.com"))
-                dir = "../esign.pymepharco.com";
+            var dir = _configuration["Source:Path_Private"].Replace("\\private", "").Replace("\\", "/");
             //Draw the image
             var file_image = dir + user.image_sign;
             //PdfImage pdfImage = PdfImage.FromFile("." + user.image_sign);

@@ -17,19 +17,15 @@ class CanvasPanel {
 
   initPlugin(graph) {
     const parentNode = this.get("container");
-    console.log(parentNode);
     parentNode.addEventListener("dragover", (e) => {
-      // console.log(e);
-      graph.emit("canvas:mousemove", e);
+      graph.emit("mousemove", e);
     });
     parentNode.addEventListener("dragleave", (e) => {
-      console.log("mouseleave");
-      graph.emit("canvas:mouseleave", e);
+      graph.emit("mouseleave", e);
     });
   }
 
   destroy() {
-    console.log("Destroy");
     this.get("canvas").destroy();
     const container = this.get("container");
     container.parentNode.removeChild(container);

@@ -95,9 +95,9 @@ export default {
   watch: {
     data: {
       handler(newData, oldData) {
-        // if (oldData != newData) {
-        this.changeGraph();
-        // }
+        if (oldData != newData) {
+          this.changeGraph();
+        }
       },
       deep: true,
     },
@@ -120,7 +120,7 @@ export default {
     },
     initEvents() {
       var that = this;
-      console.log("event");
+      // console.log("event");
       this.graph.on("afteritemselected", (items) => {
         // console.log(items);
         if (items && items.length > 0) {
@@ -215,14 +215,14 @@ export default {
       } else {
         that.data.nodes.splice(index, 1);
       }
-      console.log(that.data);
+      // console.log(that.data);
     },
     init() {
       if (this.graph) {
         $(this.$refs["canvas"]).empty();
-        console.log("có graph");
+        // console.log("có graph");
       }
-      console.log(this.$refs["toolbar"].$el);
+      // console.log(this.$refs["toolbar"].$el);
       let plugins = [];
       this.cmdPlugin = new Command();
       const canvasPanel = new CanvasPanel({ container: this.$refs["canvas"] });
@@ -264,7 +264,7 @@ export default {
         },
       });
       this.graph.setMode(this.mode);
-      console.log(this.mode);
+      // console.log(this.mode);
       // if (this.data.nodes) {
       //   this.graph.data(this.initShape(this.data));
       //   this.graph.render();
@@ -273,7 +273,7 @@ export default {
       // }
     },
     changeGraph() {
-      console.log(this.mode);
+      // console.log(this.mode);
       this.graph.data(this.initShape(this.data));
       this.graph.render();
       this.graph.fitView();

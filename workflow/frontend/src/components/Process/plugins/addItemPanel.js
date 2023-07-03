@@ -33,7 +33,7 @@ class AddItemPanel {
         graph.set("addModel", addModel);
       });
       child.addEventListener("dragend", (e) => {
-        graph.emit("canvas:mouseup", e);
+        graph.emit("mouseup", e);
         //graph.emit('addnodes', addModel, e);
         graph.set("addNodeDragging", false);
         graph.set("addModel", null);

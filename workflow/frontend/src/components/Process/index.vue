@@ -46,6 +46,7 @@ const demoData = ref({
       label: "Bắt đầu",
       stt: 0,
       clazz: "start",
+      variable: rand(),
       type_performer: 1,
     },
     {
@@ -58,6 +59,7 @@ const demoData = ref({
       clazz: "formTask",
       type_performer: 1,
       data_setting: {},
+      variable: rand(),
       fields: [],
     },
     {
@@ -68,6 +70,7 @@ const demoData = ref({
       label: "Phê duyệt",
       stt: 2,
       clazz: "approveTask",
+      variable: rand(),
       type_performer: 1,
       data_setting: {},
     },
@@ -79,6 +82,7 @@ const demoData = ref({
       label: "Hoàn thành",
       stt: 3,
       clazz: "success",
+      variable: rand(),
       type_performer: 1,
     },
     {
@@ -89,6 +93,7 @@ const demoData = ref({
       label: "Thất bại",
       stt: 3,
       clazz: "fail",
+      variable: rand(),
       type_performer: 1,
     },
   ],
@@ -100,6 +105,7 @@ const demoData = ref({
       target: taskNode1,
       sourceAnchor: 1,
       targetAnchor: 3,
+      variable: rand(),
       clazz: "flow",
     },
     {
@@ -111,6 +117,7 @@ const demoData = ref({
       targetAnchor: 3,
       clazz: "flow",
       label: "Gửi đi",
+      variable: rand(),
     },
     {
       id: rand(),
@@ -119,6 +126,7 @@ const demoData = ref({
       target: successNode,
       sourceAnchor: 1,
       targetAnchor: 3,
+      variable: rand(),
       clazz: "flow",
       label: "Đồng ý",
     },
@@ -128,6 +136,7 @@ const demoData = ref({
       source: taskNode2,
       target: failNode,
       sourceAnchor: 2,
+      variable: rand(),
       targetAnchor: 2,
       clazz: "flow",
       label: "Không đồng ý",
