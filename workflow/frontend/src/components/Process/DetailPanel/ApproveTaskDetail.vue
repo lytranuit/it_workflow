@@ -1,16 +1,16 @@
 ﻿<template>
   <div :data-clazz="model.clazz">
-    <div class="panelTitle">{{ i18n["approveTask"] }}</div>
+    <div class="panelTitle">{{ $t("approveTask") }}</div>
     <div class="panelBody">
       <Accordion :activeIndex="0">
-        <AccordionTab :header="i18n['detail.general']">
+        <AccordionTab :header="$t('detail.general')">
           <DefaultDetail
             :model="model"
             :onChange="onChange"
             :readOnly="readOnly"
           />
         </AccordionTab>
-        <AccordionTab :header="i18n['detail.user_performer']">
+        <AccordionTab :header="$t('detail.user_performer')">
           <div class="p-3">
             <div class="my-2">
               <b>Người thực hiện:</b>
@@ -55,7 +55,7 @@
             <SettingMail :model="model" :nodes="nodes"></SettingMail>
           </div>
         </AccordionTab>
-        <AccordionTab :header="i18n['detail.time']">
+        <AccordionTab :header="$t('detail.time')">
           <div class="p-3">
             <div class="flex-m m-2">
               <div class="">Thời hạn xử lý</div>
@@ -102,7 +102,7 @@
             </div>
           </div>
         </AccordionTab>
-        <AccordionTab :header="i18n['approveTask']">
+        <AccordionTab :header="$t('approveTask')">
           <div class="cont-empty my-3 text-center">Chọn bước cần phê duyệt</div>
           <div class="row justify-content-center">
             <div class="col-10">
@@ -116,7 +116,7 @@
           </div>
         </AccordionTab>
 
-        <AccordionTab :header="i18n['esign']">
+        <AccordionTab :header="$t('esign')">
           <div class="cont-empty my-3 text-center">Chọn mẫu cần ký</div>
           <div class="row justify-content-center">
             <div class="col-10">
@@ -135,10 +135,9 @@
 <script>
 import DefaultDetail from "./DefaultDetail.vue";
 import SettingMail from "./SettingMail.vue";
-import { useProcess } from "../../../stores/Process/store";
+import { useProcess } from "../../../stores/process";
 const store = useProcess();
 export default {
-  inject: ["i18n"],
   components: {
     DefaultDetail,
     SettingMail,

@@ -1,12 +1,12 @@
 <template>
   <div :data-clazz="model.clazz">
-    <div class="panelTitle">{{ i18n["print"] }}</div>
+    <div class="panelTitle">{{ $t("print") }}</div>
     <div class="panelBody">
       <Accordion :activeIndex="0">
-        <AccordionTab :header="i18n['detail.general']">
+        <AccordionTab :header="$t('detail.general')">
           <DefaultDetail :model="model" :onChange="onChange" />
         </AccordionTab>
-        <AccordionTab :header="i18n['detail.template']">
+        <AccordionTab :header="$t('detail.template')">
           <div class="form-group">
             <div class="col-12 mt-2">
               <b class="col-form-label">Mẫu：</b>
@@ -51,10 +51,9 @@ import {
   DxItem,
   DxVariables,
 } from "devextreme-vue/html-editor";
-import { useProcess } from "../../../stores/Process/store";
+import { useProcess } from "../../../stores/process";
 const store = useProcess();
 export default {
-  inject: ["i18n"],
   components: {
     DefaultDetail,
     DxHtmlEditor,

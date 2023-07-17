@@ -1157,7 +1157,7 @@ namespace workflow.Areas.V1.Controllers
             }
         }
         [HttpPost]
-        public async Task<JsonResult> SaveSign(Signature sign, string activity_esign_id, string activity_id)
+        public async Task<JsonResult> SaveSign(Signature sign, string activity_esign_id)
         {
             var user_local = _context.UserModel.Where(d => d.Id == sign.user_sign).FirstOrDefault();
             if (user_local == null)
@@ -1165,27 +1165,27 @@ namespace workflow.Areas.V1.Controllers
             ///// Request get user info esign
             var client = new HttpClient();
 
-            var url = _configuration["JWT:ValidIssuer"] + "/api/UserInfo?email=" + user_local.Email;
-            var response = await client.GetAsync(url);
-            EsignResponse user = await response.Content.ReadFromJsonAsync<EsignResponse>();
+            //var url = _configuration["JWT:ValidIssuer"] + "/api/UserInfo?email=" + user_local.Email;
+            //var response = await client.GetAsync(url);
+            //EsignResponse user = await response.Content.ReadFromJsonAsync<EsignResponse>();
 
             /////
+            var dir = _configuration["Source:Path_Private"].Replace("\\private", "").Replace("\\", "/");
             var timeStamp = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
             string fileName = Path.GetFileNameWithoutExtension(sign.url);
             string forlder = Path.GetDirectoryName(sign.url);
-            string ext = Path.GetExtension(user.image_sign);
-            string save = forlder.Substring(1) + "\\" + timeStamp + ".pdf";
+            string ext = Path.GetExtension(user_local.image_sign);
+            string save = "\\" + forlder.Substring(1) + "\\" + timeStamp + ".pdf";
             string Domain = (HttpContext.Request.IsHttps ? "https://" : "http://") + HttpContext.Request.Host.Value + "/";
-            var dir = _configuration["Source:Path_Private"].Replace("\\private", "").Replace("\\", "/");
             //Draw the image
-            var file_image = dir + user.image_sign;
+            var file_image = dir + user_local.image_sign;
             //PdfImage pdfImage = PdfImage.FromFile("." + user.image_sign);
             ImageData da = ImageDataFactory.Create(file_image);
             int image_size_width = (int)Math.Round((float)sign.image_size_width);
             int image_size_height = (int)Math.Round((float)sign.image_size_height);
             if (ext.ToLower() == ".png")
             {
-                using (System.Drawing.Image src = System.Drawing.Image.FromFile(dir + user.image_sign))
+                using (System.Drawing.Image src = System.Drawing.Image.FromFile(dir + user_local.image_sign))
                 using (Bitmap dst = new Bitmap(image_size_width, image_size_height))
                 using (Graphics g = Graphics.FromImage(dst))
                 {
@@ -1193,9 +1193,9 @@ namespace workflow.Areas.V1.Controllers
                     g.SmoothingMode = SmoothingMode.AntiAlias;
                     g.InterpolationMode = InterpolationMode.HighQualityBicubic;
                     g.DrawImage(src, 0, 0, dst.Width, dst.Height);
-                    file_image = "wwwroot\\temp\\" + timeStamp + ".png";
-                    dst.Save(file_image, ImageFormat.Png);
-                    da = ImageDataFactory.CreatePng(new Uri(Domain + "/temp/" + timeStamp + ".png"));
+                    MemoryStream ms = new MemoryStream();
+                    dst.Save(ms, ImageFormat.Png);
+                    da = ImageDataFactory.CreatePng(ms.ToArray());
                 }
                 //pdfImage = PdfImage.FromFile("wwwroot\\temp\\" + timeStamp + "png");
             }
@@ -1204,8 +1204,8 @@ namespace workflow.Areas.V1.Controllers
             //Activate MultiSignatures
             //To disable Multi signatures uncomment this line : every new signature will invalidate older ones !
             //stamper = PdfStamper.CreateSignature(reader, os, '\0');
-            var dest = new PdfWriter(save);
-            var reader = new PdfReader("." + sign.url);
+            var dest = new PdfWriter(_configuration["Source:Path_Private"].Replace("\\private", "") + save);
+            var reader = new PdfReader(dir + sign.url);
 
             PdfSignerNoObjectStream signer = new PdfSignerNoObjectStream(reader, dest, new StampingProperties().UseAppendMode());
             // Creating the appearance
@@ -1239,7 +1239,7 @@ namespace workflow.Areas.V1.Controllers
 
             int p_y = 0;
             p_y += 40;
-            var text = user.FullName + "\n" + DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
+            var text = user_local.FullName + "\n" + DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
             if (sign.reason != null)
             {
                 text += "\nÝ kiến: " + sign.reason;
@@ -1276,7 +1276,7 @@ namespace workflow.Areas.V1.Controllers
 
             signer.SetFieldName(timeStamp.ToString());
             // Creating the signature
-            string KEYSTORE = dir + "/private/pfx/" + user.Id + ".pfx";
+            string KEYSTORE = dir + user_local.signature;
             char[] PASSWORD = "!PMP_it123456".ToCharArray();
 
             Pkcs12Store pk12 = new Pkcs12Store(new FileStream(KEYSTORE,
@@ -1319,7 +1319,7 @@ namespace workflow.Areas.V1.Controllers
             files.Add(new FileUp()
             {
                 name = files[0].name,
-                url = "/" + save.Replace("\\", "/"),
+                url = save.Replace("\\", "/"),
                 ext = ".pdf",
                 mimeType = "application/pdf"
             });

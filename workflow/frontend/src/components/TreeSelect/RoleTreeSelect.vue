@@ -1,10 +1,10 @@
 <template>
-  <Treeselect
+  <TreeSelect
     :options="roles"
     :multiple="multiple"
     :modelValue="modelValue"
     @update:modelValue="emit('update:modelValue', $event)"
-  ></Treeselect>
+  ></TreeSelect>
 </template>
 
 <script setup>

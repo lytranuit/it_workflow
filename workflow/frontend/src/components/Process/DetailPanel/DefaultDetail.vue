@@ -3,7 +3,7 @@
     <div class="form-group">
       <div class="col-lg-12 mt-2">
         <b class="col-form-label"
-          >{{ i18n["label"] }}:<span class="text-danger">*</span></b
+          >{{ $t("label") }}:<span class="text-danger">*</span></b
         >
         <div class="pt-1">
           <input
@@ -20,7 +20,7 @@
         </div>
       </div>
       <div class="col-lg-12 mt-2">
-        <b class="col-form-label">{{ i18n["guide"] }}：</b>
+        <b class="col-form-label">{{ $t("guide") }}：</b>
         <div class="pt-1">
           <textarea
             class="form-control form-control-sm"
@@ -35,7 +35,7 @@
         </div>
       </div>
       <div class="col-lg-12 mt-2">
-        <b class="col-form-label">{{ i18n["variable"] }}：</b>
+        <b class="col-form-label">{{ $t("variable") }}：</b>
         <div class="pt-1">
           <input
             class="form-control form-control-sm"
@@ -50,7 +50,7 @@
         </div>
       </div>
       <div class="col-lg-12 mt-2">
-        <b class="col-form-label">{{ i18n["stt"] }}:</b>
+        <b class="col-form-label">{{ $t("stt") }}:</b>
         <div class="pt-1">
           <input
             class="form-control form-control-sm"
@@ -70,7 +70,6 @@
 </template>
 <script>
 export default {
-  inject: ["i18n"],
   props: {
     model: {
       type: Object,

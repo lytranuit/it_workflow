@@ -79,7 +79,7 @@
 <script setup>
 import { storeToRefs } from "pinia";
 import Button from "primevue/button";
-import { useProcess } from "../../stores/Process/store";
+import { useProcess } from "../../stores/process";
 import { computed } from "vue";
 const store = useProcess();
 const { data } = storeToRefs(store);

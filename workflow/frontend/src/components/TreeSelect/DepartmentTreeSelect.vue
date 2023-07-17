@@ -1,11 +1,11 @@
 <template>
-  <Treeselect
+  <TreeSelect
     :options="departments"
     :multiple="multiple"
     :modelValue="modelValue"
     value-consists-of="ALL_WITH_INDETERMINATE"
     @update:modelValue="emit('update:modelValue', $event)"
-  ></Treeselect>
+  ></TreeSelect>
 </template>
 
 <script setup>

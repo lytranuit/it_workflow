@@ -1235,10 +1235,9 @@ import {
 import { DxValidator, DxCustomRule } from "devextreme-vue/validator";
 import { rand } from "../../../../utilities/rand";
 import { VueDraggableNext } from "vue-draggable-next";
-import { useProcess } from "../../../../stores/Process/store";
+import { useProcess } from "../../../../stores/process";
 const store = useProcess();
 export default {
-  inject: ["i18n"],
   components: {
     DxHtmlEditor,
     DxToolbar,

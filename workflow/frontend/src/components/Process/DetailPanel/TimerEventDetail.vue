@@ -1,10 +1,10 @@
 <template>
   <div :data-clazz="model.clazz">
-    <div class="panelTitle">{{ i18n["timerEvent"] }}</div>
+    <div class="panelTitle">{{ $t("timerEvent") }}</div>
     <div class="panelBody">
       <DefaultDetail :model="model" :onChange="onChange" :readOnly="readOnly" />
       <div class="panelRow">
-        <div>{{ i18n["timerEvent.cycle"] }}：</div>
+        <div>{{ $t("timerEvent.cycle") }}：</div>
         <el-input
           style="width: 90%; font-size: 12px"
           type="textarea"
@@ -19,7 +19,7 @@
         />
       </div>
       <div class="panelRow">
-        <div>{{ i18n["timerEvent.duration"] }}：</div>
+        <div>{{ $t("timerEvent.duration") }}：</div>
         <el-input
           style="width: 90%; font-size: 12px"
           type="textarea"
@@ -39,7 +39,6 @@
 <script>
 import DefaultDetail from "./DefaultDetail.vue";
 export default {
-  inject: ["i18n"],
   components: {
     DefaultDetail,
   },

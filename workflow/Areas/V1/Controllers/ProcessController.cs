@@ -36,6 +36,9 @@ namespace workflow.Areas.V1.Controllers
                 var list = _context.ProcessModel.Where(d => item.Contains(d.id)).ToList();
                 _context.RemoveRange(list);
                 _context.SaveChanges();
+                var list2 = _context.ProcessVersionModel.Where(d=>item.Contains(d.process_id)).ToList();
+                _context.RemoveRange(list2);
+                _context.SaveChanges();
             }
             catch (Exception ex)
             {

@@ -29,6 +29,9 @@ export default {
   excel() {
     return repository.post(`/v1/${resoure}/excel`).then((res) => res.data);
   },
+  sync() {
+    return repository.post(`/v1/${resoure}/sync`).then((res) => res.data);
+  },
   table(params) {
     return repository
       .post(`/v1/${resoure}/table`, params, {
@@ -40,11 +43,15 @@ export default {
   },
   delete(id) {
     return repository
-      .post(`/v1/${resoure}/delete`, { id: id }, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      })
+      .post(
+        `/v1/${resoure}/delete`,
+        { id: id },
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      )
       .then((res) => res.data);
   },
 };

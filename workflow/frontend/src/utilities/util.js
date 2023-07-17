@@ -22,8 +22,8 @@ const formatPrice = (value) => {
   let val = (value / 1).toFixed(2).replace(",", ".");
   return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 };
-const formatDate = (value) => {
-  return moment(value).format("YYYY-MM-DD");
+const formatDate = (value, fomat = "YYYY-MM-DD") => {
+  return moment(value).format(fomat);
 };
 
 const printTrigger = (link) => {

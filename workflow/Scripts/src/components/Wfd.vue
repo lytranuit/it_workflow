@@ -106,8 +106,6 @@
                 if (data && data.nodes) {
                     //var edges = $.extendext(true, 'replace', [], data.edges);
                     return {
-
-
                         nodes: data.nodes.map(node => {
                             return {
                                 type: getShapeName(node.clazz),

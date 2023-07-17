@@ -3,10 +3,10 @@
     <div class="panelTitle">
       {{
         model.clazz === "exclusiveGateway" || model.clazz === "gateway"
-          ? i18n["exclusiveGateway"]
+          ? $t("exclusiveGateway")
           : model.clazz === "parallelGateway"
-          ? i18n["parallelGateway"]
-          : i18n["inclusiveGateway"]
+          ? $t("parallelGateway")
+          : $t("inclusiveGateway")
       }}
     </div>
     <div class="panelBody">
@@ -17,7 +17,6 @@
 <script>
 import DefaultDetail from "./DefaultDetail.vue";
 export default {
-  inject: ["i18n"],
   components: {
     DefaultDetail,
   },

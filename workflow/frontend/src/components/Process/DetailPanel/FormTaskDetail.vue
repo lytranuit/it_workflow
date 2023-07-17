@@ -1,16 +1,16 @@
 <template>
   <div :data-clazz="model.clazz">
-    <div class="panelTitle">{{ i18n["formTask"] }}</div>
+    <div class="panelTitle">{{ $t("formTask") }}</div>
     <div class="panelBody">
       <Accordion :activeIndex="0">
-        <AccordionTab :header="i18n['detail.general']">
+        <AccordionTab :header="$t('detail.general')">
           <DefaultDetail
             :model="model"
             :onChange="onChange"
             :readOnly="readOnly"
           />
         </AccordionTab>
-        <AccordionTab :header="i18n['detail.user_performer']">
+        <AccordionTab :header="$t('detail.user_performer')">
           <div class="p-3">
             <div class="my-2">
               <b>Người thực hiện:</b>
@@ -54,7 +54,7 @@
             <SettingMail :model="model"></SettingMail>
           </div>
         </AccordionTab>
-        <AccordionTab :header="i18n['detail.time']">
+        <AccordionTab :header="$t('detail.time')">
           <div class="p-3">
             <div class="flex-m m-2">
               <div class="">Thời hạn xử lý</div>
@@ -101,7 +101,7 @@
             </div>
           </div>
         </AccordionTab>
-        <AccordionTab :header="i18n['detail.fields']">
+        <AccordionTab :header="$t('detail.fields')">
           <setting-field :model="model"></setting-field>
         </AccordionTab>
       </Accordion>
@@ -112,10 +112,9 @@
 import DefaultDetail from "./DefaultDetail.vue";
 import SettingField from "./Fields/SettingField.vue";
 import SettingMail from "./SettingMail.vue";
-import { useProcess } from "../../../stores/Process/store";
+import { useProcess } from "../../../stores/process";
 const store = useProcess();
 export default {
-  inject: ["i18n"],
   components: {
     DefaultDetail,
     SettingField,

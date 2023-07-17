@@ -12,8 +12,14 @@
         <Button
           label="Xuất Excel"
           icon="pi pi-excel"
-          class="p-button-primary p-button-sm"
+          class="p-button-primary p-button-sm mr-2"
           @click="excel"
+        ></Button>
+        <Button
+          label="Đồng bộ"
+          icon="pi pi-sync"
+          class="p-button-warning p-button-sm"
+          @click="sync"
         ></Button>
       </h5>
       <section class="card card-fluid">
@@ -68,7 +74,9 @@
                     {{ slotProps.data[col.data] }}
                   </RouterLink>
                 </template>
-                <template v-else-if="col.data == 'image'">
+                <template
+                  v-else-if="col.data == 'image' || col.data == 'image_sign'"
+                >
                   <div
                     class="text-center"
                     v-html="slotProps.data[col.data]"
@@ -146,6 +154,12 @@ const columns = ref([
     id: 3,
     label: "Hình đại diện",
     data: "image",
+    className: "text-center",
+  },
+  {
+    id: 4,
+    label: "Chữ ký",
+    data: "image_sign",
     className: "text-center",
   },
 ]);
@@ -229,6 +243,12 @@ const excel = () => {
     } else {
       alert(res.message);
     }
+  });
+};
+const sync = () => {
+  waiting.value = true;
+  userApi.sync().then((res) => {
+    waiting.value = false;
   });
 };
 watch(filters, async (newa, old) => {

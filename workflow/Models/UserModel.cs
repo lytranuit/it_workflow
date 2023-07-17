@@ -16,6 +16,8 @@ namespace Vue.Models
     {
         public string FullName { get; set; }
         public string? image_url { get; set; }
+        public string? image_sign { get; set; }
+        public string? signature { get; set; }
         public DateTime? last_login { get; set; }
 
         public DateTime? created_at { get; set; }

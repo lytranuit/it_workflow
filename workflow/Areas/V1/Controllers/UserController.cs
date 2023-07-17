@@ -29,8 +29,10 @@ namespace workflow.Areas.V1.Controllers
         private UserManager<UserModel> UserManager;
         private RoleManager<IdentityRole> RoleManager;
         private readonly IConfiguration _configuration;
-        public UserController(ItContext context, UserManager<UserModel> UserMgr, RoleManager<IdentityRole> RoleMgr, IConfiguration configuration) : base(context)
+        private EsignContext _esignContext;
+        public UserController(ItContext context, EsignContext EsignContext, UserManager<UserModel> UserMgr, RoleManager<IdentityRole> RoleMgr, IConfiguration configuration) : base(context)
         {
+            _esignContext = EsignContext;
             _configuration = configuration;
             UserManager = UserMgr;
             RoleManager = RoleMgr;
@@ -52,6 +54,7 @@ namespace workflow.Areas.V1.Controllers
                 EmailConfirmed = true,
                 FullName = User.FullName,
                 image_url = User.image_url,
+                image_sign = User.image_sign,
             };
             IdentityResult result = await UserManager.CreateAsync(user, password);
             if (result.Succeeded)
@@ -117,6 +120,7 @@ namespace workflow.Areas.V1.Controllers
             User_old.UserName = User.Email;
             User_old.FullName = User.FullName;
             User_old.image_url = User.image_url;
+            User_old.image_sign = User.image_sign;
 
             _context.Update(User_old);
             _context.SaveChanges();
@@ -199,7 +203,7 @@ namespace workflow.Areas.V1.Controllers
             var role_avaliable = _configuration.GetSection("Roles").Get<string[]>().ToList();
             var roles_old = RoleManager.Roles.Where(d => role_avaliable.Contains(d.Name)).Select(a => a.Id).ToList();
             var roles = _context.UserRoleModel.Where(d => d.UserId == id && roles_old.Contains(d.RoleId)).Select(d => d.RoleId).ToList();
-            return Json(new { success = true, id = User.Id, roles = roles, departments = User.departments.Select(d => d.department_id.ToString()).ToList(), email = User.Email, FullName = User.FullName, image_url = User.image_url });
+            return Json(new { success = true, id = User.Id, roles = roles, departments = User.departments.Select(d => d.department_id.ToString()).ToList(), email = User.Email, FullName = User.FullName, image_url = User.image_url, image_sign = User.image_sign });
         }
 
         [HttpPost]
@@ -235,12 +239,14 @@ namespace workflow.Areas.V1.Controllers
             foreach (var record in datapost)
             {
                 var image = "<img src='" + record.image_url + "' class='thumb-sm rounded-circle'>";
+                var image_sign = "<img src='" + record.image_sign + "' class='' width='100'>";
                 var data1 = new
                 {
                     Id = record.Id,
                     email = record.Email,
                     fullName = record.FullName,
-                    image = image
+                    image = image,
+                    image_sign = image_sign
                 };
                 data.Add(data1);
             }
@@ -360,8 +366,41 @@ namespace workflow.Areas.V1.Controllers
             }
             return list;
         }
+        [HttpPost]
+        public async Task<JsonResult> sync()
+        {
+            var user_esign = _esignContext.UserEsignModel.Where(d => d.deleted_at == null && d.image_sign != "/private/images/tick.png").ToList();
 
+            foreach (var user in user_esign)
+            {
+                var find = _context.UserModel.Where(d => d.Email.ToLower() == user.Email.ToLower()).FirstOrDefault();
+                if (find != null)
+                {
+                    find.FullName = user.FullName;
+                    find.image_sign = user.image_sign;
+                    find.image_url = user.image_url;
+                    find.signature = $"/private/pfx/{user.Id}.pfx";
+                    _context.Update(find);
+                    _context.SaveChanges();
+                }
+                else
+                {
+                    UserModel newuser = new UserModel
+                    {
+                        Email = user.Email,
+                        UserName = user.Email,
+                        EmailConfirmed = true,
+                        FullName = user.FullName,
+                        image_url = user.image_url,
+                        image_sign = user.image_sign,
+                        signature = $"/private/pfx/{user.Id}.pfx"
+                    };
+                    IdentityResult result = await UserManager.CreateAsync(newuser, "!PMP_it123456");
 
+                }
+            }
+            return Json(new { success = true });
+        }
 
         [HttpPost]
         public async Task<JsonResult> excel()

@@ -1,11 +1,11 @@
 <template>
   <div class="itemPanel" :style="{ height: height + 'px' }">
     <Accordion :activeIndex="0" multiple>
-      <AccordionTab :header="i18n['setting']" contentClass="text-center">
+      <AccordionTab :header="$t('setting')" contentClass="text-center">
         <div class="form-group text-left">
           <div class="col-lg-12 mt-2">
             <b class="col-form-label"
-              >{{ i18n["process.name"] }}<span class="text-danger">*</span></b
+              >{{ $t("process.name") }}<span class="text-danger">*</span></b
             >
             <div class="pt-1">
               <input
@@ -19,7 +19,7 @@
           </div>
           <div class="col-lg-12 mt-2">
             <b class="col-form-label"
-              >{{ i18n["process.group"] }}:<span class="text-danger">*</span></b
+              >{{ $t("process.group") }}:<span class="text-danger">*</span></b
             >
             <div class="pt-1">
               <TreeSelect
@@ -30,7 +30,7 @@
             </div>
           </div>
           <div class="col-lg-12 mt-2">
-            <b class="col-form-label">{{ i18n["process.description"] }}:</b>
+            <b class="col-form-label">{{ $t("process.description") }}:</b>
             <div class="pt-1">
               <textarea
                 id="description"
@@ -41,30 +41,30 @@
           </div>
         </div>
       </AccordionTab>
-      <AccordionTab :header="i18n['start']" contentClass="text-center">
+      <AccordionTab :header="$t('start')" contentClass="text-center">
         <img
           data-item="{clazz:'start',size:'30*30',label:''}"
           :src="'/src/assets/flow/start.svg'"
           style="width: 42px; height: 42px"
         />
-        <div>{{ i18n["startEvent"] }}</div>
+        <div>{{ $t("startEvent") }}</div>
         <!--<img data-item="{clazz:'timerStart',size:'30*30',label:''}"
              :src="'/src/assets/flow/timer-start.svg'" style="width:42px;height:42px" />
-        <div>{{i18n['timerEvent']}}</div>-->
+        <div>{{$t('timerEvent')}}</div>-->
       </AccordionTab>
-      <AccordionTab :header="i18n['task']" contentClass="text-center">
+      <AccordionTab :header="$t('task')" contentClass="text-center">
         <img
           data-item="{clazz:'formTask',size:'80*44',label:''}"
           :src="'/src/assets/flow/script-task.svg'"
           style="width: 80px; height: 44px"
         />
-        <div>{{ i18n["formTask"] }}</div>
+        <div>{{ $t("formTask") }}</div>
         <img
           data-item="{clazz:'approveTask',size:'80*44',label:''}"
           :src="'/src/assets/flow/approve.svg'"
           style="width: 44px; height: 44px"
         />
-        <div>{{ i18n["approveTask"] }}</div>
+        <div>{{ $t("approveTask") }}</div>
         <img
           data-item="{clazz:'suggestTask',size:'60*44',label:''}"
           :src="'/src/assets/flow/suggest-task.svg'"
@@ -76,15 +76,15 @@
             border-radius: 8px;
           "
         />
-        <div>{{ i18n["suggest"] }}</div>
+        <div>{{ $t("suggest") }}</div>
       </AccordionTab>
-      <AccordionTab :header="i18n['system']" contentClass="text-center">
+      <AccordionTab :header="$t('system')" contentClass="text-center">
         <img
           data-item="{clazz:'mailSystem',size:'80*44',label:''}"
           :src="'/src/assets/flow/mail-task.svg'"
           style="width: 80px; height: 44px"
         />
-        <div>{{ i18n["mail"] }}</div>
+        <div>{{ $t("mail") }}</div>
         <img
           data-item="{clazz:'printSystem',size:'50*60',label:''}"
           :src="'/src/assets/flow/printSystem.svg'"
@@ -96,44 +96,44 @@
             border-radius: 8px;
           "
         />
-        <div>{{ i18n["print"] }}</div>
+        <div>{{ $t("print") }}</div>
       </AccordionTab>
-      <AccordionTab :header="i18n['gateway']" contentClass="text-center">
+      <AccordionTab :header="$t('gateway')" contentClass="text-center">
         <!--<img data-item="{clazz:'exclusiveGateway',size:'40*40',label:''}"
              :src="'/src/assets/flow/exclusive-gateway.svg'" style="width:48px;height:48px" />
-        <div>{{i18n['exclusiveGateway']}}</div>-->
+        <div>{{$t('exclusiveGateway')}}</div>-->
         <img
           data-item="{clazz:'parallelGateway',size:'40*40',label:''}"
           :src="'/src/assets/flow/parallel-gateway.svg'"
           style="width: 48px; height: 48px"
         />
-        <div>{{ i18n["parallelGateway"] }}</div>
+        <div>{{ $t("parallelGateway") }}</div>
         <img
           data-item="{clazz:'inclusiveGateway',size:'40*40',label:''}"
           :src="'/src/assets/flow/inclusive-gateway.svg'"
           style="width: 48px; height: 48px"
         />
-        <div>{{ i18n["inclusiveGateway"] }}</div>
+        <div>{{ $t("inclusiveGateway") }}</div>
       </AccordionTab>
-      <AccordionTab :header="i18n['end']" contentClass="text-center">
+      <AccordionTab :header="$t('end')" contentClass="text-center">
         <img
           data-item="{clazz:'fail',size:'30*30',label:''}"
           :src="'/src/assets/flow/end.svg'"
           style="width: 42px; height: 42px"
         />
-        <div>{{ i18n["failEvent"] }}</div>
+        <div>{{ $t("failEvent") }}</div>
         <img
           data-item="{clazz:'success',size:'30*30',label:''}"
           :src="'/src/assets/flow/success.png'"
           style="width: 42px; height: 42px"
         />
-        <div>{{ i18n["successEvent"] }}</div>
+        <div>{{ $t("successEvent") }}</div>
       </AccordionTab>
     </Accordion>
   </div>
 </template>
 <script setup>
-import { useProcess } from "../../stores/Process/store";
+import { useProcess } from "../../stores/process";
 import { storeToRefs } from "pinia";
 import { inject } from "vue";
 const store = useProcess();
@@ -149,7 +149,6 @@ const props = defineProps({
     default: () => ({}),
   },
 });
-const i18n = inject("i18n");
 </script>
 
 <style lang="scss">

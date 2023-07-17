@@ -116,6 +116,23 @@
                       </div>
                     </div>
                   </div>
+                  <div class="col-12">
+                    <div class="card no-shadow border">
+                      <div class="card-header">Chữ ký</div>
+                      <div class="card-body text-center">
+                        <input
+                          type="hidden"
+                          name="image_sign"
+                          v-model="data.image_sign"
+                        />
+                        <ImageManager
+                          @choose="chooseSign"
+                          :image="data.image_sign"
+                        >
+                        </ImageManager>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -218,8 +235,11 @@ onMounted(() => {
   store.fetchData(route.params.id);
 });
 
-const choose = (id) => {
-  data.value.image_url = "/v1/SQLProvider/viewLibrary/" + id;
+const choose = (path) => {
+  data.value.image_url = "/private/upload" + path;
+};
+const chooseSign = (path) => {
+  data.value.image_sign = "/private/upload" + path;
 };
 const submit = () => {
   var vaild = $("#form").valid();

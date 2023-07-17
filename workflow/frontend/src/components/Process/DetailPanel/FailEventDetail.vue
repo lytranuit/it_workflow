@@ -1,6 +1,6 @@
 <template>
   <div :data-clazz="model.clazz">
-    <div class="panelTitle">{{ i18n["failEvent"] }}</div>
+    <div class="panelTitle">{{ $t("failEvent") }}</div>
     <div class="panelBody">
       <DefaultDetail :model="model" :onChange="onChange" :readOnly="readOnly" />
     </div>
@@ -9,7 +9,6 @@
 <script>
 import DefaultDetail from "./DefaultDetail.vue";
 export default {
-  inject: ["i18n"],
   components: {
     DefaultDetail,
   },

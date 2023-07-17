@@ -12,19 +12,62 @@
       @click="save_data"
     ></Button>
     <DataFields></DataFields>
-    <Wfd ref="wfd" :height="600" :lang="lang" />
+    <div class="root">
+      <ToolbarPanel ref="toolbar_ref" :mode="mode" />
+      <div style="display: flex">
+        <ItemPanel
+          ref="addItemPanel_ref"
+          :height="height"
+          :model="data.model"
+          v-if="mode == 'edit'"
+        />
+        <div
+          ref="canvas"
+          class="canvasPanel"
+          :style="{
+            height: height + 'px',
+            width: mode != 'edit' ? '100%' : '65%',
+          }"
+        ></div>
+        <DetailPanel
+          ref="detailPanel"
+          v-if="mode == 'edit'"
+          :height="height"
+          :model="selectedModel"
+          :readOnly="mode !== 'edit'"
+          :onChange="
+            (key, val) => {
+              onItemCfgChange(key, val);
+            }
+          "
+        />
+      </div>
+    </div>
   </div>
 </template>
 <script setup>
+import G6 from "@antv/g6/lib";
 import Button from "primevue/button";
-import { useProcess } from "../../stores/Process/store";
-import Wfd from "./Wfd.vue";
+import { useProcess } from "../../stores/process";
+// import Wfd from "./Wfd.vue";
 import { rand } from "../../utilities/rand";
 import DataFields from "./DataFields.vue";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import Api from "../../api/Api";
 import { useRouter } from "vue-router";
+import ToolbarPanel from "../ToolbarPanel.vue";
+import ItemPanel from "./ItemPanel.vue";
+import DetailPanel from "./DetailPanel/index.vue";
+import registerShape from "../../shape/index";
+import registerBehavior from "../../behavior/index";
+import { getShapeName } from "../../utilities/clazz";
+import Command from "../../plugins/command";
+import Toolbar from "../../plugins/toolbar";
+import AddItemPanel from "../../plugins/addItemPanel";
+import CanvasPanel from "../../plugins/canvasPanel";
+registerShape(G6);
+registerBehavior(G6);
 const router = useRouter();
 const store = useProcess();
 var new_process_id = rand();
@@ -36,6 +79,8 @@ var failNode = rand();
 const errors = ref([]);
 const modalVisible = ref(false);
 const lang = ref("vi");
+const height = ref(600);
+const mode = ref("edit");
 const demoData = ref({
   nodes: [
     {
@@ -149,7 +194,14 @@ const demoData = ref({
     name: "",
   },
 });
+const canvas = ref();
+const toolbar_ref = ref();
+const addItemPanel_ref = ref();
+
+const graph = ref();
+const selectedModel = ref();
 const { departments, users, groups, data } = storeToRefs(store);
+// const {} = store;
 const props = defineProps({
   process_id: String,
 });
@@ -200,9 +252,177 @@ const vaild = () => {
   errors.value = [];
   return true;
 };
-onMounted(() => {
+const init = () => {
+  let plugins = [];
+  var cmdPlugin = new Command();
+  const canvasPanel = new CanvasPanel({ container: canvas.value });
+  const toolbar = new Toolbar({ container: toolbar_ref.value.$el });
+  plugins = [cmdPlugin, toolbar, canvasPanel];
+
+  const addItemPanel = new AddItemPanel({
+    container: addItemPanel_ref.value.$el,
+  });
+  plugins.push(addItemPanel);
+
+  const width = canvas.value.offsetWidth;
+
+  graph.value = new G6.Graph({
+    plugins: plugins,
+    container: canvas.value,
+    height: height.value,
+    width: width,
+    modes: {
+      default: ["drag-canvas", "clickSelected"],
+      view: [],
+      edit: [
+        "drag-canvas",
+        "hoverNodeActived",
+        "hoverAnchorActived",
+        "dragNode",
+        "dragEdge",
+        "dragPanelItemAddNode",
+        "clickSelected",
+        "deleteItem",
+        "itemAlign",
+        "dragPoint",
+        "brush-select",
+      ],
+    },
+    defaultEdge: {
+      type: "flow-polyline-round",
+      // Other properties for all the nodes
+    },
+  });
+  graph.value.setMode(mode.value);
+  changeGraph();
+  // console.log(this.mode);
+  // if (this.data.nodes) {
+  //   this.graph.data(this.initShape(this.data));
+  //   this.graph.render();
+  //   this.graph.fitView();
+  //   this.initEvents();
+  // }
+};
+const initShape = (data) => {
+  if (data && data.nodes) {
+    //var edges = $.extendext(true, 'replace', [], data.edges);
+    return {
+      nodes: data.nodes.map((node) => {
+        return {
+          type: getShapeName(node.clazz),
+          ...node,
+        };
+      }),
+      edges: data.edges,
+    };
+  }
+  return data;
+};
+const initEvents = () => {
+  // console.log("event");
+  graph.value.on("afteritemselected", (items) => {
+    // console.log(items);
+    if (items && items.length > 0) {
+      let item = store.findItembyId(items[0]);
+      //if (!item) {
+      //     item = this.getNodeInSubProcess(items[0])
+      // }
+      selectedModel.value = item;
+    } else {
+      selectedModel.value = {};
+    }
+  });
+  graph.value.on("beforeadditem", (node) => {
+    //console.log(node);
+    var model = node.model;
+    var type = node.type;
+    var random = rand();
+    model.id = random;
+    model.variable = random;
+    if (type == "node") {
+      model.data_setting = {};
+      if (model.clazz == "mailSystem") {
+        model.data_setting.mail = {};
+      }
+      data.value.nodes.push(model);
+    } else {
+      data.value.edges.push(model);
+    }
+    selectedModel.value = model;
+  });
+  graph.value.on("removeShape", (items) => {
+    if (items && items.length > 0) {
+      removeShape(items[0]);
+    }
+  });
+  graph.value.on("afterupdateitem", (items) => {
+    //console.log(items);
+    ///UPDATE X,Y
+    var cfg = items.cfg;
+    if (cfg.x || cfg.y) {
+      var item = items.item;
+      var id = item._cfg.id;
+      var index = store.findIndexNode(id);
+      data.value.nodes[index].x = cfg.x;
+      data.value.nodes[index].y = cfg.y;
+    }
+  });
+
+  // const page = this.$refs["canvas"];
+  // const graph = this.graph;
+  // const height = this.height - 1;
+  // this.resizeFunc = () => {
+  //   graph.changeSize(page.offsetWidth, height);
+  // };
+  // window.addEventListener("resize", this.resizeFunc);
+};
+
+const removeShape = (id) => {
+  let index = data.value.nodes.findIndex(function (item) {
+    return item.id == id;
+  });
+
+  if (index == -1) {
+    index = data.value.edges.findIndex(function (item) {
+      return item.id == id;
+    });
+    if (index != -1) data.value.edges.splice(index, 1);
+  } else {
+    data.value.nodes.splice(index, 1);
+  }
+  // console.log(that.data);
+};
+const changeGraph = () => {
+  // console.log(mode.value);
+  graph.value.data(initShape(data.value));
+  graph.value.render();
+  graph.value.fitView();
+  initEvents();
+};
+const onItemCfgChange = (key, value) => {
+  const items = graph.value.get("selectedItems");
+  if (typeof value == "object") {
+    value = $(value.target).val();
+  }
+  if (items && items.length > 0) {
+    let item = graph.value.findById(items[0]);
+    // if (!item) {
+    //   item = this.getNodeInSubProcess(items[0]);
+    // }
+    if (graph.value.executeCommand) {
+      graph.value.executeCommand("update", {
+        itemId: items[0],
+        updateModel: { [key]: value },
+      });
+    } else {
+      graph.value.updateItem(item, { [key]: value });
+    }
+    //this.selectedModel = { ...item.getModel()
+  }
+};
+onMounted(async () => {
   if (props.process_id) {
-    store.init(props.process_id);
+    await store.init(props.process_id);
   } else {
     data.value = demoData.value;
   }
@@ -219,11 +439,34 @@ onMounted(() => {
   Api.processgroup().then((res) => {
     groups.value = res;
   });
+
+  init();
 });
+watch(
+  () => data,
+  (newValue, oldValue) => {
+    if (oldValue != newValue) {
+      changeGraph();
+    }
+  },
+  { deep: true }
+);
 </script>
 <style scoped>
 #app {
   color: #2c3e50;
   border: 1px solid #e1e1e1;
+}
+.root {
+  width: 100%;
+  height: 100%;
+  background-color: #fff;
+  display: block;
+}
+.canvasPanel {
+  flex: 0 0 auto;
+  float: left;
+  background-color: #fff;
+  border-bottom: 1px solid #e9e9e9;
 }
 </style>

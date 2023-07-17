@@ -1,9 +1,9 @@
 <template>
   <div :data-clazz="model.clazz">
-    <div class="panelTitle">{{ i18n["mail"] }}</div>
+    <div class="panelTitle">{{ $t("mail") }}</div>
     <div class="panelBody">
       <Accordion :activeIndex="0">
-        <AccordionTab :header="i18n['detail.general']">
+        <AccordionTab :header="$t('detail.general')">
           <DefaultDetail :model="model" :onChange="onChange" />
           <SettingMail :model="model"></SettingMail>
         </AccordionTab>
@@ -15,7 +15,6 @@
 import DefaultDetail from "./DefaultDetail.vue";
 import SettingMail from "./SettingMail.vue";
 export default {
-  inject: ["i18n"],
   components: {
     SettingMail,
     DefaultDetail,

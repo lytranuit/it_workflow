@@ -167,10 +167,9 @@ import {
   DxItem,
   DxVariables,
 } from "devextreme-vue/html-editor";
-import { useProcess } from "../../../stores/Process/store";
+import { useProcess } from "../../../stores/process";
 const store = useProcess();
 export default {
-  inject: ["i18n"],
   components: {
     DxHtmlEditor,
     DxItem,

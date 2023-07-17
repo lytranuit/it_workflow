@@ -84,7 +84,6 @@ import MailDetail from "./MailDetail.vue";
 import PrintDetail from "./PrintDetail.vue";
 
 export default {
-  inject: ["i18n"],
   components: {
     FormTaskDetail,
     TimerEventDetail,
