@@ -148,7 +148,7 @@ export default function (G6) {
     "form-task-node",
     {
       options: $.extendext(true, "replace", {}, taskDefaultOptions, {
-        icon: "/src/assets/icons/flow/icon_script.svg",
+        icon: "/images/icons/flow/icon_script.svg",
         style: {
           fill: "#FFF7E6",
           stroke: "#FFA940",
@@ -166,7 +166,7 @@ export default function (G6) {
     "approve-task-node",
     {
       options: $.extendext(true, "replace", {}, startDefaultOptions, {
-        icon: "/src/assets/icons/flow/approve.svg",
+        icon: "/images/icons/flow/approve.svg",
         iconStyle: {
           width: 8,
           height: 8,
@@ -192,7 +192,7 @@ export default function (G6) {
       shapeType: "rect",
       labelPosition: "bottom",
       options: $.extendext(true, "replace", {}, taskDefaultOptions, {
-        icon: "/src/assets/icons/flow/suggest-task.svg",
+        icon: "/images/icons/flow/suggest-task.svg",
         iconStyle: {
           width: 20,
           height: 22,
@@ -329,7 +329,7 @@ export default function (G6) {
       shapeType: "rect",
       labelPosition: "bottom",
       options: $.extendext(true, "replace", {}, taskDefaultOptions, {
-        icon: "/src/assets/icons/flow/icon_mail.svg",
+        icon: "/images/icons/flow/icon_mail.svg",
         iconStyle: {
           width: 15,
           height: 15,
@@ -369,7 +369,7 @@ export default function (G6) {
       shapeType: "rect",
       labelPosition: "bottom",
       options: $.extendext(true, "replace", {}, taskDefaultOptions, {
-        icon: "/src/assets/icons/flow/printSystem.svg",
+        icon: "/images/icons/flow/printSystem.svg",
         iconStyle: {
           width: 20,
           height: 22,
@@ -535,7 +535,7 @@ export default function (G6) {
       shapeType: "circle",
       labelPosition: "bottom",
       options: $.extendext(true, "replace", {}, endDefaultOptions, {
-        icon: "/src/assets/icons/flow/success.png",
+        icon: "/images/icons/flow/success.png",
         style: {
           fill: "aliceblue",
           stroke: "rgb(103 194 58)",
@@ -592,7 +592,7 @@ export default function (G6) {
   );
 
   //G6.registerNode('timer-start-node', {
-  //    options: $.extendext(true, 'replace', {}, startDefaultOptions, { icon: require('/src/assets/icons/flow/icon_timer.svg') }),
+  //    options: $.extendext(true, 'replace', {}, startDefaultOptions, { icon: require('/images/icons/flow/icon_timer.svg') }),
   //    afterDraw(cfg, group) { this.runAnimate(cfg, group) },
   //}, 'start-node');
 }

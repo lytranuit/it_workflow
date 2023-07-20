@@ -29,7 +29,7 @@ namespace Vue
 
             var connectionString = builder.Configuration.GetConnectionString("ItConnection") ?? throw new InvalidOperationException("Connection string 'ItConnection' not found.");
             var EsignConnectionString = builder.Configuration.GetConnectionString("EsignConnection") ?? throw new InvalidOperationException("Connection string 'EsignConnectionString' not found.");
-            
+
 
             builder.Services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             builder.Services.AddControllersWithViews().AddJsonOptions(x =>
@@ -40,7 +40,7 @@ namespace Vue
             builder.Services.AddDefaultIdentity<UserModel>(options => options.SignIn.RequireConfirmedAccount = false).AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<IdentityContext>(); ;
 
-           
+
 
             builder.Services.AddDbContext<ItContext>(options =>
               options.UseSqlServer(connectionString)
@@ -122,7 +122,15 @@ namespace Vue
             app.UseAuthentication();
             app.UseAuthorization();
 
+            //app.UseStaticFiles(new StaticFileOptions
+            //{
 
+            //    FileProvider = new PhysicalFileProvider(Path.Combine(builder.Environment.ContentRootPath, "frontend", "src")),
+            //    RequestPath = "/src",
+            //    OnPrepareResponse = ctx =>
+            //    {
+            //    }
+            //});
             app.UseStaticFiles(new StaticFileOptions
             {
                 FileProvider = new PhysicalFileProvider(builder.Configuration["Source:Path_Private"]),

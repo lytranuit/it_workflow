@@ -53,28 +53,26 @@
                 />
               </div>
               <div v-if="element.type == 'formular'">
-                <VueNumberFormat
-                  class="form-control form-control-sm"
+                <InputNumber
+                  class="w-100"
                   v-model="element.values.value"
-                  :options="options_formular(element.data_setting)"
                   :name="element.id"
                   :required="element.is_require"
-                  readonly
-                ></VueNumberFormat>
+                  readonly=""
+                  v-bind="options_formular2(element.data_setting)"
+                />
               </div>
               <div v-if="element.type == 'currency'">
-                <CurrencyInput
-                  @change="signalChange(element.id)"
+                <InputNumber
+                  class="w-100"
                   :name="element.id"
                   :required="element.is_require"
                   v-model="element.values.value"
-                  :options="{
-                    locale: 'de-DE',
-                    currency: element.data_setting.currency || 'VND',
-                    hideCurrencySymbolOnFocus: false,
-                    hideGroupingSeparatorOnFocus: false,
-                    hideNegligibleDecimalDigitsOnFocus: false,
-                  }"
+                  :suffix="element.data_setting.currency || 'VND'"
+                  locale="de-DE"
+                  :minFractionDigits="2"
+                  inputClass="p-inputtext-sm"
+                  @update:model-value="signalChange(element.id)"
                 />
               </div>
 
@@ -310,14 +308,14 @@
                       {{ row[column.id] }}
                     </div>
                     <div v-if="column.type == 'formular'">
-                      <VueNumberFormat
-                        class="form-control form-control-sm"
+                      <InputNumber
+                        class="w-100"
                         v-model="row[column.id]"
-                        :options="options_formular(column)"
                         :name="column.id + '_' + index1"
                         :required="column.is_require"
-                        readonly
-                      ></VueNumberFormat>
+                        readonly=""
+                        v-bind="options_formular2(column)"
+                      />
                     </div>
                     <div v-if="column.type == 'number'">
                       <input
@@ -337,8 +335,16 @@
                       />
                     </div>
                     <div v-if="column.type == 'currency'">
-                      <CurrencyInput
-                        @change="
+                      <InputNumber
+                        class="w-100"
+                        v-model="row[column.id]"
+                        :name="column.id + '_' + index1"
+                        :required="column.is_require"
+                        :suffix="column.currency || 'VND'"
+                        locale="de-DE"
+                        :minFractionDigits="2"
+                        inputClass="p-inputtext-sm"
+                        @update:model-value="
                           signalChange(
                             column.id,
                             index1,
@@ -346,16 +352,6 @@
                             element.values.list_data
                           )
                         "
-                        :name="column.id + '_' + index1"
-                        :required="column.is_require"
-                        v-model="row[column.id]"
-                        :options="{
-                          locale: 'de-DE',
-                          currency: column.currency || 'VND',
-                          hideCurrencySymbolOnFocus: false,
-                          hideGroupingSeparatorOnFocus: false,
-                          hideNegligibleDecimalDigitsOnFocus: false,
-                        }"
                       />
                     </div>
                     <div v-if="column.type == 'text'">
@@ -499,14 +495,16 @@
 
 import stringMath from "string-math";
 // const emitter = mitt();
-import CurrencyInput from "../../CurrencyInput.vue";
 import VueNumberFormat from "@igortrindade/vue-number-format";
+import InputNumber from "primevue/inputnumber";
 import Calendar from "primevue/calendar";
 import { rand } from "../../../utilities/rand";
+import OverlayPanel from "primevue/overlaypanel";
+import moment from "moment";
 export default {
   components: {
-    CurrencyInput,
     VueNumberFormat,
+    InputNumber,
   },
   props: {
     fields: {
@@ -529,6 +527,11 @@ export default {
       type: Boolean,
       default: () => false,
     },
+  },
+  data() {
+    return {
+      change: 1,
+    };
   },
   mounted() {
     var index = 0;
@@ -589,6 +592,22 @@ export default {
         isInteger: false,
       };
     },
+
+    options_formular2(column) {
+      var suffix = "";
+      if (column.formular.type_return == "percent") {
+        suffix = " %";
+      } else if (column.formular.type_return == "currency") {
+        suffix = " VND";
+      }
+      return {
+        suffix: suffix,
+        locale: "de-DE",
+        minFractionDigits: "2",
+        inputClass: "p-inputtext-sm",
+      };
+    },
+
     signalChange: function (id, index = null, columns = [], list_data = []) {
       //console.log(evt.target);
       //var name = $(evt.target).attr("name");
@@ -622,6 +641,7 @@ export default {
             var result = stringMath(text, function (err) {
               return 0;
             });
+            console.log(column);
             row[column_id] = result;
             this.signalChange(column_id, index, columns, list_data);
             //console.log(text);
@@ -869,6 +889,7 @@ export default {
     },
 
     format_formular(value, option) {
+      console.log(value);
       return VueNumberFormat.format(value, option);
     },
   },

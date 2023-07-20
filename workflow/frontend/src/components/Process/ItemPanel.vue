@@ -44,30 +44,30 @@
       <AccordionTab :header="$t('start')" contentClass="text-center">
         <img
           data-item="{clazz:'start',size:'30*30',label:''}"
-          :src="'/src/assets/flow/start.svg'"
+          :src="'/images/flow/start.svg'"
           style="width: 42px; height: 42px"
         />
         <div>{{ $t("startEvent") }}</div>
         <!--<img data-item="{clazz:'timerStart',size:'30*30',label:''}"
-             :src="'/src/assets/flow/timer-start.svg'" style="width:42px;height:42px" />
+             :src="'/images/flow/timer-start.svg'" style="width:42px;height:42px" />
         <div>{{$t('timerEvent')}}</div>-->
       </AccordionTab>
       <AccordionTab :header="$t('task')" contentClass="text-center">
         <img
           data-item="{clazz:'formTask',size:'80*44',label:''}"
-          :src="'/src/assets/flow/script-task.svg'"
+          :src="'/images/flow/script-task.svg'"
           style="width: 80px; height: 44px"
         />
         <div>{{ $t("formTask") }}</div>
         <img
           data-item="{clazz:'approveTask',size:'80*44',label:''}"
-          :src="'/src/assets/flow/approve.svg'"
+          :src="'/images/flow/approve.svg'"
           style="width: 44px; height: 44px"
         />
         <div>{{ $t("approveTask") }}</div>
         <img
           data-item="{clazz:'suggestTask',size:'60*44',label:''}"
-          :src="'/src/assets/flow/suggest-task.svg'"
+          :src="'/images/flow/suggest-task.svg'"
           style="
             width: 60px;
             height: 44px;
@@ -81,13 +81,13 @@
       <AccordionTab :header="$t('system')" contentClass="text-center">
         <img
           data-item="{clazz:'mailSystem',size:'80*44',label:''}"
-          :src="'/src/assets/flow/mail-task.svg'"
+          :src="'/images/flow/mail-task.svg'"
           style="width: 80px; height: 44px"
         />
         <div>{{ $t("mail") }}</div>
         <img
           data-item="{clazz:'printSystem',size:'50*60',label:''}"
-          :src="'/src/assets/flow/printSystem.svg'"
+          :src="'/images/flow/printSystem.svg'"
           style="
             width: 50px;
             height: 60px;
@@ -100,17 +100,17 @@
       </AccordionTab>
       <AccordionTab :header="$t('gateway')" contentClass="text-center">
         <!--<img data-item="{clazz:'exclusiveGateway',size:'40*40',label:''}"
-             :src="'/src/assets/flow/exclusive-gateway.svg'" style="width:48px;height:48px" />
+             :src="'/images/flow/exclusive-gateway.svg'" style="width:48px;height:48px" />
         <div>{{$t('exclusiveGateway')}}</div>-->
         <img
           data-item="{clazz:'parallelGateway',size:'40*40',label:''}"
-          :src="'/src/assets/flow/parallel-gateway.svg'"
+          :src="'/images/flow/parallel-gateway.svg'"
           style="width: 48px; height: 48px"
         />
         <div>{{ $t("parallelGateway") }}</div>
         <img
           data-item="{clazz:'inclusiveGateway',size:'40*40',label:''}"
-          :src="'/src/assets/flow/inclusive-gateway.svg'"
+          :src="'/images/flow/inclusive-gateway.svg'"
           style="width: 48px; height: 48px"
         />
         <div>{{ $t("inclusiveGateway") }}</div>
@@ -118,13 +118,13 @@
       <AccordionTab :header="$t('end')" contentClass="text-center">
         <img
           data-item="{clazz:'fail',size:'30*30',label:''}"
-          :src="'/src/assets/flow/end.svg'"
+          :src="'/images/flow/end.svg'"
           style="width: 42px; height: 42px"
         />
         <div>{{ $t("failEvent") }}</div>
         <img
           data-item="{clazz:'success',size:'30*30',label:''}"
-          :src="'/src/assets/flow/success.png'"
+          :src="'/images/flow/success.png'"
           style="width: 42px; height: 42px"
         />
         <div>{{ $t("successEvent") }}</div>

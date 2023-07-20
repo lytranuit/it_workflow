@@ -38,6 +38,20 @@ export default {
       .then((res) => res.data);
   },
 
+  exportVersion(id) {
+    return repository
+      .post(
+        `/v1/${resoure}/exportVersion`,
+        { process_version_id: id },
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      )
+      .then((res) => res.data);
+  },
+
   release(id) {
     return repository
       .post(

@@ -316,8 +316,7 @@ export default {
       if (!that.readonly) {
         var pdfjsLib = window["pdfjs-dist/build/pdf"];
         // The workerSrc property shall be specified.
-        pdfjsLib.GlobalWorkerOptions.workerSrc =
-          "/src/assets/lib/pdfview/pdf.worker.js";
+        pdfjsLib.GlobalWorkerOptions.workerSrc = "/lib/pdfview/pdf.worker.js";
 
         // Asynchronous download of PDF
         var loadingTask = pdfjsLib.getDocument(this.url);

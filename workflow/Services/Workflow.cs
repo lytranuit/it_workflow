@@ -275,12 +275,12 @@ namespace it.Services
 
                 foreach (var field in activity.fields)
                 {
-                    if (!MergeFieldNames.Contains(field.variable))
+                    if (!MergeFieldNames.Contains(field.variable) && field.type != "table")
                         continue;
                     var data_setting = field.data_setting;
                     var values = field.values;
                     var text = values.value;
-                    if (field.type == "select")
+                    if (field.type == "select" || field.type == "radio")
                     {
                         var options = data_setting.options;
                         var option = options.Where(d => d.id == values.value).FirstOrDefault();
@@ -336,7 +336,7 @@ namespace it.Services
                         replacements.Add(field.variable, text);
                         //replacements_file.Add(field.variable, String.Join(",", list_file));
                     }
-                    else if (field.type == "select_multiple")
+                    else if (field.type == "select_multiple" || field.type == "checkbox")
                     {
                         var options = data_setting.options;
                         var option = options.Where(d => values.value_array.Contains(d.id)).Select(d => d.name).ToList();
@@ -386,6 +386,7 @@ namespace it.Services
                             text = "√";
                         }
                     }
+
                     else if (field.type == "table")
                     {
                         var columns = data_setting.columns;
@@ -437,7 +438,7 @@ namespace it.Services
                             //merge data in list to word table
                             document.MailMerge.ExecuteWidthNestedRegion(dsTmp, list);
                         }
-                        else
+                        else if (MergeFieldNames.Contains(field.variable))
                         {
                             text = field.id;
 
@@ -500,6 +501,7 @@ namespace it.Services
                                             value_column = "√";
                                         }
                                     }
+
                                     TextRange TR2 = p2.AppendText(value_column);
 
 
@@ -517,6 +519,32 @@ namespace it.Services
                             }
                             replacements_table.Add(text, table);
                             replacements.Add(field.variable, text);
+                        }
+                        else
+                        {
+                            for (int r = 0; r < list_data.Count; r++)
+                            {
+                                var data = list_data[r];
+
+                                foreach (var column in columns)
+                                {
+                                    string value_column = data.ContainsKey(column.id) ? data[column.id] : "";
+                                    if (column.type == "currency")
+                                    {
+                                        CultureInfo cul = CultureInfo.GetCultureInfo("vi-VN");   // try with "en-US"
+                                        value_column = double.Parse(value_column).ToString("#,###", cul.NumberFormat);
+                                    }
+                                    else if (column.type == "yesno")
+                                    {
+                                        if (value_column == "true")
+                                        {
+                                            value_column = "√";
+                                        }
+                                    }
+                                    var variable_child = $"{field.variable}_{column.variable}_{r}";
+                                    replacements.Add(variable_child, value_column);
+                                }
+                            }
                         }
 
                     }

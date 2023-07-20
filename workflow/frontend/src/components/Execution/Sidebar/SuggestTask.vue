@@ -170,15 +170,14 @@ export default {
         "?token=sdfxvbdfgertewrkvcbgyrewbnfgsdfwetyrtrgdgweqfvqqazqhjkuiyort";
 
       var pdfjsLib = window["pdfjs-dist/build/pdf"];
-      console.log(pdfjsLib);
+      // console.log(pdfjsLib);
       // The workerSrc property shall be specified.
-      pdfjsLib.GlobalWorkerOptions.workerSrc =
-        "/src/assets/lib/pdfview/pdf.worker.js";
+      pdfjsLib.GlobalWorkerOptions.workerSrc = "/lib/pdfview/pdf.worker.js";
       // Asynchronous download of PDF
       var loadingTask = pdfjsLib.getDocument(this.url);
       loadingTask.promise.then(
         async function (pdf) {
-          console.log(pdf);
+          // console.log(pdf);
           //await that.getsign();
           thePdf = pdf;
 
@@ -308,7 +307,7 @@ export default {
   },
   methods: {
     async renderPage(pageNumber, canvas) {
-      console.log(this.thePdf);
+      // console.log(this.thePdf);
       return thePdf.getPage(pageNumber).then(function (page) {
         var viewport = page.getViewport({
           scale: 1,

@@ -423,804 +423,720 @@
         >
       </div>
     </div>
-    <div
-      id="myModal"
-      class="modal"
-      tabindex="-1"
-      role="dialog"
-      data-backdrop="static"
+    <Dialog
+      v-model:visible="visible"
+      modal
+      :header="temp_add.description"
+      :style="{ width: '50vw' }"
     >
-      <div
-        class="modal-dialog"
-        role="document"
-        :class="{ 'modal-lg': temp_add.type == 'table' }"
-      >
-        <div class="modal-content">
-          <div class="modal-header">
-            <h3 class="modal-title">{{ temp_add.description }}</h3>
+      <div class="form-group row">
+        <div class="col-lg-12 mt-2">
+          <b class="col-form-label"
+            >Tên trường:<span class="text-danger">*</span></b
+          >
+          <div class="pt-1">
+            <input
+              class="form-control form-control-sm"
+              type="text"
+              name="name"
+              required=""
+              v-model="temp_add.name"
+            />
           </div>
-          <div class="modal-body">
-            <div class="form-group row">
-              <div class="col-lg-12 mt-2">
-                <b class="col-form-label"
-                  >Tên trường:<span class="text-danger">*</span></b
+        </div>
+        <div class="col-lg-12 mt-2" v-if="temp_add.type == 'currency'">
+          <b class="col-form-label"
+            >Tiền tệ:<span class="text-danger">*</span></b
+          >
+          <div class="pt-1">
+            <select
+              class="form-control form-control-sm"
+              v-model="temp_add.data_setting.currency"
+              name="currency"
+              required=""
+            >
+              <option value="VND" selected>VND</option>
+              <option value="USD">DOLLAR</option>
+              <option value="EUR">EURO</option>
+            </select>
+          </div>
+        </div>
+        <div
+          class="col-lg-12 mt-2"
+          v-if="
+            temp_add.type == 'date' ||
+            temp_add.type == 'date_time' ||
+            temp_add.type == 'date_month'
+          "
+        >
+          <b class="col-form-label">Kiểu dữ liệu:</b>
+          <div class="pt-1">
+            <select
+              class="form-control form-control-sm"
+              v-model="temp_add.type"
+            >
+              <option value="date">Ngày/Tháng/Năm</option>
+              <option value="date_month">Tháng/Năm</option>
+              <option value="date_time">Ngày/Tháng/Năm Giờ:Phút</option>
+            </select>
+          </div>
+        </div>
+        <div
+          class="col-lg-12 mt-2"
+          v-if="
+            temp_add.type == 'select' ||
+            temp_add.type == 'select_multiple' ||
+            temp_add.type == 'radio' ||
+            temp_add.type == 'checkbox' ||
+            temp_add.type == 'task'
+          "
+        >
+          <b class="col-form-label">Danh sách giá trị:</b>
+          <div class="list-group-item">
+            <draggable class="" v-model="temp_add.data_setting.options">
+              <transition-group type="transition" name="flip-list">
+                <div
+                  class="flex-m mb-2"
+                  v-for="(option, index) in temp_add.data_setting.options"
+                  :key="option.id"
                 >
-                <div class="pt-1">
+                  <div class="handle icon-move mr-2" style="cursor: move">
+                    <i class="fas fa-grip-vertical"></i>
+                  </div>
                   <input
                     class="form-control form-control-sm"
-                    type="text"
-                    name="name"
-                    required=""
-                    v-model="temp_add.name"
+                    v-model="option.name"
                   />
-                </div>
-              </div>
-              <div class="col-lg-12 mt-2" v-if="temp_add.type == 'currency'">
-                <b class="col-form-label"
-                  >Tiền tệ:<span class="text-danger">*</span></b
-                >
-                <div class="pt-1">
-                  <select
-                    class="form-control form-control-sm"
-                    v-model="temp_add.data_setting.currency"
-                    name="currency"
-                    required=""
-                  >
-                    <option value="VND" selected>VND</option>
-                    <option value="USD">DOLLAR</option>
-                    <option value="EUR">EURO</option>
-                  </select>
-                </div>
-              </div>
-              <div
-                class="col-lg-12 mt-2"
-                v-if="
-                  temp_add.type == 'date' ||
-                  temp_add.type == 'date_time' ||
-                  temp_add.type == 'date_month'
-                "
-              >
-                <b class="col-form-label">Kiểu dữ liệu:</b>
-                <div class="pt-1">
-                  <select
-                    class="form-control form-control-sm"
-                    v-model="temp_add.type"
-                  >
-                    <option value="date">Ngày/Tháng/Năm</option>
-                    <option value="date_month">Tháng/Năm</option>
-                    <option value="date_time">Ngày/Tháng/Năm Giờ:Phút</option>
-                  </select>
-                </div>
-              </div>
-              <div
-                class="col-lg-12 mt-2"
-                v-if="
-                  temp_add.type == 'select' ||
-                  temp_add.type == 'select_multiple' ||
-                  temp_add.type == 'radio' ||
-                  temp_add.type == 'checkbox' ||
-                  temp_add.type == 'task'
-                "
-              >
-                <b class="col-form-label">Danh sách giá trị:</b>
-                <div class="list-group-item">
-                  <draggable class="" v-model="temp_add.data_setting.options">
-                    <transition-group type="transition" name="flip-list">
-                      <div
-                        class="flex-m mb-2"
-                        v-for="(option, index) in temp_add.data_setting.options"
-                        :key="option.id"
-                      >
-                        <div class="handle icon-move mr-2" style="cursor: move">
-                          <i class="fas fa-grip-vertical"></i>
-                        </div>
-                        <input
-                          class="form-control form-control-sm"
-                          v-model="option.name"
-                        />
-                        <div
-                          class="ml-2 text-danger"
-                          style="cursor: pointer"
-                          v-on:click="remove_option(index)"
-                          v-if="temp_add.data_setting.options.length > 1"
-                        >
-                          <i class="fas fa-trash-alt"></i>
-                        </div>
-                      </div>
-                    </transition-group>
-                  </draggable>
-
                   <div
-                    class="btn-group"
-                    role="group"
-                    aria-label="Basic example"
+                    class="ml-2 text-danger"
+                    style="cursor: pointer"
+                    v-on:click="remove_option(index)"
+                    v-if="temp_add.data_setting.options.length > 1"
                   >
-                    <button
-                      class="btn btn-secondary btn-sm"
-                      v-on:click="add_option($event)"
-                    >
-                      <i class="fas fa-plus mr-2"></i> Thêm dòng
-                    </button>
+                    <i class="fas fa-trash-alt"></i>
                   </div>
                 </div>
-              </div>
-              <div
-                class="col-lg-12 mt-2 flex-m"
-                v-if="
-                  temp_add.type == 'select' ||
-                  temp_add.type == 'select_multiple' ||
-                  temp_add.type == 'radio' ||
-                  temp_add.type == 'checkbox'
-                "
+              </transition-group>
+            </draggable>
+
+            <div class="btn-group" role="group" aria-label="Basic example">
+              <button
+                class="btn btn-secondary btn-sm"
+                v-on:click="add_option($event)"
               >
-                <b class="col-form-label mr-3">Kiểu chọn giá trị:</b>
-                <div>
-                  <div>
-                    <div class="radio radio-primary form-check-inline">
-                      <input
-                        type="radio"
-                        id="inlineRadio1"
-                        value="select"
-                        name="radioInline"
-                        v-model="temp_add.type"
-                      />
-                      <label class="mb-0" for="inlineRadio1">
-                        Sổ chọn một
-                      </label>
-                    </div>
-                    <div class="radio radio-primary form-check-inline">
-                      <input
-                        type="radio"
-                        id="inlineRadio2"
-                        value="select_multiple"
-                        name="radioInline"
-                        v-model="temp_add.type"
-                      />
-                      <label class="mb-0" for="inlineRadio2">
-                        Sổ chọn nhiều
-                      </label>
-                    </div>
-                  </div>
-                  <div>
-                    <div class="radio radio-primary form-check-inline">
-                      <input
-                        type="radio"
-                        id="inlineRadio3"
-                        value="radio"
-                        name="radioInline"
-                        v-model="temp_add.type"
-                      />
-                      <label class="mb-0" for="inlineRadio3">
-                        Tích chọn một
-                      </label>
-                    </div>
-                    <div class="radio radio-primary form-check-inline">
-                      <input
-                        type="radio"
-                        id="inlineRadio4"
-                        value="checkbox"
-                        name="radioInline"
-                        v-model="temp_add.type"
-                      />
-                      <label class="mb-0" for="inlineRadio4">
-                        Tích chọn nhiều
-                      </label>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div
-                class="col-lg-12 mt-2"
-                v-if="
-                  temp_add.type == 'employee' ||
-                  temp_add.type == 'employee_multiple'
-                "
-              >
-                <b class="col-form-label mr-3">Kiểu chọn giá trị:</b>
-
-                <div class="radio radio-primary form-check-inline">
-                  <input
-                    type="radio"
-                    id="inlineRadio1"
-                    value="employee"
-                    name="radioInline"
-                    v-model="temp_add.type"
-                  />
-                  <label class="mb-0" for="inlineRadio1"> Chọn một </label>
-                </div>
-                <div class="radio radio-primary form-check-inline">
-                  <input
-                    type="radio"
-                    id="inlineRadio2"
-                    value="employee_multiple"
-                    name="radioInline"
-                    v-model="temp_add.type"
-                  />
-                  <label class="mb-0" for="inlineRadio2"> Chọn nhiều </label>
-                </div>
-              </div>
-
-              <div
-                class="col-lg-12 mt-2"
-                v-if="
-                  temp_add.type == 'department' ||
-                  temp_add.type == 'department_multiple'
-                "
-              >
-                <b class="col-form-label mr-3">Kiểu chọn giá trị:</b>
-
-                <div class="radio radio-primary form-check-inline">
-                  <input
-                    type="radio"
-                    id="inlineRadio1"
-                    value="department"
-                    name="radioInline"
-                    v-model="temp_add.type"
-                  />
-                  <label class="mb-0" for="inlineRadio1"> Chọn một </label>
-                </div>
-                <div class="radio radio-primary form-check-inline">
-                  <input
-                    type="radio"
-                    id="inlineRadio2"
-                    value="department_multiple"
-                    name="radioInline"
-                    v-model="temp_add.type"
-                  />
-                  <label class="mb-0" for="inlineRadio2"> Chọn nhiều </label>
-                </div>
-              </div>
-
-              <div
-                class="col-lg-12 mt-2"
-                v-if="
-                  temp_add.type == 'file' || temp_add.type == 'file_multiple'
-                "
-              >
-                <b class="col-form-label mr-3">Kiểu chọn giá trị:</b>
-
-                <div class="radio radio-primary form-check-inline">
-                  <input
-                    type="radio"
-                    id="inlineRadio1"
-                    value="file"
-                    name="radioInline"
-                    v-model="temp_add.type"
-                  />
-                  <label class="mb-0" for="inlineRadio1"> Chọn một </label>
-                </div>
-                <div class="radio radio-primary form-check-inline">
-                  <input
-                    type="radio"
-                    id="inlineRadio2"
-                    value="file_multiple"
-                    name="radioInline"
-                    v-model="temp_add.type"
-                  />
-                  <label class="mb-0" for="inlineRadio2"> Chọn nhiều </label>
-                </div>
-              </div>
-              <div class="col-lg-12 mt-2" v-if="temp_add.type == 'formular'">
-                <b class="col-form-label mr-3">Lấy thông tin từ:</b>
-                <div class="radio radio-primary form-check-inline">
-                  <input
-                    type="radio"
-                    id="inlineRadio1"
-                    value="1"
-                    name="radioInline"
-                    v-model="temp_add.data_setting.formular.type"
-                  />
-                  <label class="mb-0" for="inlineRadio1">
-                    Trường dữ liệu
-                  </label>
-                </div>
-                <div class="radio radio-primary form-check-inline">
-                  <input
-                    type="radio"
-                    id="inlineRadio2"
-                    value="2"
-                    name="radioInline"
-                    v-model="temp_add.data_setting.formular.type"
-                  />
-                  <label class="mb-0" for="inlineRadio2"> Bảng </label>
-                </div>
-                <div
-                  class="mt-2"
-                  v-if="temp_add.data_setting.formular.type == 1"
-                >
-                  <DxHtmlEditor
-                    @value-changed="
-                      change_formular($event, temp_add.data_setting)
-                    "
-                    :value="temp_add.data_setting.formular.temp2"
-                    :mentions="mentions(model.fields)"
-                    style="min-height: 100px"
-                  >
-                    <DxValidator>
-                      <DxCustomRule
-                        message="Công thức không hợp lệ, vui lòng kiểm tra lại!"
-                        :validation-callback="validateFormular"
-                      />
-                    </DxValidator>
-                  </DxHtmlEditor>
-                  <div class="description-formular">
-                    <div>
-                      Gõ <b class="text-secondary">#</b> để chọn trường thông
-                      tin.
-                    </div>
-                    <div>
-                      Các phép toán có thể thực hiện: Cộng (+), Trừ (-), Nhân
-                      (*), Chia (/), Đóng mở ngoặc ().
-                    </div>
-                  </div>
-                </div>
-                <div
-                  class="row mt-2"
-                  v-if="temp_add.data_setting.formular.type == 2"
-                >
-                  <div class="col-6">
-                    <b class="col-form-label"
-                      >Toán tử<span class="text-danger">*</span></b
-                    >
-                    <select
-                      class="form-control form-control-sm"
-                      v-model="temp_add.data_setting.formular.operator_type"
-                    >
-                      <option value="sum">Tính tổng</option>
-                      <option value="avg">Tính trung bình</option>
-                      <option value="min">Tính Min</option>
-                      <option value="max">Tính Max</option>
-                    </select>
-                  </div>
-                  <div class="col-6">
-                    <b class="col-form-label"
-                      >Cột dữ liệu:<span class="text-danger">*</span></b
-                    >
-                    <select
-                      class="form-control form-control-sm"
-                      v-model="temp_add.data_setting.formular.operator_column"
-                    >
-                      <option
-                        v-for="(column, index) in table_column(model.fields)"
-                        :value="column.id"
-                      >
-                        {{ column.text }}
-                      </option>
-                    </select>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="col-6">
-                    <b class="col-form-label"
-                      >Kiểu dữ liệu trả về:<span class="text-danger">*</span></b
-                    >
-                    <select
-                      class="form-control form-control-sm"
-                      v-model="temp_add.data_setting.formular.type_return"
-                    >
-                      <option value="decimal">Số thập phân</option>
-                      <option value="percent">Số phần trăm</option>
-                      <option value="currency">Tiền tệ</option>
-                    </select>
-                  </div>
-                  <div class="col-6">
-                    <b class="col-form-label"
-                      >Số chữ số phần thập phân:<span class="text-danger"
-                        >*</span
-                      ></b
-                    >
-                    <input
-                      class="form-control form-control-sm"
-                      type="number"
-                      v-model="temp_add.data_setting.formular.decimal_number"
-                    />
-                  </div>
-                </div>
-              </div>
-              <div class="col-lg-12 mt-2" v-if="temp_add.type == 'table'">
-                <div class="col-form-label mr-3">Thiết lập cột:</div>
-                <div class="list-group-item">
-                  <div class="flex-m mb-2">
-                    <div style="margin-left: 25px; width: 300px">Tên cột</div>
-                    <div style="margin-left: 25px; width: 300px">
-                      Kiểu dữ liệu
-                    </div>
-                    <div style="margin-left: 25px">Bắt buộc</div>
-                  </div>
-                  <draggable class="" v-model="temp_add.data_setting.columns">
-                    <transition-group type="transition" name="flip-list">
-                      <div
-                        class="flex-m mb-2"
-                        v-for="(column, index) in temp_add.data_setting.columns"
-                        :key="column.id"
-                      >
-                        <div class="handle icon-move mr-2" style="cursor: move">
-                          <i class="fas fa-grip-vertical"></i>
-                        </div>
-
-                        <input
-                          class="form-control form-control-sm mr-2"
-                          v-model="column.name"
-                        />
-                        <div class="mr-5 flex-m" style="width: 700px">
-                          <select
-                            class="form-control form-control-sm mr-1"
-                            v-model="column.type"
-                            @change="change_column_type(column)"
-                          >
-                            <option value="stt">STT tăng dần</option>
-                            <option value="text">Một dòng</option>
-                            <option value="textarea">Nhiều dòng</option>
-                            <option value="number">Số</option>
-                            <option value="currency">Tiền tệ</option>
-                            <option value="email">Email</option>
-                            <option value="yesno">Yes/no</option>
-                            <option value="formular">Công thức</option>
-                          </select>
-                          <select
-                            class="form-control form-control-sm"
-                            v-if="column.type == 'currency'"
-                            v-model="column.currency"
-                            required
-                          >
-                            <option value="VND" selected>VND</option>
-                            <option value="USD">DOLLAR</option>
-                            <option value="EUR">EURO</option>
-                          </select>
-                          <div class="keepopen dropdown">
-                            <a
-                              class="btn btn-sm btn-setting dropdown-toggle"
-                              data-toggle="dropdown"
-                              :id="'dropdown_' + index"
-                              aria-haspopup="true"
-                              aria-expanded="false"
-                            >
-                              <i class="fas fa-cog"></i>
-                            </a>
-                            <div
-                              class="dropdown-menu"
-                              style="width: 500px; z-index: 1051"
-                              :aria-labelledby="'dropdown_' + index"
-                              role="menu"
-                            >
-                              <div class="p-3">
-                                <b class="col-form-label"
-                                  >Tên biến:<span class="text-danger"
-                                    >*</span
-                                  ></b
-                                >
-                                <div class="pt-1">
-                                  <input
-                                    class="form-control form-control-sm"
-                                    type="text"
-                                    v-model="column.variable"
-                                  />
-                                </div>
-                                <div v-if="column.type == 'formular'">
-                                  <b class="col-form-label"
-                                    >Thiết lập công thức:<span
-                                      class="text-danger"
-                                      >*</span
-                                    ></b
-                                  >
-                                  <DxHtmlEditor
-                                    @value-changed="
-                                      change_formular($event, column)
-                                    "
-                                    :value="column.formular.temp2"
-                                    :mentions="
-                                      mentions_table(
-                                        temp_add.data_setting.columns
-                                      )
-                                    "
-                                    style="min-height: 100px"
-                                  >
-                                    <DxValidator>
-                                      <DxCustomRule
-                                        message="Công thức không hợp lệ, vui lòng kiểm tra lại!"
-                                        :validation-callback="validateFormular"
-                                      />
-                                    </DxValidator>
-                                  </DxHtmlEditor>
-                                  <div class="description-formular">
-                                    <div>
-                                      Gõ <b class="text-secondary">#</b> để chọn
-                                      trường thông tin.
-                                    </div>
-                                    <div>
-                                      Các phép toán có thể thực hiện: Cộng (+),
-                                      Trừ (-), Nhân (*), Chia (/), Đóng mở ngoặc
-                                      ().
-                                    </div>
-                                  </div>
-                                  <div class="row">
-                                    <div class="col-6">
-                                      <b class="col-form-label"
-                                        >Kiểu dữ liệu trả về:<span
-                                          class="text-danger"
-                                          >*</span
-                                        ></b
-                                      >
-                                      <select
-                                        class="form-control form-control-sm"
-                                        v-model="column.formular.type_return"
-                                      >
-                                        <option value="decimal">
-                                          Số thập phân
-                                        </option>
-                                        <option value="percent">
-                                          Số phần trăm
-                                        </option>
-                                        <option value="currency">
-                                          Tiền tệ
-                                        </option>
-                                      </select>
-                                    </div>
-                                    <div class="col-6">
-                                      <b class="col-form-label"
-                                        >Số chữ số phần thập phân:<span
-                                          class="text-danger"
-                                          >*</span
-                                        ></b
-                                      >
-                                      <input
-                                        class="form-control form-control-sm"
-                                        type="number"
-                                        v-model="column.formular.decimal_number"
-                                      />
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div
-                          class="custom-control custom-switch switch-primary mr-2"
-                        >
-                          <input
-                            type="checkbox"
-                            class="custom-control-input"
-                            :id="column.id"
-                            v-model="column.is_require"
-                          />
-                          <label
-                            class="custom-control-label"
-                            :for="column.id"
-                          ></label>
-                        </div>
-                        <div
-                          class="text-danger"
-                          style="cursor: pointer"
-                          v-on:click="remove_column(index)"
-                          v-if="temp_add.data_setting.columns.length > 1"
-                        >
-                          <i class="fas fa-trash-alt"></i>
-                        </div>
-                      </div>
-                    </transition-group>
-                  </draggable>
-
-                  <div class="btn-group" role="group">
-                    <button
-                      class="btn btn-secondary btn-sm"
-                      v-on:click="add_column($event)"
-                    >
-                      <i class="fas fa-plus mr-2"></i> Thêm cột
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <div class="col-lg-12 mt-2">
-                <b class="col-form-label">Hướng dẫn nhập:</b>
-                <div class="pt-1">
-                  <textarea
-                    class="form-control form-control-sm"
-                    type="text"
-                    name="guide"
-                    v-model="temp_add.guide"
-                    placeholder="Nhập nội dung hướng dẫn"
-                  ></textarea>
-                </div>
-              </div>
-              <template
-                v-if="
-                  temp_add.type != 'table' &&
-                  temp_add.type != 'task' &&
-                  temp_add.type != 'yesno' &&
-                  temp_add.type != 'formular'
-                "
-              >
-                <div class="col-lg-12 mt-2">
-                  <div class="checkbox checkbox-primary">
-                    <input
-                      id="checkbox2"
-                      type="checkbox"
-                      v-model="temp_add.is_require"
-                    />
-                    <label for="checkbox2"> Trường bắt buộc </label>
-                  </div>
-                </div>
-                <div
-                  class="col-lg-12 mt-2"
-                  v-if="
-                    temp_add.type != 'date' &&
-                    temp_add.type != 'date_time' &&
-                    temp_add.type != 'date_month' &&
-                    temp_add.type != 'file' &&
-                    temp_add.type != 'file_multiple'
-                  "
-                >
-                  <div class="checkbox checkbox-primary">
-                    <input
-                      id="checkbox3"
-                      type="checkbox"
-                      v-model="temp_add.has_default"
-                    />
-                    <label for="checkbox3"> Giá trị mặc định </label>
-                  </div>
-                </div>
-              </template>
-              <div class="col-lg-12 mt-2" v-if="temp_add.type == 'task'">
-                <div class="checkbox checkbox-primary">
-                  <input
-                    id="checkbox3"
-                    type="checkbox"
-                    v-model="temp_add.is_require"
-                  />
-                  <label for="checkbox3">
-                    Bắc buộc hoàn thành toàn bộ công việc
-                  </label>
-                </div>
-              </div>
-              <div
-                class="col-lg-12 mt-2"
-                v-if="temp_add.type == 'text' && temp_add.has_default"
-              >
+                <i class="fas fa-plus mr-2"></i> Thêm dòng
+              </button>
+            </div>
+          </div>
+        </div>
+        <div
+          class="col-lg-12 mt-2 flex-m"
+          v-if="
+            temp_add.type == 'select' ||
+            temp_add.type == 'select_multiple' ||
+            temp_add.type == 'radio' ||
+            temp_add.type == 'checkbox'
+          "
+        >
+          <b class="col-form-label mr-3">Kiểu chọn giá trị:</b>
+          <div>
+            <div>
+              <div class="radio radio-primary form-check-inline">
                 <input
-                  class="form-control form-control-sm"
-                  type="text"
-                  v-model="temp_add.data_setting.default_value"
-                  placeholder="Mặc định"
+                  type="radio"
+                  id="inlineRadio1"
+                  value="select"
+                  name="radioInline"
+                  v-model="temp_add.type"
                 />
+                <label class="mb-0" for="inlineRadio1"> Sổ chọn một </label>
               </div>
-              <div
-                class="col-lg-12 mt-2"
-                v-if="temp_add.type == 'number' && temp_add.has_default"
-              >
+              <div class="radio radio-primary form-check-inline">
                 <input
-                  class="form-control form-control-sm"
-                  type="number"
-                  v-model="temp_add.data_setting.default_value"
-                  placeholder="Mặc định"
+                  type="radio"
+                  id="inlineRadio2"
+                  value="select_multiple"
+                  name="radioInline"
+                  v-model="temp_add.type"
                 />
+                <label class="mb-0" for="inlineRadio2"> Sổ chọn nhiều </label>
               </div>
-
-              <div
-                class="col-lg-12 mt-2"
-                v-if="temp_add.type == 'currency' && temp_add.has_default"
-              >
+            </div>
+            <div>
+              <div class="radio radio-primary form-check-inline">
                 <input
-                  class="form-control form-control-sm"
-                  type="number"
-                  v-model="temp_add.data_setting.default_value"
-                  placeholder="Mặc định"
+                  type="radio"
+                  id="inlineRadio3"
+                  value="radio"
+                  name="radioInline"
+                  v-model="temp_add.type"
                 />
+                <label class="mb-0" for="inlineRadio3"> Tích chọn một </label>
               </div>
-              <div
-                class="col-lg-12 mt-2"
-                v-if="temp_add.type == 'email' && temp_add.has_default"
-              >
+              <div class="radio radio-primary form-check-inline">
                 <input
-                  class="form-control form-control-sm"
-                  type="email"
-                  v-model="temp_add.data_setting.default_value"
-                  placeholder="Mặc định"
+                  type="radio"
+                  id="inlineRadio4"
+                  value="checkbox"
+                  name="radioInline"
+                  v-model="temp_add.type"
                 />
-              </div>
-              <div
-                class="col-lg-12 mt-2"
-                v-if="temp_add.type == 'textarea' && temp_add.has_default"
-              >
-                <textarea
-                  class="form-control form-control-sm"
-                  type="text"
-                  v-model="temp_add.data_setting.default_value"
-                  placeholder="Mặc định"
-                ></textarea>
-              </div>
-              <div
-                class="col-lg-12 mt-2"
-                v-if="temp_add.type == 'select' && temp_add.has_default"
-              >
-                <TreeSelect
-                  v-model="temp_add.data_setting.default_value"
-                  :options="get_options(temp_add.data_setting.options)"
-                >
-                </TreeSelect>
-              </div>
-              <div
-                class="col-lg-12 mt-2"
-                v-if="
-                  temp_add.type == 'select_multiple' && temp_add.has_default
-                "
-              >
-                <TreeSelect
-                  v-model="temp_add.data_setting.default_value_array"
-                  :options="get_options(temp_add.data_setting.options)"
-                  multiple
-                >
-                </TreeSelect>
-              </div>
-              <div
-                class="col-lg-12 mt-2"
-                v-if="temp_add.type == 'employee' && temp_add.has_default"
-              >
-                <TreeSelect
-                  v-model="temp_add.data_setting.default_value"
-                  :options="users"
-                >
-                </TreeSelect>
-              </div>
-
-              <div
-                class="col-lg-12 mt-2"
-                v-if="
-                  temp_add.type == 'employee_multiple' && temp_add.has_default
-                "
-              >
-                <TreeSelect
-                  v-model="temp_add.data_setting.default_value_array"
-                  :options="users"
-                  multiple
-                >
-                </TreeSelect>
-              </div>
-
-              <div
-                class="col-lg-12 mt-2"
-                v-if="temp_add.type == 'department' && temp_add.has_default"
-              >
-                <TreeSelect
-                  v-model="temp_add.data_setting.default_value"
-                  :options="departments"
-                >
-                </TreeSelect>
-              </div>
-              <div
-                class="col-lg-12 mt-2"
-                v-if="
-                  temp_add.type == 'department_multiple' && temp_add.has_default
-                "
-              >
-                <TreeSelect
-                  v-model="temp_add.data_setting.default_value_array"
-                  :options="departments"
-                  multiple
-                >
-                </TreeSelect>
+                <label class="mb-0" for="inlineRadio4"> Tích chọn nhiều </label>
               </div>
             </div>
           </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-primary"
-              v-on:click="save_field($event)"
+        </div>
+        <div
+          class="col-lg-12 mt-2"
+          v-if="
+            temp_add.type == 'employee' || temp_add.type == 'employee_multiple'
+          "
+        >
+          <b class="col-form-label mr-3">Kiểu chọn giá trị:</b>
+
+          <div class="radio radio-primary form-check-inline">
+            <input
+              type="radio"
+              id="inlineRadio1"
+              value="employee"
+              name="radioInline"
+              v-model="temp_add.type"
+            />
+            <label class="mb-0" for="inlineRadio1"> Chọn một </label>
+          </div>
+          <div class="radio radio-primary form-check-inline">
+            <input
+              type="radio"
+              id="inlineRadio2"
+              value="employee_multiple"
+              name="radioInline"
+              v-model="temp_add.type"
+            />
+            <label class="mb-0" for="inlineRadio2"> Chọn nhiều </label>
+          </div>
+        </div>
+
+        <div
+          class="col-lg-12 mt-2"
+          v-if="
+            temp_add.type == 'department' ||
+            temp_add.type == 'department_multiple'
+          "
+        >
+          <b class="col-form-label mr-3">Kiểu chọn giá trị:</b>
+
+          <div class="radio radio-primary form-check-inline">
+            <input
+              type="radio"
+              id="inlineRadio1"
+              value="department"
+              name="radioInline"
+              v-model="temp_add.type"
+            />
+            <label class="mb-0" for="inlineRadio1"> Chọn một </label>
+          </div>
+          <div class="radio radio-primary form-check-inline">
+            <input
+              type="radio"
+              id="inlineRadio2"
+              value="department_multiple"
+              name="radioInline"
+              v-model="temp_add.type"
+            />
+            <label class="mb-0" for="inlineRadio2"> Chọn nhiều </label>
+          </div>
+        </div>
+
+        <div
+          class="col-lg-12 mt-2"
+          v-if="temp_add.type == 'file' || temp_add.type == 'file_multiple'"
+        >
+          <b class="col-form-label mr-3">Kiểu chọn giá trị:</b>
+
+          <div class="radio radio-primary form-check-inline">
+            <input
+              type="radio"
+              id="inlineRadio1"
+              value="file"
+              name="radioInline"
+              v-model="temp_add.type"
+            />
+            <label class="mb-0" for="inlineRadio1"> Chọn một </label>
+          </div>
+          <div class="radio radio-primary form-check-inline">
+            <input
+              type="radio"
+              id="inlineRadio2"
+              value="file_multiple"
+              name="radioInline"
+              v-model="temp_add.type"
+            />
+            <label class="mb-0" for="inlineRadio2"> Chọn nhiều </label>
+          </div>
+        </div>
+        <div class="col-lg-12 mt-2" v-if="temp_add.type == 'formular'">
+          <b class="col-form-label mr-3">Lấy thông tin từ:</b>
+          <div class="radio radio-primary form-check-inline">
+            <input
+              type="radio"
+              id="inlineRadio1"
+              value="1"
+              name="radioInline"
+              v-model="temp_add.data_setting.formular.type"
+            />
+            <label class="mb-0" for="inlineRadio1"> Trường dữ liệu </label>
+          </div>
+          <div class="radio radio-primary form-check-inline">
+            <input
+              type="radio"
+              id="inlineRadio2"
+              value="2"
+              name="radioInline"
+              v-model="temp_add.data_setting.formular.type"
+            />
+            <label class="mb-0" for="inlineRadio2"> Bảng </label>
+          </div>
+          <div class="mt-2" v-if="temp_add.data_setting.formular.type == 1">
+            <DxHtmlEditor
+              @value-changed="change_formular($event, temp_add.data_setting)"
+              :value="temp_add.data_setting.formular.temp2"
+              :mentions="mentions(model.fields)"
+              style="min-height: 100px"
             >
-              Lưu lại
-            </button>
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-dismiss="modal"
-            >
-              Hủy bỏ
-            </button>
+              <DxValidator>
+                <DxCustomRule
+                  message="Công thức không hợp lệ, vui lòng kiểm tra lại!"
+                  :validation-callback="validateFormular"
+                />
+              </DxValidator>
+            </DxHtmlEditor>
+            <div class="description-formular">
+              <div>
+                Gõ <b class="text-secondary">#</b> để chọn trường thông tin.
+              </div>
+              <div>
+                Các phép toán có thể thực hiện: Cộng (+), Trừ (-), Nhân (*),
+                Chia (/), Đóng mở ngoặc ().
+              </div>
+            </div>
+          </div>
+          <div class="row mt-2" v-if="temp_add.data_setting.formular.type == 2">
+            <div class="col-6">
+              <b class="col-form-label"
+                >Toán tử<span class="text-danger">*</span></b
+              >
+              <select
+                class="form-control form-control-sm"
+                v-model="temp_add.data_setting.formular.operator_type"
+              >
+                <option value="sum">Tính tổng</option>
+                <option value="avg">Tính trung bình</option>
+                <option value="min">Tính Min</option>
+                <option value="max">Tính Max</option>
+              </select>
+            </div>
+            <div class="col-6">
+              <b class="col-form-label"
+                >Cột dữ liệu:<span class="text-danger">*</span></b
+              >
+              <select
+                class="form-control form-control-sm"
+                v-model="temp_add.data_setting.formular.operator_column"
+              >
+                <option
+                  v-for="(column, index) in table_column(model.fields)"
+                  :value="column.id"
+                >
+                  {{ column.text }}
+                </option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-6">
+              <b class="col-form-label"
+                >Kiểu dữ liệu trả về:<span class="text-danger">*</span></b
+              >
+              <select
+                class="form-control form-control-sm"
+                v-model="temp_add.data_setting.formular.type_return"
+              >
+                <option value="decimal">Số thập phân</option>
+                <option value="percent">Số phần trăm</option>
+                <option value="currency">Tiền tệ</option>
+              </select>
+            </div>
+            <div class="col-6">
+              <b class="col-form-label"
+                >Số chữ số phần thập phân:<span class="text-danger">*</span></b
+              >
+              <input
+                class="form-control form-control-sm"
+                type="number"
+                v-model="temp_add.data_setting.formular.decimal_number"
+              />
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-12 mt-2" v-if="temp_add.type == 'table'">
+          <div class="col-form-label mr-3">Thiết lập cột:</div>
+          <div class="list-group-item">
+            <div class="flex-m mb-2">
+              <div style="margin-left: 25px; width: 300px">Tên cột</div>
+              <div style="margin-left: 25px; width: 300px">Kiểu dữ liệu</div>
+              <div style="margin-left: 25px">Bắt buộc</div>
+            </div>
+            <draggable class="" v-model="temp_add.data_setting.columns">
+              <transition-group type="transition" name="flip-list">
+                <div
+                  class="flex-m mb-2"
+                  v-for="(column, index) in temp_add.data_setting.columns"
+                  :key="column.id"
+                >
+                  <div class="handle icon-move mr-2" style="cursor: move">
+                    <i class="fas fa-grip-vertical"></i>
+                  </div>
+
+                  <input
+                    class="form-control form-control-sm mr-2"
+                    v-model="column.name"
+                  />
+                  <div class="mr-5 flex-m" style="width: 700px">
+                    <select
+                      class="form-control form-control-sm mr-1"
+                      v-model="column.type"
+                      @change="change_column_type(column)"
+                    >
+                      <option value="stt">STT tăng dần</option>
+                      <option value="text">Một dòng</option>
+                      <option value="textarea">Nhiều dòng</option>
+                      <option value="number">Số</option>
+                      <option value="currency">Tiền tệ</option>
+                      <option value="email">Email</option>
+                      <option value="yesno">Yes/no</option>
+                      <option value="formular">Công thức</option>
+                    </select>
+                    <select
+                      class="form-control form-control-sm"
+                      v-if="column.type == 'currency'"
+                      v-model="column.currency"
+                      required
+                    >
+                      <option value="VND" selected>VND</option>
+                      <option value="USD">DOLLAR</option>
+                      <option value="EUR">EURO</option>
+                    </select>
+                    <div>
+                      <a
+                        class="btn btn-sm btn-setting"
+                        @click="toggle($event, column)"
+                      >
+                        <i class="fas fa-cog"></i>
+                      </a>
+                    </div>
+                  </div>
+                  <div class="custom-control custom-switch switch-primary mr-2">
+                    <input
+                      type="checkbox"
+                      class="custom-control-input"
+                      :id="column.id"
+                      v-model="column.is_require"
+                    />
+                    <label
+                      class="custom-control-label"
+                      :for="column.id"
+                    ></label>
+                  </div>
+                  <div
+                    class="text-danger"
+                    style="cursor: pointer"
+                    v-on:click="remove_column(index)"
+                    v-if="temp_add.data_setting.columns.length > 1"
+                  >
+                    <i class="fas fa-trash-alt"></i>
+                  </div>
+                </div>
+              </transition-group>
+            </draggable>
+
+            <div class="btn-group" role="group">
+              <button
+                class="btn btn-secondary btn-sm"
+                v-on:click="add_column($event)"
+              >
+                <i class="fas fa-plus mr-2"></i> Thêm cột
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-12 mt-2">
+          <b class="col-form-label">Hướng dẫn nhập:</b>
+          <div class="pt-1">
+            <textarea
+              class="form-control form-control-sm"
+              type="text"
+              name="guide"
+              v-model="temp_add.guide"
+              placeholder="Nhập nội dung hướng dẫn"
+            ></textarea>
+          </div>
+        </div>
+        <template
+          v-if="
+            temp_add.type != 'table' &&
+            temp_add.type != 'task' &&
+            temp_add.type != 'yesno' &&
+            temp_add.type != 'formular'
+          "
+        >
+          <div class="col-lg-12 mt-2">
+            <div class="checkbox checkbox-primary">
+              <input
+                id="checkbox2"
+                type="checkbox"
+                v-model="temp_add.is_require"
+              />
+              <label for="checkbox2"> Trường bắt buộc </label>
+            </div>
+          </div>
+          <div
+            class="col-lg-12 mt-2"
+            v-if="
+              temp_add.type != 'date' &&
+              temp_add.type != 'date_time' &&
+              temp_add.type != 'date_month' &&
+              temp_add.type != 'file' &&
+              temp_add.type != 'file_multiple'
+            "
+          >
+            <div class="checkbox checkbox-primary">
+              <input
+                id="checkbox3"
+                type="checkbox"
+                v-model="temp_add.has_default"
+              />
+              <label for="checkbox3"> Giá trị mặc định </label>
+            </div>
+          </div>
+        </template>
+        <div class="col-lg-12 mt-2" v-if="temp_add.type == 'task'">
+          <div class="checkbox checkbox-primary">
+            <input
+              id="checkbox3"
+              type="checkbox"
+              v-model="temp_add.is_require"
+            />
+            <label for="checkbox3">
+              Bắc buộc hoàn thành toàn bộ công việc
+            </label>
+          </div>
+        </div>
+        <div
+          class="col-lg-12 mt-2"
+          v-if="temp_add.type == 'text' && temp_add.has_default"
+        >
+          <input
+            class="form-control form-control-sm"
+            type="text"
+            v-model="temp_add.data_setting.default_value"
+            placeholder="Mặc định"
+          />
+        </div>
+        <div
+          class="col-lg-12 mt-2"
+          v-if="temp_add.type == 'number' && temp_add.has_default"
+        >
+          <input
+            class="form-control form-control-sm"
+            type="number"
+            v-model="temp_add.data_setting.default_value"
+            placeholder="Mặc định"
+          />
+        </div>
+
+        <div
+          class="col-lg-12 mt-2"
+          v-if="temp_add.type == 'currency' && temp_add.has_default"
+        >
+          <input
+            class="form-control form-control-sm"
+            type="number"
+            v-model="temp_add.data_setting.default_value"
+            placeholder="Mặc định"
+          />
+        </div>
+        <div
+          class="col-lg-12 mt-2"
+          v-if="temp_add.type == 'email' && temp_add.has_default"
+        >
+          <input
+            class="form-control form-control-sm"
+            type="email"
+            v-model="temp_add.data_setting.default_value"
+            placeholder="Mặc định"
+          />
+        </div>
+        <div
+          class="col-lg-12 mt-2"
+          v-if="temp_add.type == 'textarea' && temp_add.has_default"
+        >
+          <textarea
+            class="form-control form-control-sm"
+            type="text"
+            v-model="temp_add.data_setting.default_value"
+            placeholder="Mặc định"
+          ></textarea>
+        </div>
+        <div
+          class="col-lg-12 mt-2"
+          v-if="temp_add.type == 'select' && temp_add.has_default"
+        >
+          <TreeSelect
+            v-model="temp_add.data_setting.default_value"
+            :options="get_options(temp_add.data_setting.options)"
+          >
+          </TreeSelect>
+        </div>
+        <div
+          class="col-lg-12 mt-2"
+          v-if="temp_add.type == 'select_multiple' && temp_add.has_default"
+        >
+          <TreeSelect
+            v-model="temp_add.data_setting.default_value_array"
+            :options="get_options(temp_add.data_setting.options)"
+            multiple
+          >
+          </TreeSelect>
+        </div>
+        <div
+          class="col-lg-12 mt-2"
+          v-if="temp_add.type == 'employee' && temp_add.has_default"
+        >
+          <TreeSelect
+            v-model="temp_add.data_setting.default_value"
+            :options="users"
+          >
+          </TreeSelect>
+        </div>
+
+        <div
+          class="col-lg-12 mt-2"
+          v-if="temp_add.type == 'employee_multiple' && temp_add.has_default"
+        >
+          <TreeSelect
+            v-model="temp_add.data_setting.default_value_array"
+            :options="users"
+            multiple
+          >
+          </TreeSelect>
+        </div>
+
+        <div
+          class="col-lg-12 mt-2"
+          v-if="temp_add.type == 'department' && temp_add.has_default"
+        >
+          <TreeSelect
+            v-model="temp_add.data_setting.default_value"
+            :options="departments"
+          >
+          </TreeSelect>
+        </div>
+        <div
+          class="col-lg-12 mt-2"
+          v-if="temp_add.type == 'department_multiple' && temp_add.has_default"
+        >
+          <TreeSelect
+            v-model="temp_add.data_setting.default_value_array"
+            :options="departments"
+            multiple
+          >
+          </TreeSelect>
+        </div>
+      </div>
+      <template #footer>
+        <button
+          type="button"
+          class="btn btn-primary"
+          @click="save_field($event)"
+        >
+          Lưu lại
+        </button>
+        <button
+          type="button"
+          class="btn btn-secondary"
+          @click="visible = false"
+        >
+          Hủy bỏ
+        </button>
+      </template>
+    </Dialog>
+    <OverlayPanel ref="op" :dismissable="false" showCloseIcon>
+      <div class="p-3">
+        <b class="col-form-label"
+          >Tên biến:<span class="text-danger">*</span></b
+        >
+        <div class="pt-1">
+          <input
+            class="form-control form-control-sm"
+            type="text"
+            v-model="column_temp.variable"
+          />
+        </div>
+        <div v-if="column_temp.type == 'formular'">
+          <b class="col-form-label"
+            >Thiết lập công thức:<span class="text-danger">*</span></b
+          >
+          <DxHtmlEditor
+            @value-changed="change_formular($event, column_temp)"
+            :value="column_temp.formular.temp2"
+            :mentions="mentions_table(temp_add.data_setting.columns)"
+            style="min-height: 100px"
+          >
+            <DxValidator>
+              <DxCustomRule
+                message="Công thức không hợp lệ, vui lòng kiểm tra lại!"
+                :validation-callback="validateFormular"
+              />
+              <DxMention></DxMention>
+            </DxValidator>
+          </DxHtmlEditor>
+          <div class="description-formular">
+            <div>
+              Gõ <b class="text-secondary">#</b> để chọn trường thông tin.
+            </div>
+            <div>
+              Các phép toán có thể thực hiện: Cộng (+), Trừ (-), Nhân (*), Chia
+              (/), Đóng mở ngoặc ().
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-6">
+              <b class="col-form-label"
+                >Kiểu dữ liệu trả về:<span class="text-danger">*</span></b
+              >
+              <select
+                class="form-control form-control-sm"
+                v-model="column_temp.formular.type_return"
+              >
+                <option value="decimal">Số thập phân</option>
+                <option value="percent">Số phần trăm</option>
+                <option value="currency">Tiền tệ</option>
+              </select>
+            </div>
+            <div class="col-6">
+              <b class="col-form-label"
+                >Số chữ số phần thập phân:<span class="text-danger">*</span></b
+              >
+              <input
+                class="form-control form-control-sm"
+                type="number"
+                v-model="column_temp.formular.decimal_number"
+              />
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </OverlayPanel>
   </div>
 </template>
 <script>
@@ -1231,7 +1147,10 @@ import {
   DxToolbar,
   DxItem,
   DxVariables,
+  DxMention,
 } from "devextreme-vue/html-editor";
+import OverlayPanel from "primevue/overlaypanel";
+import Dialog from "primevue/dialog";
 import { DxValidator, DxCustomRule } from "devextreme-vue/validator";
 import { rand } from "../../../../utilities/rand";
 import { VueDraggableNext } from "vue-draggable-next";
@@ -1246,6 +1165,9 @@ export default {
     DxValidator,
     DxCustomRule,
     draggable: VueDraggableNext,
+    OverlayPanel,
+    Dialog,
+    DxMention,
   },
   props: {
     model: {
@@ -1342,10 +1264,16 @@ export default {
       temp_add: {},
       drag: false,
       formular: "",
+      column_temp: {},
+      visible: false,
     };
   },
   mounted() {},
   methods: {
+    toggle(e, column) {
+      this.column_temp = column;
+      this.$refs["op"].toggle(e);
+    },
     validateFormular(e) {
       var value = e.value;
       var $content = $("<div>" + value + "</div>");
@@ -1363,10 +1291,10 @@ export default {
     change_formular(e, column) {
       var value = e.value;
       column.formular.temp = value;
-      //console.log(e, column);
+      console.log(e, column);
     },
     table_column(fields) {
-      console.log(fields);
+      // console.log(fields);
       var data = [];
       var fields = fields.filter(function (item) {
         return item.type == "table";
@@ -1403,6 +1331,7 @@ export default {
           id: field.id,
         });
       }
+      console.log(data);
       return [
         {
           dataSource: data,
@@ -1424,6 +1353,7 @@ export default {
           id: column.id,
         });
       }
+      console.log(data);
       return [
         {
           dataSource: data,
@@ -1480,11 +1410,14 @@ export default {
         }
       }
       this.temp_add = $.extendext(true, "replace", {}, item);
-      $("#myModal").modal("show");
+      // $("#myModal").modal("show");
+      this.visible = true;
     },
     copy(item) {
       this.temp_add = $.extendext(true, "replace", {}, item, { id: rand() });
-      $("#myModal").modal("show");
+      // $("#myModal").modal("show");
+
+      this.visible = true;
     },
     add_field(type, description) {
       var default1 = {
@@ -1550,7 +1483,8 @@ export default {
       }
       var new_item = $.extendext(true, "replace", default1, temp);
       this.temp_add = new_item;
-      $("#myModal").modal("show");
+      // $("#myModal").modal("show");
+      this.visible = true;
     },
     remove_field(id) {
       var index = this.model.fields.findIndex(function (temp) {
@@ -1620,7 +1554,9 @@ export default {
       this.temp_add.data_setting.columns.splice(index, 1);
     },
     save_field(evt) {
-      $("#myModal").modal("hide");
+      // $("#myModal").modal("hide");
+
+      this.visible = false;
       if (this.temp_add.data_setting.columns) {
         for (var column of this.temp_add.data_setting.columns) {
           if (column.type == "formular" && column.formular.temp) {

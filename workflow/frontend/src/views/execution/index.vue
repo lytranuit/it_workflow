@@ -1,15 +1,6 @@
 <template>
   <div class="row clearfix">
     <div class="col-12">
-      <h5 class="card-header drag-handle">
-        <RouterLink to="/process/add">
-          <Button
-            label="Tạo mới"
-            icon="pi pi-plus"
-            class="p-button-success p-button-sm mr-2"
-          ></Button>
-        </RouterLink>
-      </h5>
       <section class="card card-fluid">
         <div class="card-body" style="overflow: auto; position: relative">
           <DataTable
@@ -57,35 +48,43 @@
             >
               <template #body="slotProps">
                 <template v-if="col.data == 'id'">
-                  <RouterLink :to="'/process/edit/' + slotProps.data[col.data]">
+                  <RouterLink
+                    :to="
+                      '/execution/details/' +
+                      slotProps.data['process_version_id'] +
+                      '?execution_id=' +
+                      slotProps.data['id']
+                    "
+                  >
                     <i class="fas fa-pencil-alt mr-2"></i>
                     {{ slotProps.data[col.data] }}
                   </RouterLink>
                 </template>
-                <template v-else-if="col.data == 'group'">
+                <template v-else-if="col.data == 'status_id'">
                   <Button
-                    :label="slotProps.data[col.data].name"
-                    class="p-button-sm mr-2"
-                    :style="
-                      'background-color: ' +
-                      slotProps.data[col.data].color +
-                      ';border-color: ' +
-                      slotProps.data[col.data].color +
-                      ';'
+                    :label="slotProps.data['status']"
+                    :class="
+                      'p-button-sm status status_' + slotProps.data['status_id']
                     "
                   ></Button>
                 </template>
-                <template v-else-if="col.data == 'status_id'">
-                  <Button
-                    label="Draft"
-                    class="p-button-secondary p-button-sm mr-2"
-                    v-if="slotProps.data[col.data] == 1"
-                  ></Button>
-                  <Button
-                    label="Release"
-                    class="p-button-primary p-button-sm mr-2"
-                    v-else-if="slotProps.data[col.data] == 2"
-                  ></Button>
+                <template v-else-if="col.data == 'activities'">
+                  <div
+                    style="position: relative; margin: 0 auto"
+                    :id="'conta_' + slotProps.data[col.data]"
+                  >
+                    <span
+                      v-for="activity of slotProps.data.activities"
+                      v-tooltip.top="activity.label"
+                      :class="{
+                        e_activity: true,
+                        e_activity_success:
+                          !activity.blocking && !activity.failed,
+                        e_activity_blocking: activity.blocking,
+                        e_activity_fail: activity.failed,
+                      }"
+                    ></span>
+                  </div>
                 </template>
                 <div v-else v-html="slotProps.data[col.data]"></div>
               </template>
@@ -103,24 +102,11 @@
             </Column>
             <Column style="width: 1rem">
               <template #body="slotProps">
-                <span class="p-buttonset">
-                  <Button
-                    v-if="slotProps.data['status_id'] == 1"
-                    icon="fas fa-arrow-up"
-                    class="p-button-success p-button-sm"
-                    @click="confirmRelease(slotProps.data['id'])"
-                  ></Button>
-                  <Button
-                    icon="pi pi-download"
-                    class="p-button-primary p-button-sm"
-                    @click="excel(slotProps.data['id'])"
-                  ></Button>
-                  <Button
-                    icon="pi pi-trash"
-                    class="p-button-danger p-button-sm"
-                    @click="confirmDelete(slotProps.data['id'])"
-                  ></Button>
-                </span>
+                <Button
+                  icon="pi pi-trash"
+                  class="p-button p-button-danger p-button-sm"
+                  @click="confirmDelete(slotProps.data['id'])"
+                ></Button>
               </template>
             </Column>
           </DataTable>
@@ -134,7 +120,7 @@
 
 <script setup>
 import { onMounted, ref, computed, watch } from "vue";
-import processApi from "../../api/processApi";
+import executionApi from "../../api/executionApi";
 import Button from "primevue/button";
 import DataTable from "primevue/datatable";
 import { FilterMatchMode } from "primevue/api";
@@ -156,21 +142,39 @@ const columns = ref([
 
   {
     id: 1,
-    label: "Quy trình",
-    data: "name",
+    label: "Tiêu đề",
+    data: "title",
     filter: true,
   },
   {
     id: 2,
-    label: "Nhóm Quy trình",
-    data: "group",
+    label: "Quy trình",
+    data: "process",
     className: "text-center",
     filter: true,
   },
   {
     id: 3,
+    label: "Người tạo",
+    data: "user_create",
+    className: "text-center",
+  },
+  {
+    id: 4,
+    label: "Ngày tạo",
+    data: "date_create",
+    className: "text-center",
+  },
+  {
+    id: 5,
     label: "Trạng thái",
     data: "status_id",
+    className: "text-center",
+  },
+  {
+    id: 6,
+    label: "Tiến trình",
+    data: "activities",
     className: "text-center",
   },
 ]);
@@ -208,7 +212,7 @@ const dt = ref(null);
 ////Data table
 const loadLazyData = () => {
   loading.value = true;
-  processApi.table(lazyParams.value).then((res) => {
+  executionApi.table(lazyParams.value).then((res) => {
     // console.log(res);
     datatable.value = res.data;
     totalRecords.value = res.recordsFiltered;
@@ -224,29 +228,17 @@ const onPage = (event) => {
 
 const confirmDelete = (id) => {
   confirm.require({
-    message: "Bạn có muốn xóa process này?",
+    message: "Bạn có muốn xóa Mục này không?",
     header: "Xác nhận",
     icon: "pi pi-exclamation-triangle",
     accept: () => {
-      processApi.remove({ item: [id] }).then((res) => {
+      executionApi.delete(id).then((res) => {
         loadLazyData();
       });
     },
   });
 };
 
-const confirmRelease = (id) => {
-  confirm.require({
-    message: "Bạn có muốn phát hành process này?",
-    header: "Xác nhận",
-    icon: "pi pi-exclamation-triangle",
-    accept: () => {
-      processApi.release(id).then((res) => {
-        loadLazyData();
-      });
-    },
-  });
-};
 onMounted(() => {
   let cache = localStorage.getItem(column_cache);
   if (!cache) {
@@ -259,19 +251,48 @@ onMounted(() => {
   loadLazyData();
 });
 const waiting = ref();
-const excel = (id) => {
-  waiting.value = true;
-  processApi.export(id).then((res) => {
-    console.log(res);
-    waiting.value = false;
-    if (res.success) {
-      window.open(res.link, "_blank");
-    } else {
-      alert(res.message);
-    }
-  });
-};
 watch(filters, async (newa, old) => {
   loadLazyData();
 });
 </script>
+<style scoped>
+.status {
+  border: 0px;
+}
+.status_2 {
+  background-color: #d8f4ff;
+  color: #0c9cdd;
+}
+
+.status_3 {
+  background-color: #1ecab8;
+  color: white;
+}
+
+.status_4 {
+  background-color: #f1646c;
+  color: white;
+}
+
+.e_activity {
+  width: 15px;
+  height: 7px;
+  background: #d1d1d1;
+  display: inline-block;
+  margin: 3px;
+  cursor: pointer;
+}
+
+.e_activity_success {
+  background: green;
+}
+
+.e_activity_fail {
+  background: red;
+}
+
+.e_activity_blocking {
+  background: #d8f4ff;
+  border: 1px double #dbdbdb;
+}
+</style>

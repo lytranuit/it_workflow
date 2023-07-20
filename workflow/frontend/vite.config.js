@@ -12,9 +12,6 @@ export default defineConfig({
       dirs: "src/views",
     }),
   ],
-  optimizeDeps: {
-    disabled: false,
-  },
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),

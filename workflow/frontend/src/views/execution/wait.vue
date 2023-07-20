@@ -1,30 +1,8 @@
 <template>
   <div class="row clearfix">
     <div class="col-12">
-      <h5 class="card-header drag-handle">
-        <RouterLink to="user/add">
-          <Button
-            label="Tạo mới"
-            icon="pi pi-plus"
-            class="p-button-success p-button-sm mr-2"
-          ></Button>
-        </RouterLink>
-        <Button
-          label="Xuất Excel"
-          icon="pi pi-excel"
-          class="p-button-primary p-button-sm mr-2"
-          @click="excel"
-        ></Button>
-        <Button
-          label="Đồng bộ"
-          icon="pi pi-sync"
-          class="p-button-warning p-button-sm"
-          @click="sync"
-        ></Button>
-      </h5>
       <section class="card card-fluid">
         <div class="card-body" style="overflow: auto; position: relative">
-          <ConfirmDialog></ConfirmDialog>
           <DataTable
             class="p-datatable-customers"
             showGridlines
@@ -66,21 +44,47 @@
               :header="col.label"
               :key="col.data"
               :showFilterMatchModes="false"
+              :class="col.className"
             >
               <template #body="slotProps">
                 <template v-if="col.data == 'id'">
-                  <RouterLink :to="'/user/edit/' + slotProps.data[col.data]">
+                  <RouterLink
+                    :to="
+                      '/execution/details/' +
+                      slotProps.data['process_version_id'] +
+                      '?execution_id=' +
+                      slotProps.data['id']
+                    "
+                  >
                     <i class="fas fa-pencil-alt mr-2"></i>
                     {{ slotProps.data[col.data] }}
                   </RouterLink>
                 </template>
-                <template
-                  v-else-if="col.data == 'image' || col.data == 'image_sign'"
-                >
+                <template v-else-if="col.data == 'status_id'">
+                  <Button
+                    :label="slotProps.data['status']"
+                    :class="
+                      'p-button-sm status status_' + slotProps.data['status_id']
+                    "
+                  ></Button>
+                </template>
+                <template v-else-if="col.data == 'activities'">
                   <div
-                    class="text-center"
-                    v-html="slotProps.data[col.data]"
-                  ></div>
+                    style="position: relative; margin: 0 auto"
+                    :id="'conta_' + slotProps.data[col.data]"
+                  >
+                    <span
+                      v-for="activity of slotProps.data.activities"
+                      v-tooltip.top="activity.label"
+                      :class="{
+                        e_activity: true,
+                        e_activity_success:
+                          !activity.blocking && !activity.failed,
+                        e_activity_blocking: activity.blocking,
+                        e_activity_fail: activity.failed,
+                      }"
+                    ></span>
+                  </div>
                 </template>
                 <div v-else v-html="slotProps.data[col.data]"></div>
               </template>
@@ -98,25 +102,25 @@
             </Column>
             <Column style="width: 1rem">
               <template #body="slotProps">
-                <a
-                  class="p-link text-danger font-16"
+                <Button
+                  icon="pi pi-trash"
+                  class="p-button p-button-danger p-button-sm"
                   @click="confirmDelete(slotProps.data['id'])"
-                  ><i class="pi pi-trash"></i
-                ></a>
+                ></Button>
               </template>
             </Column>
           </DataTable>
         </div>
       </section>
     </div>
-
+    <ConfirmDialog></ConfirmDialog>
     <Loading :waiting="waiting"></Loading>
   </div>
 </template>
 
 <script setup>
 import { onMounted, ref, computed, watch } from "vue";
-import userApi from "../../api/userApi";
+import executionApi from "../../api/executionApi";
 import Button from "primevue/button";
 import DataTable from "primevue/datatable";
 import { FilterMatchMode } from "primevue/api";
@@ -125,6 +129,9 @@ import InputText from "primevue/inputtext";
 import ConfirmDialog from "primevue/confirmdialog";
 import { useConfirm } from "primevue/useconfirm";
 import Loading from "../../components/Loading.vue";
+import { useRoute } from "vue-router";
+
+const route = useRoute();
 const confirm = useConfirm();
 const datatable = ref();
 const columns = ref([
@@ -132,46 +139,57 @@ const columns = ref([
     id: 0,
     label: "ID",
     data: "id",
-    className: "text-center",
     filter: true,
   },
 
   {
     id: 1,
-    label: "Email",
-    data: "email",
-    className: "text-center",
+    label: "Tiêu đề",
+    data: "title",
     filter: true,
   },
   {
     id: 2,
-    label: "Họ và tên",
-    data: "fullName",
+    label: "Quy trình",
+    data: "process",
     className: "text-center",
     filter: true,
   },
   {
     id: 3,
-    label: "Hình đại diện",
-    data: "image",
+    label: "Người tạo",
+    data: "user_create",
     className: "text-center",
   },
   {
     id: 4,
-    label: "Chữ ký",
-    data: "image_sign",
+    label: "Ngày tạo",
+    data: "date_create",
+    className: "text-center",
+  },
+  {
+    id: 5,
+    label: "Trạng thái",
+    data: "status_id",
+    className: "text-center",
+  },
+  {
+    id: 6,
+    label: "Tiến trình",
+    data: "activities",
     className: "text-center",
   },
 ]);
 const filters = ref({
   id: { value: null, matchMode: FilterMatchMode.CONTAINS },
-  fullName: { value: null, matchMode: FilterMatchMode.CONTAINS },
-  email: { value: null, matchMode: FilterMatchMode.CONTAINS },
+  name: { value: null, matchMode: FilterMatchMode.CONTAINS },
+  group_id: { value: null, matchMode: FilterMatchMode.CONTAINS },
+  status_id: { value: null, matchMode: FilterMatchMode.CONTAINS },
 });
 const totalRecords = ref(0);
 const loading = ref(true);
 const showing = ref([]);
-const column_cache = "columns_user"; ////
+const column_cache = "columns_process"; ////
 const first = ref(0);
 const rows = ref(10);
 const draw = ref(0);
@@ -184,11 +202,14 @@ const lazyParams = computed(() => {
   for (let key in filters.value) {
     data_filters[key] = filters.value[key].value;
   }
+  let user_id = route.query.user_id || null;
   return {
     draw: draw.value,
     start: first.value,
     length: rows.value,
     filters: data_filters,
+    type: "wait",
+    user_id: user_id,
   };
 });
 const dt = ref(null);
@@ -196,7 +217,7 @@ const dt = ref(null);
 ////Data table
 const loadLazyData = () => {
   loading.value = true;
-  userApi.table(lazyParams.value).then((res) => {
+  executionApi.table(lazyParams.value).then((res) => {
     // console.log(res);
     datatable.value = res.data;
     totalRecords.value = res.recordsFiltered;
@@ -212,16 +233,17 @@ const onPage = (event) => {
 
 const confirmDelete = (id) => {
   confirm.require({
-    message: "Bạn có muốn xóa user này?",
+    message: "Bạn có muốn xóa Mục này không?",
     header: "Xác nhận",
     icon: "pi pi-exclamation-triangle",
     accept: () => {
-      userApi.delete(id).then((res) => {
+      executionApi.delete(id).then((res) => {
         loadLazyData();
       });
     },
   });
 };
+
 onMounted(() => {
   let cache = localStorage.getItem(column_cache);
   if (!cache) {
@@ -234,25 +256,48 @@ onMounted(() => {
   loadLazyData();
 });
 const waiting = ref();
-const excel = () => {
-  waiting.value = true;
-  userApi.excel().then((res) => {
-    waiting.value = false;
-    if (res.success) {
-      window.open(res.link, "_blank");
-    } else {
-      alert(res.message);
-    }
-  });
-};
-const sync = () => {
-  waiting.value = true;
-  userApi.sync().then((res) => {
-    waiting.value = false;
-  });
-};
 watch(filters, async (newa, old) => {
-  first.value = 0;
   loadLazyData();
 });
 </script>
+<style scoped>
+.status {
+  border: 0px;
+}
+.status_2 {
+  background-color: #d8f4ff;
+  color: #0c9cdd;
+}
+
+.status_3 {
+  background-color: #1ecab8;
+  color: white;
+}
+
+.status_4 {
+  background-color: #f1646c;
+  color: white;
+}
+
+.e_activity {
+  width: 15px;
+  height: 7px;
+  background: #d1d1d1;
+  display: inline-block;
+  margin: 3px;
+  cursor: pointer;
+}
+
+.e_activity_success {
+  background: green;
+}
+
+.e_activity_fail {
+  background: red;
+}
+
+.e_activity_blocking {
+  background: #d8f4ff;
+  border: 1px double #dbdbdb;
+}
+</style>

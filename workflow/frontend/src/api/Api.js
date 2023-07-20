@@ -54,6 +54,51 @@ export default {
       })
       .then((res) => res.data);
   },
+  HomeBadge() {
+    return repository.get(`/v1/${resoure}/HomeBadge`).then((res) => res.data);
+  },
+  datachartDepartment() {
+    return repository
+      .get(`/v1/${resoure}/datachartDepartment`)
+      .then((res) => res.data);
+  },
+
+  tableUser() {
+    return repository
+      .post(
+        `/v1/${resoure}/tableUser`,
+        {},
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      )
+      .then((res) => res.data);
+  },
+
+  tableProcess() {
+    return repository
+      .post(
+        `/v1/${resoure}/tableProcess`,
+        {},
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      )
+      .then((res) => res.data);
+  },
+  saveprocess(params) {
+    return repository
+      .post(`/v1/${resoure}/saveprocess`, params, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
+      .then((res) => res.data);
+  },
   morecomment(execution_id, from_id) {
     return repository
       .get(`/v1/${resoure}/morecomment`, {

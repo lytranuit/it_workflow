@@ -36,7 +36,7 @@ namespace workflow.Areas.V1.Controllers
                 var list = _context.ProcessModel.Where(d => item.Contains(d.id)).ToList();
                 _context.RemoveRange(list);
                 _context.SaveChanges();
-                var list2 = _context.ProcessVersionModel.Where(d=>item.Contains(d.process_id)).ToList();
+                var list2 = _context.ProcessVersionModel.Where(d => item.Contains(d.process_id)).ToList();
                 _context.RemoveRange(list2);
                 _context.SaveChanges();
             }
@@ -164,9 +164,9 @@ namespace workflow.Areas.V1.Controllers
         }
         public async Task<JsonResult> exportVersion(string process_version_id)
         {
+            var viewPath = "wwwroot/excel/template/process.xlsx";
+            var documentPath = "/excel/data/" + DateTime.Now.ToFileTimeUtc() + ".xlsx";
             string Domain = (HttpContext.Request.IsHttps ? "https://" : "http://") + HttpContext.Request.Host.Value;
-            var viewPath = "private/excel/template/process.xlsx";
-            var documentPath = "/private/excel/data/" + DateTime.Now.ToFileTimeUtc() + ".xlsx";
             Workbook workbook = new Workbook();
             workbook.LoadFromFile(viewPath);
             Worksheet sheet = workbook.Worksheets[0];
@@ -331,7 +331,7 @@ namespace workflow.Areas.V1.Controllers
                             else if (field.type == "file" || field.type == "file_multiple")
                             {
                                 CellRange cell = row.Cells[(start_col_field - 1)];
-                                if (values.files != null && values.files.Count > 0)
+                                if (values.files != null)
                                 {
                                     foreach (var file in values.files)
                                     {
@@ -345,6 +345,8 @@ namespace workflow.Areas.V1.Controllers
 
                                     }
                                 }
+
+
                                 //var files = values.files.Select(d => d.name).ToList();
                                 //text = String.Join(", ", files);
                                 //row.Cells[(start_col_field - 1)].Value = text;
@@ -369,22 +371,6 @@ namespace workflow.Areas.V1.Controllers
                                 var option = _context.UserModel.Where(d => values.value_array.Contains(d.Id.ToString())).Select(d => d.FullName).ToList();
                                 text = String.Join(", ", option);
                                 row.Cells[(start_col_field - 1)].Value = text;
-                            }
-                            else if (field.type == "currency")
-                            {
-                                if (text == null)
-                                    continue;
-                                row.Cells[(start_col_field - 1)].NumberValue = double.Parse(text.ToString());
-                                row.Cells[(start_col_field - 1)].NumberFormat = "#,##0.00";
-
-                            }
-                            else if (field.type == "formular")
-                            {
-                                if (text == null)
-                                    continue;
-                                row.Cells[(start_col_field - 1)].NumberValue = double.Parse(text.ToString());
-                                row.Cells[(start_col_field - 1)].NumberFormat = "#,##0.00";
-
                             }
                             else if (field.type == "table")
                             {
@@ -412,23 +398,8 @@ namespace workflow.Areas.V1.Controllers
                                     foreach (var column in columns)
                                     {
                                         var start_col_table = (int)column.start_c;
-                                        var value_column = data[column.id];
-                                        if (value_column == null)
-                                            continue;
+                                        var value_column = data.ContainsKey(column.id) ? data[column.id] : "";
                                         if (column.type == "currency")
-                                        {
-                                            if (i != 0)
-                                            {
-                                                new_row.Cells[(start_col_table - 1)].NumberValue = double.Parse(value_column.ToString());
-                                                new_row.Cells[(start_col_table - 1)].NumberFormat = "#,##0.00";
-                                            }
-                                            else
-                                            {
-                                                row.Cells[(start_col_table - 1)].NumberValue = double.Parse(value_column.ToString());
-                                                row.Cells[(start_col_table - 1)].NumberFormat = "#,##0.00";
-                                            }
-                                        }
-                                        else if (column.type == "formular")
                                         {
                                             if (i != 0)
                                             {
@@ -506,9 +477,9 @@ namespace workflow.Areas.V1.Controllers
 
             sheet = workbook.Worksheets[0];
             sheet.Activate();
-            workbook.SaveToFile("." + documentPath, ExcelVersion.Version2013);
+            workbook.SaveToFile("./wwwroot" + documentPath, ExcelVersion.Version2013);
 
-            return Json(new { url = documentPath });
+            return Json(new { success = true, link = documentPath });
         }
 
         [HttpPost]
@@ -685,16 +656,19 @@ namespace workflow.Areas.V1.Controllers
                                 else if (field.type == "file" || field.type == "file_multiple")
                                 {
                                     CellRange cell = row.Cells[(start_col_field - 1)];
-                                    foreach (var file in values.files)
+                                    if (values.files != null)
                                     {
-                                        HyperLink urlLink = newSheet.HyperLinks.Add(cell);
+                                        foreach (var file in values.files)
+                                        {
+                                            HyperLink urlLink = newSheet.HyperLinks.Add(cell);
 
-                                        urlLink.Type = HyperLinkType.Url;
+                                            urlLink.Type = HyperLinkType.Url;
 
-                                        urlLink.TextToDisplay = file.name;
+                                            urlLink.TextToDisplay = file.name;
 
-                                        urlLink.Address = Domain + file.url;
+                                            urlLink.Address = Domain + file.url;
 
+                                        }
                                     }
 
 
@@ -749,7 +723,7 @@ namespace workflow.Areas.V1.Controllers
                                         foreach (var column in columns)
                                         {
                                             var start_col_table = (int)column.start_c;
-                                            var value_column = data[column.id];
+                                            var value_column = data.ContainsKey(column.id) ? data[column.id] : "";
                                             if (column.type == "currency")
                                             {
                                                 if (i != 0)

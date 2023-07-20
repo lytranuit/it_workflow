@@ -92,7 +92,6 @@
 </template>
 <script>
 import Api from "../../api/Api";
-
 import { formatDate } from "../../utilities/util";
 export default {
   components: {},

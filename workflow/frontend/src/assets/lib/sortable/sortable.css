@@ -27,7 +27,7 @@
     margin: 0 .5em;
     height: 8px;
     width: 6px;
-    background-image: url(../../images/drag-indicator.png);
+    /* background-image: url(../../images/drag-indicator.png); */
     -webkit-transform: translate3d(-.5em, 0, 0);
     transform: translate3d(-.5em, 0, 0);
     -webkit-user-select: none;
