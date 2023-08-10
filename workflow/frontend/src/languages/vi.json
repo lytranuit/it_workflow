@@ -105,6 +105,7 @@
     "process.id": "Workflow ID",
     "process.name": "Tên quy trình",
     "process.group": "Nhóm quy trình",
+    "process.code": "Mã bắt đầu",
     "process.description": "Ghi chú",
     "detail.general": "Chung",
     "detail.fields": "Trường dữ liệu",

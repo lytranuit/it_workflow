@@ -17,6 +17,7 @@ namespace workflow.Areas.V1.Models
 
         public string title { get; set; }
         public string user_id { get; set; }
+        public string? code { get; set; }
         public int? status_id { get; set; }
         public string? status
         {

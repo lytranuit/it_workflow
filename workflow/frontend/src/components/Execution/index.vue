@@ -29,17 +29,17 @@
         <div class="flex-m">
           <span class="">
             <span class="">ID</span>:
-            <span class="font-weight-bold"> {{ model.id }} </span>
+            <span class="font-weight-bold"> {{ model.code }} </span>
           </span>
           <span class="mx-2">|</span>
-          <div class="flex-m">
+          <div class="">
             <span class="">Người tạo</span>:
             <span class="font-weight-bold" v-if="model.user">
               {{ model.user.fullName }}
             </span>
           </div>
           <span class="mx-2">|</span>
-          <div data-v-cf52cf0c="">
+          <div class="">
             <span class=""> Ngày tạo: </span
             ><span class="font-weight-bold"> {{ model.created_at }} </span>
           </div>

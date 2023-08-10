@@ -251,6 +251,9 @@ const vaild = () => {
   if (!model.group_id || model.group_id == "") {
     errors.value.push("- <b>Nhóm quy trình</b> chưa chọn!");
   }
+  if (!model.code || model.code == "") {
+    errors.value.push("- <b>Mã</b> chưa nhập!");
+  }
   if (errors.value.length) {
     return false;
   }

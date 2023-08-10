@@ -678,33 +678,49 @@ namespace workflow.Areas.V1.Controllers
         {
             try
             {
+                var process_version_id = ExecutionModel.process_version_id;
 
-                System.Security.Claims.ClaimsPrincipal currentUser = User;
-                string user_id = UserManager.GetUserId(currentUser); // Get user id:
-                ExecutionModel.user = null;
-                ExecutionModel.created_at = DateTime.Now;
-                ExecutionModel.user_id = user_id;
-                ExecutionModel.status_id = (int)ExecutionStatus.Executing;
-                _context.Add(ExecutionModel);
-                _context.SaveChanges();
-
-
-                /////create event
-                var user = _context.UserModel.Find(user_id);
-                EventModel EventModel = new EventModel
+                var process_version = _context.ProcessVersionModel.Where(d => d.id == process_version_id).FirstOrDefault();
+                if (process_version != null)
                 {
-                    execution_id = ExecutionModel.id,
-                    event_content = "<b>" + user.FullName + "</b> tạo mới",
-                    created_at = DateTime.Now,
-                };
-                _context.Add(EventModel);
-                await _context.SaveChangesAsync();
+                    var process_id = process_version.process_id;
+                    var process = process_version.process;
+                    var list_version = _context.ProcessVersionModel.Where(d => d.process_id == process_id).Select(d => d.id).ToList();
+                    var count = _context.ExecutionModel.Where(d => list_version.Contains(d.process_version_id)).Count();
+
+                    System.Security.Claims.ClaimsPrincipal currentUser = User;
+                    string user_id = UserManager.GetUserId(currentUser); // Get user id:
+                    ExecutionModel.code = process.code + "-" + (count + 1);
+                    ExecutionModel.user = null;
+                    ExecutionModel.created_at = DateTime.Now;
+                    ExecutionModel.user_id = user_id;
+                    ExecutionModel.status_id = (int)ExecutionStatus.Executing;
+                    _context.Add(ExecutionModel);
+                    _context.SaveChanges();
+
+
+                    /////create event
+                    var user = _context.UserModel.Find(user_id);
+                    EventModel EventModel = new EventModel
+                    {
+                        execution_id = ExecutionModel.id,
+                        event_content = "<b>" + user.FullName + "</b> tạo mới",
+                        created_at = DateTime.Now,
+                    };
+                    _context.Add(EventModel);
+                    await _context.SaveChangesAsync();
+                    return Json(new { success = 1, data = ExecutionModel });
+                }
+                else
+                {
+                    return Json(new { success = 0, message = "Không tìm thấy Qui trình" });
+                }
             }
             catch (DbUpdateConcurrencyException)
             {
-
+                return Json(new { success = 0, message = "" });
             }
-            return Json(new { success = 1, data = ExecutionModel });
+
 
         }
         [HttpPost]

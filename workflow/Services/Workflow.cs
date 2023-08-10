@@ -684,8 +684,8 @@ namespace it.Services
         {
             string libreOfficePath = _configuration["LibreOffice:Path"];
             //// FIXME: file name escaping: I have not idea how to do it in .NET.
-            Console.WriteLine(string.Format("--convert-to pdf --nologo " + file + " --outdir " + outputDirectory));
-            ProcessStartInfo procStartInfo = new ProcessStartInfo(libreOfficePath, string.Format("--convert-to pdf --nologo \"" + file + "\" --outdir \"" + outputDirectory + "\""));
+            //Console.WriteLine(string.Format("-env:UserInstallation=file:///C:/temp/libreoffice --convert-to pdf --nologo " + file + " --outdir " + outputDirectory));
+            ProcessStartInfo procStartInfo = new ProcessStartInfo(libreOfficePath, string.Format("-env:UserInstallation=file:///C:/temp/libreoffice --convert-to pdf --nologo \"" + file + "\" --outdir \"" + outputDirectory + "\""));
             procStartInfo.RedirectStandardOutput = true;
             procStartInfo.UseShellExecute = false;
             procStartInfo.CreateNoWindow = true;

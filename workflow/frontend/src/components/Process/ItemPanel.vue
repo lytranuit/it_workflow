@@ -5,14 +5,14 @@
         <div class="form-group text-left">
           <div class="col-lg-12 mt-2">
             <b class="col-form-label"
-              >{{ $t("process.name") }}<span class="text-danger">*</span></b
+              >{{ $t("process.name") }}: <span class="text-danger">*</span></b
             >
             <div class="pt-1">
               <input
                 class="form-control form-control-sm"
                 type="text"
                 name="name"
-                importd=""
+                required
                 v-model="model.name"
               />
             </div>
@@ -26,6 +26,21 @@
                 v-model="model.group_id"
                 :options="groups"
                 :append-to-body="false"
+              />
+            </div>
+          </div>
+          <div class="col-lg-12 mt-2">
+            <b class="col-form-label"
+              >{{ $t("process.code") }}: <span class="text-danger">*</span></b
+            >
+            <div class="pt-1">
+              <input
+                id="code"
+                class="form-control form-control-sm"
+                type="text"
+                name="code"
+                required
+                v-model="model.code"
               />
             </div>
           </div>

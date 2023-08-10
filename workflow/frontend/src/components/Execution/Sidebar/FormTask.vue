@@ -240,20 +240,20 @@
                 </div>
               </div>
               <div v-if="element.type == 'department'">
-                <DepartmentTreeSelectVue
+                <DepartmentTreeSelect
                   v-model="element.values.value"
                   :required="element.is_require"
                   :name="element.id"
-                ></DepartmentTreeSelectVue>
+                ></DepartmentTreeSelect>
               </div>
 
               <div v-if="element.type == 'department_multiple'">
-                <DepartmentTreeSelectVue
+                <DepartmentTreeSelect
                   v-model="element.values.value_array"
                   :required="element.is_require"
                   :name="element.id"
                   multiple
-                ></DepartmentTreeSelectVue>
+                ></DepartmentTreeSelect>
               </div>
               <div v-if="element.type == 'task'">
                 <div
@@ -497,11 +497,13 @@ import Calendar from "primevue/calendar";
 import { rand } from "../../../utilities/rand";
 import moment from "moment";
 import UserTreeSelect from "../../TreeSelect/UserTreeSelect.vue";
+import DepartmentTreeSelect from "../../TreeSelect/DepartmentTreeSelect.vue";
 export default {
   components: {
     VueNumberFormat,
     InputNumber,
     UserTreeSelect,
+    DepartmentTreeSelect,
   },
   props: {
     fields: {
