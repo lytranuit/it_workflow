@@ -27,29 +27,23 @@
               v-if="model.type_performer == 1 || model.type_performer == 2"
             >
               <b>Bước:</b>
-              <TreeSelect
-                :append-to-body="false"
-                :options="nodes"
+              <NodePreviousTreeSelect
                 v-model="model.data_setting.block_id"
-              ></TreeSelect>
+              ></NodePreviousTreeSelect>
             </div>
             <div class="my-2" v-if="model.type_performer == 4">
               <b>Người dùng:</b>
-              <TreeSelect
+              <UserTreeSelect
                 multiple
                 v-model="model.data_setting.listuser"
-                :options="users"
-                :append-to-body="false"
-              />
+              ></UserTreeSelect>
             </div>
             <div class="my-2" v-if="model.type_performer == 3">
               <b>Bộ phận:</b>
-              <TreeSelect
+              <DepartmentTreeSelect
                 multiple
                 v-model="model.data_setting.listdepartment"
-                :options="departments"
-                :append-to-body="false"
-              />
+              ></DepartmentTreeSelect>
             </div>
             <SettingMail :model="model"></SettingMail>
           </div>
@@ -113,12 +107,20 @@ import DefaultDetail from "./DefaultDetail.vue";
 import SettingField from "./Fields/SettingField.vue";
 import SettingMail from "./SettingMail.vue";
 import { useProcess } from "../../../stores/process";
+import DepartmentTreeSelect from "../../TreeSelect/DepartmentTreeSelect.vue";
+import UserTreeSelect from "../../TreeSelect/UserTreeSelect.vue";
+import NodeTreeSelect from "../../TreeSelect/NodeTreeSelect.vue";
+import NodePreviousTreeSelect from "../../TreeSelect/NodePreviousTreeSelect.vue";
 const store = useProcess();
 export default {
   components: {
     DefaultDetail,
     SettingField,
     SettingMail,
+    UserTreeSelect,
+    NodeTreeSelect,
+    DepartmentTreeSelect,
+    NodePreviousTreeSelect,
   },
   data() {
     return {

@@ -27,29 +27,23 @@
               v-if="model.type_performer == 1 || model.type_performer == 2"
             >
               <b>Bước:</b>
-              <TreeSelect
-                :append-to-body="false"
-                :options="prev_nodes"
+              <NodePreviousTreeSelect
                 v-model="model.data_setting.block_id"
-              ></TreeSelect>
+              ></NodePreviousTreeSelect>
             </div>
             <div class="my-2" v-if="model.type_performer == 4">
               <b>Người dùng:</b>
-              <TreeSelect
+              <UserTreeSelect
                 multiple
                 v-model="model.data_setting.listuser"
-                :options="users"
-                :append-to-body="false"
-              />
+              ></UserTreeSelect>
             </div>
             <div class="my-2" v-if="model.type_performer == 3">
               <b>Bộ phận:</b>
-              <TreeSelect
+              <DepartmentTreeSelect
                 multiple
                 v-model="model.data_setting.listdepartment"
-                :options="departments"
-                :append-to-body="false"
-              />
+              ></DepartmentTreeSelect>
             </div>
           </div>
         </AccordionTab>
@@ -104,11 +98,9 @@
           <div class="cont-empty my-3 text-center">Chọn mẫu gợi ý</div>
           <div class="row justify-content-center">
             <div class="col-10">
-              <TreeSelect
-                :options="prev_nodes_print"
+              <NodePreviousPrintTreeSelect
                 v-model="model.data_setting.blocks_esign_id"
-                :append-to-body="false"
-              ></TreeSelect>
+              ></NodePreviousPrintTreeSelect>
             </div>
           </div>
         </AccordionTab>
@@ -118,37 +110,19 @@
 </template>
 <script>
 import DefaultDetail from "./DefaultDetail.vue";
-import { useProcess } from "../../../stores/process";
-const store = useProcess();
+// import { useProcess } from "../../../stores/process";
+import NodePreviousTreeSelect from "../../TreeSelect/NodePreviousTreeSelect.vue";
+import UserTreeSelect from "../../TreeSelect/UserTreeSelect.vue";
+import DepartmentTreeSelect from "../../TreeSelect/DepartmentTreeSelect.vue";
+import NodePreviousPrintTreeSelect from "../../TreeSelect/NodePreviousPrintTreeSelect.vue";
+// const store = useProcess();
 export default {
   components: {
     DefaultDetail,
-  },
-
-  computed: {
-    users() {
-      return store.users;
-    },
-    departments() {
-      return store.departments;
-    },
-    nodes() {
-      return store.data.nodes;
-    },
-    prev_nodes() {
-      var nodes = this.nodes;
-      var model = this.model;
-      return nodes.filter(function (item) {
-        return item.stt < model.stt;
-      });
-    },
-    prev_nodes_print() {
-      var nodes = this.nodes;
-      var model = this.model;
-      return nodes.filter(function (item) {
-        return item.stt < model.stt && item.clazz == "printSystem";
-      });
-    },
+    NodePreviousTreeSelect,
+    UserTreeSelect,
+    DepartmentTreeSelect,
+    NodePreviousPrintTreeSelect,
   },
   props: {
     model: {

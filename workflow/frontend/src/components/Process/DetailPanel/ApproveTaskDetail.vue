@@ -27,32 +27,24 @@
               v-if="model.type_performer == 1 || model.type_performer == 2"
             >
               <b>Bước:</b>
-              <TreeSelect
-                :append-to-body="false"
-                :options="prev_nodes"
+              <NodePreviousTreeSelect
                 v-model="model.data_setting.block_id"
-              ></TreeSelect>
+              ></NodePreviousTreeSelect>
             </div>
             <div class="my-2" v-if="model.type_performer == 4">
               <b>Người dùng:</b>
-              <TreeSelect
+              <UserTreeSelect
                 multiple
                 v-model="model.data_setting.listuser"
-                :options="users"
-                :append-to-body="false"
-              />
+              ></UserTreeSelect>
             </div>
             <div class="my-2" v-if="model.type_performer == 3">
               <b>Bộ phận:</b>
-              <TreeSelect
+              <DepartmentTreeSelect
                 multiple
                 v-model="model.data_setting.listdepartment"
-                :options="departments"
-                :append-to-body="false"
-              />
+              ></DepartmentTreeSelect>
             </div>
-
-            <SettingMail :model="model" :nodes="nodes"></SettingMail>
           </div>
         </AccordionTab>
         <AccordionTab :header="$t('detail.time')">
@@ -106,12 +98,10 @@
           <div class="cont-empty my-3 text-center">Chọn bước cần phê duyệt</div>
           <div class="row justify-content-center">
             <div class="col-10">
-              <TreeSelect
-                :options="prev_nodes_form"
+              <NodePreviousFormTreeSelect
                 v-model="model.data_setting.blocks_approve_id"
                 multiple
-                :append-to-body="false"
-              ></TreeSelect>
+              ></NodePreviousFormTreeSelect>
             </div>
           </div>
         </AccordionTab>
@@ -120,11 +110,9 @@
           <div class="cont-empty my-3 text-center">Chọn mẫu cần ký</div>
           <div class="row justify-content-center">
             <div class="col-10">
-              <TreeSelect
-                :options="prev_nodes_print"
+              <NodePreviousPrintTreeSelect
                 v-model="model.data_setting.blocks_esign_id"
-                :append-to-body="false"
-              ></TreeSelect>
+              ></NodePreviousPrintTreeSelect>
             </div>
           </div>
         </AccordionTab>
@@ -135,12 +123,22 @@
 <script>
 import DefaultDetail from "./DefaultDetail.vue";
 import SettingMail from "./SettingMail.vue";
-import { useProcess } from "../../../stores/process";
-const store = useProcess();
+// import { useProcess } from "../../../stores/process";
+import NodePreviousTreeSelect from "../../TreeSelect/NodePreviousTreeSelect.vue";
+import UserTreeSelect from "../../TreeSelect/UserTreeSelect.vue";
+import DepartmentTreeSelect from "../../TreeSelect/DepartmentTreeSelect.vue";
+import NodePreviousPrintTreeSelect from "../../TreeSelect/NodePreviousPrintTreeSelect.vue";
+import NodePreviousFormTreeSelect from "../../TreeSelect/NodePreviousFormTreeSelect.vue";
+// const store = useProcess();
 export default {
   components: {
     DefaultDetail,
     SettingMail,
+    NodePreviousTreeSelect,
+    NodePreviousPrintTreeSelect,
+    NodePreviousFormTreeSelect,
+    UserTreeSelect,
+    DepartmentTreeSelect,
   },
   data() {
     return {
@@ -159,38 +157,6 @@ export default {
     readOnly: {
       type: Boolean,
       default: false,
-    },
-  },
-  computed: {
-    users() {
-      return store.users;
-    },
-    departments() {
-      return store.departments;
-    },
-    nodes() {
-      return store.data.nodes;
-    },
-    prev_nodes() {
-      var nodes = this.nodes;
-      var model = this.model;
-      return nodes.filter(function (item) {
-        return item.stt < model.stt;
-      });
-    },
-    prev_nodes_form() {
-      var nodes = this.nodes;
-      var model = this.model;
-      return nodes.filter(function (item) {
-        return item.stt < model.stt && item.clazz == "formTask";
-      });
-    },
-    prev_nodes_print() {
-      var nodes = this.nodes;
-      var model = this.model;
-      return nodes.filter(function (item) {
-        return item.stt < model.stt && item.clazz == "printSystem";
-      });
     },
   },
 };

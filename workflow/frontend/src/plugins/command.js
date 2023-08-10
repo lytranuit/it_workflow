@@ -179,7 +179,7 @@ class Command {
               cmdPlugin._deleteSubProcessNode(graph, i);
             }
           });
-
+          console.log("removeShape");
           graph.emit("removeShape", selectedItems);
           graph.set("selectedItems", []);
           graph.emit("afteritemselected", []);

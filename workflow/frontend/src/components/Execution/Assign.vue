@@ -45,22 +45,20 @@
                       </div>
                       <div class="col-9">
                         <div v-if="element.data_setting.type_performer == 4">
-                          <TreeSelect
+                          <UserTreeSelect
                             multiple
-                            v-model="element.data_setting.listuser"
-                            :options="users"
-                            :name="'user_' + index"
                             required
-                          />
+                            v-model="element.data_setting.listuser"
+                            :name="'user_' + index"
+                          ></UserTreeSelect>
                         </div>
                         <div v-if="element.data_setting.type_performer == 3">
-                          <TreeSelect
+                          <DepartmentTreeSelect
                             multiple
-                            v-model="element.data_setting.listdepartment"
-                            :options="departments"
-                            :name="'dep_' + index"
                             required
-                          />
+                            v-model="element.data_setting.listdepartment"
+                            :name="'dep_' + index"
+                          ></DepartmentTreeSelect>
                         </div>
                       </div>
                     </div>
@@ -81,9 +79,11 @@
 </template>
 <script>
 import { useProcess } from "../../stores/process";
+import DepartmentTreeSelect from "../TreeSelect/DepartmentTreeSelect.vue";
+import UserTreeSelect from "../TreeSelect/UserTreeSelect.vue";
 var store = useProcess();
 export default {
-  components: {},
+  components: { UserTreeSelect, DepartmentTreeSelect },
   props: {
     data_custom_block: {
       type: Array,

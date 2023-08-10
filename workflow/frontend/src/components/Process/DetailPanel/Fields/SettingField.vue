@@ -213,49 +213,45 @@
                   </div>
 
                   <div v-if="element.type == 'employee'">
-                    <TreeSelect
-                      :options="users"
-                      :value="
+                    <UserTreeSelect
+                      :modelValue="
                         element.has_default
                           ? element.data_setting.default_value
                           : ''
                       "
-                    ></TreeSelect>
+                    ></UserTreeSelect>
                   </div>
 
                   <div v-if="element.type == 'employee_multiple'">
-                    <TreeSelect
-                      :options="users"
-                      :value="
+                    <UserTreeSelect
+                      :modelValue="
                         element.has_default
                           ? element.data_setting.default_value_array
                           : []
                       "
                       multiple
-                    ></TreeSelect>
+                    ></UserTreeSelect>
                   </div>
 
                   <div v-if="element.type == 'department'">
-                    <TreeSelect
-                      :options="departments"
-                      :value="
+                    <DepartmentTreeSelect
+                      :modelValue="
                         element.has_default
                           ? element.data_setting.default_value
                           : ''
                       "
-                    ></TreeSelect>
+                    ></DepartmentTreeSelect>
                   </div>
 
                   <div v-if="element.type == 'department_multiple'">
-                    <TreeSelect
-                      :options="departments"
-                      :value="
+                    <DepartmentTreeSelect
+                      :modelValue="
                         element.has_default
                           ? element.data_setting.default_value_array
                           : []
                       "
                       multiple
-                    ></TreeSelect>
+                    ></DepartmentTreeSelect>
                   </div>
 
                   <div v-if="element.type == 'task'">
@@ -1012,45 +1008,37 @@
           class="col-lg-12 mt-2"
           v-if="temp_add.type == 'employee' && temp_add.has_default"
         >
-          <TreeSelect
+          <UserTreeSelect
             v-model="temp_add.data_setting.default_value"
-            :options="users"
-          >
-          </TreeSelect>
+          ></UserTreeSelect>
         </div>
 
         <div
           class="col-lg-12 mt-2"
           v-if="temp_add.type == 'employee_multiple' && temp_add.has_default"
         >
-          <TreeSelect
+          <UserTreeSelect
             v-model="temp_add.data_setting.default_value_array"
-            :options="users"
             multiple
-          >
-          </TreeSelect>
+          ></UserTreeSelect>
         </div>
 
         <div
           class="col-lg-12 mt-2"
           v-if="temp_add.type == 'department' && temp_add.has_default"
         >
-          <TreeSelect
+          <DepartmentTreeSelect
             v-model="temp_add.data_setting.default_value"
-            :options="departments"
-          >
-          </TreeSelect>
+          ></DepartmentTreeSelect>
         </div>
         <div
           class="col-lg-12 mt-2"
           v-if="temp_add.type == 'department_multiple' && temp_add.has_default"
         >
-          <TreeSelect
+          <DepartmentTreeSelect
             v-model="temp_add.data_setting.default_value_array"
-            :options="departments"
             multiple
-          >
-          </TreeSelect>
+          ></DepartmentTreeSelect>
         </div>
       </div>
       <template #footer>
@@ -1154,8 +1142,10 @@ import Dialog from "primevue/dialog";
 import { DxValidator, DxCustomRule } from "devextreme-vue/validator";
 import { rand } from "../../../../utilities/rand";
 import { VueDraggableNext } from "vue-draggable-next";
-import { useProcess } from "../../../../stores/process";
-const store = useProcess();
+// import { useProcess } from "../../../../stores/process";
+import UserTreeSelect from "../../../TreeSelect/UserTreeSelect.vue";
+import DepartmentTreeSelect from "../../../TreeSelect/DepartmentTreeSelect.vue";
+// const store = useProcess();
 export default {
   components: {
     DxHtmlEditor,
@@ -1168,19 +1158,13 @@ export default {
     OverlayPanel,
     Dialog,
     DxMention,
+    UserTreeSelect,
+    DepartmentTreeSelect,
   },
   props: {
     model: {
       type: Object,
       default: () => ({}),
-    },
-  },
-  computed: {
-    users() {
-      return store.users;
-    },
-    departments() {
-      return store.departments;
     },
   },
   data() {

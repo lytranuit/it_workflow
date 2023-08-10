@@ -126,8 +126,6 @@
           @require_sign="require_sign"
         ></ApproveTask>
         <SuggestTask
-          :departments="departments"
-          :users="users"
           :nodes="nodes"
           :readonly="readonly"
           v-if="model.clazz == 'suggestTask'"

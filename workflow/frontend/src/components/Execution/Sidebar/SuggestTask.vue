@@ -71,15 +71,7 @@ export default {
       type: Object,
       default: () => ({}),
     },
-    users: {
-      type: Array,
-      default: () => [],
-    },
     nodes: {
-      type: Array,
-      default: () => [],
-    },
-    departments: {
       type: Array,
       default: () => [],
     },

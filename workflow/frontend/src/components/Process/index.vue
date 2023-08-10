@@ -51,7 +51,6 @@ import Button from "primevue/button";
 import { useProcess } from "../../stores/process";
 // import Wfd from "./Wfd.vue";
 import { rand } from "../../utilities/rand";
-import DataFields from "./DataFields.vue";
 import { onMounted, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import Api from "../../api/Api";
@@ -66,6 +65,7 @@ import Command from "../../plugins/command";
 import Toolbar from "../../plugins/toolbar";
 import AddItemPanel from "../../plugins/addItemPanel";
 import CanvasPanel from "../../plugins/canvasPanel";
+import DataFields from "./DataFields.vue";
 registerShape(G6);
 registerBehavior(G6);
 const router = useRouter();
@@ -199,8 +199,7 @@ const toolbar_ref = ref();
 const addItemPanel_ref = ref();
 
 const graph = ref();
-const selectedModel = ref();
-const { departments, users, groups, data } = storeToRefs(store);
+const { departments, users, groups, data, selectedModel } = storeToRefs(store);
 // const {} = store;
 const props = defineProps({
   process_id: String,
@@ -218,6 +217,14 @@ const save_data = () => {
       return d;
     });
     edges = edges.map(function (d) {
+      var indexSource = store.findIndexNode(d.source);
+      if (indexSource == -1) {
+        return null;
+      }
+      var indexTarget = store.findIndexNode(d.target);
+      if (indexTarget == -1) {
+        return null;
+      }
       delete d.sourceNode;
       delete d.targetNode;
       delete d.endPoint;
@@ -225,13 +232,11 @@ const save_data = () => {
       delete d.style;
       return d;
     });
+    edges = edges.filter((n) => n);
     item = $.extendext(true, "replace", {}, data.value.model, {
       blocks: nodes,
       links: edges,
     });
-    // console.log(item);s
-    // $(".preloader").fadeIn();
-
     Api.saveprocess(item).then((res) => {
       router.push("/process");
     });
@@ -389,6 +394,7 @@ const removeShape = (id) => {
     if (index != -1) data.value.edges.splice(index, 1);
   } else {
     data.value.nodes.splice(index, 1);
+    ///find edges
   }
   // console.log(that.data);
 };
@@ -426,20 +432,9 @@ onMounted(async () => {
   } else {
     data.value = demoData.value;
   }
-
-  /// Lấy department
-  Api.department().then((res) => {
-    departments.value = res;
-  });
-  /// Lấy users
-  Api.employee().then((res) => {
-    users.value = res;
-  });
-  /// Lấy processgroup
-  Api.processgroup().then((res) => {
-    groups.value = res;
-  });
-
+  store.fetchDepartments();
+  store.fetchUsers();
+  store.fetchGroups();
   init();
 });
 watch(

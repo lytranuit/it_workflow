@@ -27,13 +27,12 @@
                 <div class="row bg-white flex-m">
                   <div class="col-3">Người thực hiện:</div>
                   <div class="col-9">
-                    <TreeSelect
+                    <UserTreeSelect
                       multiple
-                      v-model="listusersign"
-                      :options="users"
-                      name="user_sign"
                       required
-                    />
+                      v-model="listusersign"
+                      name="user_sign"
+                    ></UserTreeSelect>
                   </div>
                 </div>
               </form>
@@ -50,13 +49,11 @@
   </div>
 </template>
 <script>
+import UserTreeSelect from "../TreeSelect/UserTreeSelect.vue";
+
 export default {
-  components: {},
+  components: { UserTreeSelect },
   props: {
-    users: {
-      type: Array,
-      default: () => [],
-    },
     activity: {
       type: Object,
       default: () => ({}),

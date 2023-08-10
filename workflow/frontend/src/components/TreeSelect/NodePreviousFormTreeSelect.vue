@@ -1,6 +1,6 @@
 <template>
   <TreeSelect
-    :options="roles"
+    :options="prev_nodes_form"
     :multiple="multiple"
     :modelValue="modelValue"
     @update:modelValue="emit('update:modelValue', $event)"
@@ -8,9 +8,9 @@
 </template>
 
 <script setup>
-import { useAuth } from "../../stores/auth";
 import { storeToRefs } from "pinia";
 import { computed, onMounted } from "vue";
+import { useProcess } from "../../stores/process";
 const props = defineProps({
   modelValue: {
     type: [String, Array],
@@ -21,9 +21,9 @@ const props = defineProps({
   },
 });
 const emit = defineEmits(["update:modelValue"]);
-const store = useAuth();
-const { roles } = storeToRefs(store);
+const store = useProcess();
+const { prev_nodes_form } = storeToRefs(store);
 onMounted(() => {
-  store.fetchRoles();
+  // store.fetchDepartment();
 });
 </script>

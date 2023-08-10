@@ -12,12 +12,34 @@ export const useProcess = defineStore("process", () => {
   const data = ref({});
   const data_custom_block = ref([]);
   const groups = ref([]);
-  const roles = ref();
-  const departments = ref();
-  const users = ref();
+  const roles = ref([]);
+  const departments = ref([]);
+  const users = ref([]);
   const model = ref({});
+  const selectedModel = ref({});
   const editTitle = ref(false);
   const graph = ref();
+  const nodes = computed(() => {
+    return data.value.nodes;
+  });
+  const edges = computed(() => {
+    return data.value.edges;
+  });
+  const prev_nodes = computed(() => {
+    return nodes.value.filter(function (item) {
+      return item.stt < selectedModel.value.stt;
+    });
+  });
+  const prev_nodes_print = computed(() => {
+    return nodes.value.filter(function (item) {
+      return item.stt < selectedModel.value.stt && item.clazz == "printSystem";
+    });
+  });
+  const prev_nodes_form = computed(() => {
+    return nodes.value.filter(function (item) {
+      return item.stt < selectedModel.value.stt && item.clazz == "formTask";
+    });
+  });
   const init = (process_id) => {
     return Api.process(process_id).then((res) => {
       let data_tmp = {};
@@ -253,6 +275,26 @@ export const useProcess = defineStore("process", () => {
     editTitle.value = false;
     data.value = {};
   };
+  const fetchUsers = () => {
+    if (users.value.length) return;
+    Api.employee().then((res) => {
+      users.value = res;
+    });
+  };
+
+  const fetchDepartments = () => {
+    if (departments.value.length) return;
+    Api.department().then((res) => {
+      departments.value = res;
+    });
+  };
+
+  const fetchGroups = () => {
+    if (groups.value.length) return;
+    Api.processgroup().then((res) => {
+      groups.value = res;
+    });
+  };
   return {
     data,
     data_transition,
@@ -265,6 +307,12 @@ export const useProcess = defineStore("process", () => {
     model,
     editTitle,
     graph,
+    nodes,
+    edges,
+    prev_nodes,
+    prev_nodes_print,
+    prev_nodes_form,
+    selectedModel,
     init,
     findIndexNode,
     findIndexEdge,
@@ -273,5 +321,8 @@ export const useProcess = defineStore("process", () => {
     active_activity,
     hasPermission,
     reset,
+    fetchUsers,
+    fetchGroups,
+    fetchDepartments,
   };
 });

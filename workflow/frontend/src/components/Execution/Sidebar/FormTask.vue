@@ -188,22 +188,20 @@
               </div>
 
               <div v-if="element.type == 'employee'">
-                <TreeSelect
-                  :options="users"
+                <UserTreeSelect
                   v-model="element.values.value"
                   :required="element.is_require"
                   :name="element.id"
-                ></TreeSelect>
+                ></UserTreeSelect>
               </div>
 
               <div v-if="element.type == 'employee_multiple'">
-                <TreeSelect
-                  :options="users"
+                <UserTreeSelect
                   v-model="element.values.value_array"
-                  multiple
                   :required="element.is_require"
                   :name="element.id"
-                ></TreeSelect>
+                  multiple
+                ></UserTreeSelect>
               </div>
               <div v-if="element.type == 'radio'">
                 <div
@@ -242,22 +240,20 @@
                 </div>
               </div>
               <div v-if="element.type == 'department'">
-                <TreeSelect
-                  :options="departments"
+                <DepartmentTreeSelectVue
                   v-model="element.values.value"
                   :required="element.is_require"
                   :name="element.id"
-                ></TreeSelect>
+                ></DepartmentTreeSelectVue>
               </div>
 
               <div v-if="element.type == 'department_multiple'">
-                <TreeSelect
-                  :options="departments"
+                <DepartmentTreeSelectVue
                   v-model="element.values.value_array"
-                  multiple
                   :required="element.is_require"
                   :name="element.id"
-                ></TreeSelect>
+                  multiple
+                ></DepartmentTreeSelectVue>
               </div>
               <div v-if="element.type == 'task'">
                 <div
@@ -499,12 +495,13 @@ import VueNumberFormat from "@igortrindade/vue-number-format";
 import InputNumber from "primevue/inputnumber";
 import Calendar from "primevue/calendar";
 import { rand } from "../../../utilities/rand";
-import OverlayPanel from "primevue/overlaypanel";
 import moment from "moment";
+import UserTreeSelect from "../../TreeSelect/UserTreeSelect.vue";
 export default {
   components: {
     VueNumberFormat,
     InputNumber,
+    UserTreeSelect,
   },
   props: {
     fields: {

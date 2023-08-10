@@ -83,6 +83,8 @@
                   <div class="col-lg-10 pt-1">
                     <DepartmentTreeSelect
                       v-model="data.departments"
+                      valueConsistsOf="ALL_WITH_INDETERMINATE"
+                      :flat="false"
                       multiple
                     ></DepartmentTreeSelect>
                     <select
