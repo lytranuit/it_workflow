@@ -271,6 +271,7 @@ export const useProcess = defineStore("process", () => {
     data_transition.value = [];
     data_activity.value = [];
     data_custom_block.value = [];
+    selectedModel.value = null;
     model.value = {};
     editTitle.value = false;
     data.value = {};

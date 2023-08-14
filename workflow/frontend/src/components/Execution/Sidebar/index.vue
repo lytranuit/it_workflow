@@ -5,8 +5,11 @@
         <a
           class="nav-link cursor-pointer flex-m items-center font-13"
           href="#"
-          @click="assign_again(model.block_id)"
-          v-if="model.blocking && hasPermission()"
+          @click="assign_again(selectedModel.block_id)"
+          v-if="
+            selectedModel.blocking &&
+            (hasPermission() || model.user_id == current_user.id)
+          "
         >
           <i class="fas fa-share font-16"></i>
           <div class="ml-2">Phân công lại</div>
@@ -14,9 +17,11 @@
         <a
           class="nav-link cursor-pointer flex-m items-center font-13"
           href="#"
-          @click="require_sign(model)"
+          @click="require_sign(selectedModel)"
           v-if="
-            model.blocking && hasPermission() && model.clazz == 'approveTask'
+            selectedModel.blocking &&
+            hasPermission() &&
+            selectedModel.clazz == 'approveTask'
           "
         >
           <i class="fas fa-signature"></i>
@@ -46,7 +51,7 @@
       <div class="header">
         <div class="flex-m">
           <div>
-            <div class="tilte">{{ model.label }}</div>
+            <div class="tilte">{{ selectedModel.label }}</div>
             <div class="flex-m" v-if="html != ''">
               <div class="flex-m">
                 Người thực hiện: <span v-html="html" class="ml-1"></span>
@@ -54,7 +59,10 @@
             </div>
           </div>
         </div>
-        <div class="box_transition" v-if="model.blocking && hasPermission()">
+        <div
+          class="box_transition"
+          v-if="selectedModel.blocking && hasPermission()"
+        >
           <button
             class="mr-2"
             :class="{
@@ -64,16 +72,16 @@
             tabindex="1"
             type="button"
             name="button"
-            v-for="item in model.outEdges"
+            v-for="item in selectedModel.outEdges"
             :key="item.id"
-            @click="execute_transition(model.id, item.id)"
+            @click="execute_transition(selectedModel.id, item.id)"
           >
             {{ item.label }}
           </button>
         </div>
         <div
           class="box_transition"
-          v-if="model.blocking && !hasPermission() && !hasRequireSign()"
+          v-if="selectedModel.blocking && !hasPermission() && !hasRequireSign()"
         >
           <span class="text-danger"
             >Bạn không có quyền thực hiện bước này.</span
@@ -81,7 +89,7 @@
         </div>
         <div
           class="box_transition"
-          v-if="model.blocking && !hasPermission() && hasRequireSign()"
+          v-if="selectedModel.blocking && !hasPermission() && hasRequireSign()"
         >
           <button
             class="mr-2 btn-reverse"
@@ -104,8 +112,8 @@
       <div
         class="body"
         v-if="
-          (model.blocking && hasPermission()) ||
-          model.executed ||
+          (selectedModel.blocking && hasPermission()) ||
+          selectedModel.executed ||
           hasRequireSign()
         "
       >
@@ -114,27 +122,27 @@
           :users="users"
           :fields="fields"
           :readonly="readonly"
-          v-if="model.clazz == 'formTask'"
+          v-if="selectedModel.clazz == 'formTask'"
         ></FormTask>
         <ApproveTask
           :departments="departments"
           :users="users"
           :nodes="nodes"
           :readonly="readonly"
-          v-if="model.clazz == 'approveTask'"
-          :model="model"
+          v-if="selectedModel.clazz == 'approveTask'"
+          :model="selectedModel"
           @require_sign="require_sign"
         ></ApproveTask>
         <SuggestTask
           :nodes="nodes"
           :readonly="readonly"
-          v-if="model.clazz == 'suggestTask'"
-          :model="model"
+          v-if="selectedModel.clazz == 'suggestTask'"
+          :model="selectedModel"
         ></SuggestTask>
         <PrintSystem
-          v-if="model.clazz == 'printSystem'"
+          v-if="selectedModel.clazz == 'printSystem'"
           :nodes="nodes"
-          :model="model"
+          :model="selectedModel"
         ></PrintSystem>
       </div>
     </form>
@@ -159,12 +167,6 @@ export default {
     SuggestTask,
     PrintSystem,
   },
-  props: {
-    model: {
-      type: Object,
-      default: () => ({}),
-    },
-  },
   data() {
     return {
       readonly: false,
@@ -175,13 +177,13 @@ export default {
     };
   },
   watch: {
-    model: {
+    selectedModel: {
       handler(newData, oldData) {
-        this.visible = this.model != null;
+        this.visible = this.selectedModel != null;
         // console.log(this.model);
         if (oldData !== newData) {
           this.initHtml();
-          this.readonly = !this.model.blocking;
+          this.readonly = !this.selectedModel.blocking;
         }
       },
       immediate: true,
@@ -206,6 +208,12 @@ export default {
     },
   },
   computed: {
+    model() {
+      return store.model;
+    },
+    selectedModel() {
+      return store.selectedModel;
+    },
     users() {
       return store.users;
     },
@@ -216,7 +224,7 @@ export default {
       return store.departments;
     },
     fields() {
-      return this.model.fields;
+      return this.selectedModel.fields;
     },
     current_user() {
       return store_auth.user;
@@ -232,6 +240,7 @@ export default {
     } else {
       this.position = "full";
     }
+    // console.log(this.model);
   },
   methods: {
     setIsPopup(isPopup) {
@@ -285,7 +294,7 @@ export default {
       var activity_esign_id = $("#pdf-viewer").data("activity_esign");
       var user_esign = sign.data("id");
       var sign_data = {
-        block_id: that.model.block_id,
+        block_id: that.selectedModel.block_id,
         page: page,
         position_x: position_x,
         position_y: position_y,
@@ -298,7 +307,7 @@ export default {
         user_sign: that.current_user.id,
         user_esign: user_esign,
         activity_esign_id: activity_esign_id,
-        activity_id: that.model.id,
+        activity_id: that.selectedModel.id,
       };
       $(".preloader").fadeIn();
       var resp = await $.ajax({
@@ -309,30 +318,30 @@ export default {
       });
       if (resp.success == 1) {
         var resp_sign = resp.sign;
-        var data_setting = this.model.data_setting || {};
+        var data_setting = this.selectedModel.data_setting || {};
         var listusersign = data_setting.listusersign || [];
         var findindex = listusersign.findLastIndex(function (item) {
           return item.user_sign == that.current_user.id;
         });
 
         listusersign[findindex] = resp_sign;
-        this.model.data_setting.listusersign = listusersign;
-        this.model.is_update = true;
+        this.selectedModel.data_setting.listusersign = listusersign;
+        this.selectedModel.is_update = true;
         //console.log(this.model);
         this.$emit("save_data");
       }
     },
     disagree() {
       var that = this;
-      var data_setting = this.model.data_setting || {};
+      var data_setting = this.selectedModel.data_setting || {};
       var listusersign = data_setting.listusersign || [];
       var findindex = listusersign.findLastIndex(function (item) {
         return item.user_sign == that.current_user.id;
       });
 
       listusersign[findindex].status = 3;
-      this.model.data_setting.listusersign = listusersign;
-      this.model.is_update = true;
+      this.selectedModel.data_setting.listusersign = listusersign;
+      this.selectedModel.is_update = true;
       //console.log(this.model);
       this.$emit("save_data");
     },
@@ -360,7 +369,7 @@ export default {
     initHtml() {
       var that = this;
       var html = "";
-      var model = this.model;
+      var model = this.selectedModel;
       if (model.blocking) {
         var data_setting = model.data_setting;
         var type_performer = data_setting.type_performer;
@@ -413,8 +422,8 @@ export default {
         });
         var transition = transitions[findTransition];
 
-        var created_at = this.model.created_at;
-        var user_created_by = this.model.user_created_by;
+        var created_at = this.selectedModel.created_at;
+        var user_created_by = this.selectedModel.user_created_by;
         if (user_created_by) {
           html += "<b>" + user_created_by.fullName + "</b>";
         }
@@ -440,7 +449,7 @@ export default {
       this.html = html;
     },
     hasPermission() {
-      var data_setting = this.model.data_setting || {};
+      var data_setting = this.selectedModel.data_setting || {};
       var type_performer = data_setting.type_performer;
       var current_user = this.current_user;
       var user_id = current_user.id;
@@ -464,7 +473,7 @@ export default {
     },
     hasRequireSign() {
       var that = this;
-      var data_setting = this.model.data_setting || {};
+      var data_setting = this.selectedModel.data_setting || {};
       var listusersign = data_setting.listusersign || [];
       var findIndex = listusersign.findLastIndex(function (item) {
         return item.user_sign == that.current_user.id && item.status == 1;

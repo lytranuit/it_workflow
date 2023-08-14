@@ -67,7 +67,6 @@
       ></div>
       <Sidebar
         v-if="selectedModel != null"
-        :model="selectedModel"
         @save_data="save_data"
         @execute_transition="execute_transition"
         @assign_again="assign_again"
@@ -147,7 +146,6 @@ const spanTitle = ref();
 const inputTitle = ref();
 const waiting = ref();
 // const graph = ref();
-const selectedModel = ref();
 const {
   departments,
   users,
@@ -159,6 +157,7 @@ const {
   data_custom_block,
   data_transition,
   data_activity,
+  selectedModel,
 } = storeToRefs(store);
 const { user } = storeToRefs(store_auth);
 
@@ -334,6 +333,7 @@ const initEvents = () => {
     if (findBlocking != -1) {
       var model = data_activity.value[findBlocking];
       selectedModel.value = model;
+      // console.log(selectedModel.value);
       return;
     }
     selectedModel.value = null;
