@@ -168,7 +168,7 @@
                     @click="require_sign(model)"
                   >
                     <i class="fas fa-plus mr-1"></i>
-                    Yêu cầu ký nháy
+                    Yêu cầu ký tên
                   </a>
                 </div>
               </div>

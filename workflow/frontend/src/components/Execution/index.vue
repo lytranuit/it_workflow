@@ -189,8 +189,9 @@ const save_data = async () => {
   //console.log(data_transition);
   //console.log(data_activity)
   //return;
+  // console.log(1);
+  custom_block.value = [];
   var tasks = [];
-  $("#myModal-assign").modal("hide");
   waiting.value = true;
   if (model.value.id > 0) {
   } else {
@@ -865,6 +866,7 @@ const initModel = (execution) => {
 };
 
 const get_execution = async (execution_id) => {
+  waiting.value = true;
   var execution = await Api.execution(execution_id);
   model.value = initModel(execution);
   data_transition.value = await Api.TransitionByExecution(execution_id);

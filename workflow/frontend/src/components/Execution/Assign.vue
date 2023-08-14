@@ -1,89 +1,87 @@
 ﻿<template>
   <div id="popup-assign">
-    <div
-      id="myModal-assign"
-      class="modal"
-      tabindex="-1"
-      role="dialog"
-      :data-backdrop="checkModal()"
+    <Dialog
+      v-model:visible="visible"
+      header="Phân công"
+      modal
+      :closable="!required"
+      class="p-fluid"
+      style="width: 50vw"
+      @update:visible="close"
     >
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Phân công</h5>
-            <button
-              type="button"
-              class="close"
-              data-dismiss="modal"
-              aria-label="Close"
-              v-if="!required"
+      <div class="row">
+        <form id="form-assign" class="col-12">
+          <Accordion :activeIndex="activeName" multiple>
+            <AccordionTab
+              :header="element.block.label"
+              :key="index"
+              v-for="(element, index) in data_custom_block"
             >
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <div class="row">
-              <form id="form-assign" class="col-12">
-                <Accordion :activeIndex="activeName" multiple>
-                  <AccordionTab
-                    :header="element.block.label"
-                    :key="index"
-                    v-for="(element, index) in data_custom_block"
+              <div class="row bg-white">
+                <div class="col-12">Người thực hiện:</div>
+                <div class="col-3">
+                  <select
+                    class="form-control"
+                    :name="'sel_' + index"
+                    v-model="element.data_setting.type_performer"
+                    required
                   >
-                    <div class="row bg-white">
-                      <div class="col-12">Người thực hiện:</div>
-                      <div class="col-3">
-                        <select
-                          class="form-control"
-                          :name="'sel_' + index"
-                          v-model="element.data_setting.type_performer"
-                          required
-                        >
-                          <option value="3">Bộ phận</option>
-                          <option value="4">Người dùng</option>
-                        </select>
-                      </div>
-                      <div class="col-9">
-                        <div v-if="element.data_setting.type_performer == 4">
-                          <UserTreeSelect
-                            multiple
-                            required
-                            v-model="element.data_setting.listuser"
-                            :name="'user_' + index"
-                          ></UserTreeSelect>
-                        </div>
-                        <div v-if="element.data_setting.type_performer == 3">
-                          <DepartmentTreeSelect
-                            multiple
-                            required
-                            v-model="element.data_setting.listdepartment"
-                            :name="'dep_' + index"
-                          ></DepartmentTreeSelect>
-                        </div>
-                      </div>
-                    </div>
-                  </AccordionTab>
-                </Accordion>
-              </form>
-            </div>
-          </div>
-          <div class="modal-footer justify-content-center">
-            <button type="button" class="btn btn-success" @click="save()">
-              Lưu lại
-            </button>
-          </div>
-        </div>
+                    <option value="3">Bộ phận</option>
+                    <option value="4">Người dùng</option>
+                  </select>
+                </div>
+                <div class="col-9">
+                  <div v-if="element.data_setting.type_performer == 4">
+                    <UserTreeSelect
+                      multiple
+                      required
+                      v-model="element.data_setting.listuser"
+                      :name="'user_' + index"
+                    ></UserTreeSelect>
+                  </div>
+                  <div v-if="element.data_setting.type_performer == 3">
+                    <DepartmentTreeSelect
+                      multiple
+                      required
+                      v-model="element.data_setting.listdepartment"
+                      :name="'dep_' + index"
+                    ></DepartmentTreeSelect>
+                  </div>
+                </div>
+              </div>
+            </AccordionTab>
+          </Accordion>
+        </form>
       </div>
-    </div>
+      <template #footer>
+        <div class="text-center mt-3">
+          <Button
+            label="Hủy"
+            icon="pi pi-times"
+            class="p-button-sm p-button-danger"
+            @click="close"
+            v-if="!required"
+          ></Button>
+          <Button
+            label="Lưu lại"
+            icon="pi pi-save"
+            class="p-button-sm"
+            @click="save"
+          ></Button>
+        </div>
+      </template>
+    </Dialog>
   </div>
 </template>
 <script>
-import { useProcess } from "../../stores/process";
+import Dialog from "primevue/dialog";
+// import { useProcess } from "../../stores/process";
 import DepartmentTreeSelect from "../TreeSelect/DepartmentTreeSelect.vue";
 import UserTreeSelect from "../TreeSelect/UserTreeSelect.vue";
-var store = useProcess();
+import Button from "primevue/button";
+// var store = useProcess();
 export default {
-  components: { UserTreeSelect, DepartmentTreeSelect },
+  components: { UserTreeSelect, DepartmentTreeSelect, Dialog, Button },
   props: {
     data_custom_block: {
       type: Array,
@@ -100,25 +98,16 @@ export default {
     };
   },
   computed: {
+    visible() {
+      return this.data_custom_block.length > 0;
+    },
     activeName() {
       return this.data_custom_block.map(function (item, key) {
         return key;
       });
     },
-    departments() {
-      return store.departments;
-    },
-    users() {
-      return store.users;
-    },
   },
-  mounted() {
-    var that = this;
-    $("#myModal-assign").modal("show");
-    $("#myModal-assign").on("hidden.bs.modal", function (e) {
-      that.$emit("close");
-    });
-  },
+  mounted() {},
   methods: {
     save() {
       var vaild = $("#form-assign").valid();
@@ -133,10 +122,8 @@ export default {
       }
       this.$emit("save_data");
     },
-    checkModal() {
-      var text = "static";
-      if (!this.required) text = false;
-      return text;
+    close() {
+      this.$emit("close");
     },
   },
 };

@@ -7,11 +7,13 @@
     :name="name"
     :required="required"
     :value-consists-of="valueConsistsOf"
+    :append-to-body="true"
     @update:modelValue="emit('update:modelValue', $event)"
   ></TreeSelect>
 </template>
 
 <script setup>
+// import TreeSelect from "vue3-acies-treeselect";
 import { useAuth } from "../../stores/auth";
 import { storeToRefs } from "pinia";
 import { computed, onMounted } from "vue";

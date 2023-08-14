@@ -13,7 +13,9 @@
     "@antv/g6": "^4.7.14",
     "@antv/matrix-util": "2.0.7",
     "@antv/util": "~2.0.9",
+    "@bosquig/vue3-treeselect": "^0.1.5",
     "@igortrindade/vue-number-format": "^1.6.1",
+    "@pragnesh87/vue-treeselect": "^1.0.3",
     "@syncfusion/ej2-vue-filemanager": "^21.2.5",
     "axios": "^1.3.2",
     "chart.js": "^4.3.0",
@@ -38,7 +40,8 @@
     "vue-moment": "^4.1.0",
     "vue-router": "^4.1.6",
     "vue3-acies-treeselect": "^0.1.3",
-    "vue3-cookies": "^1.0.6"
+    "vue3-cookies": "^1.0.6",
+    "vue3-treeselect": "^0.1.10"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.0.0",

@@ -5,6 +5,7 @@
     :modelValue="modelValue"
     :name="name"
     :required="required"
+    :append-to-body="true"
     @update:modelValue="emit('update:modelValue', $event)"
   ></TreeSelect>
 </template>

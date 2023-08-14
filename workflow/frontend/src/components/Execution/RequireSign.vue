@@ -1,66 +1,58 @@
 ﻿<template>
   <div id="popup-require-sign">
-    <div
-      id="myModal-require-sign"
-      class="modal"
-      tabindex="-1"
-      role="dialog"
-      :data-backdrop="checkModal()"
+    <Dialog
+      v-model:visible="visible"
+      header="Yêu cầu ký tên"
+      modal
+      class="p-fluid"
+      style="width: 50vw"
+      @update:visible="close"
     >
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Yêu cầu ký nháy</h5>
-            <button
-              type="button"
-              class="close"
-              data-dismiss="modal"
-              aria-label="Close"
-              v-if="!required"
-            >
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <div class="row">
-              <form id="form-require-sign" class="col-12">
-                <div class="row bg-white flex-m">
-                  <div class="col-3">Người thực hiện:</div>
-                  <div class="col-9">
-                    <UserTreeSelect
-                      multiple
-                      required
-                      v-model="listusersign"
-                      name="user_sign"
-                    ></UserTreeSelect>
-                  </div>
-                </div>
-              </form>
+      <div class="row">
+        <form id="form-require-sign" class="col-12">
+          <div class="row bg-white flex-m">
+            <div class="col-3">Người thực hiện:</div>
+            <div class="col-9">
+              <UserTreeSelect
+                multiple
+                required
+                v-model="listusersign"
+                name="user_sign"
+              ></UserTreeSelect>
             </div>
           </div>
-          <div class="modal-footer justify-content-center">
-            <button type="button" class="btn btn-success" @click="save()">
-              Lưu lại
-            </button>
-          </div>
-        </div>
+        </form>
       </div>
-    </div>
+      <template #footer>
+        <div class="text-center mt-3">
+          <Button
+            label="Hủy"
+            icon="pi pi-times"
+            class="p-button-sm p-button-danger"
+            @click="close"
+          ></Button>
+          <Button
+            label="Lưu lại"
+            icon="pi pi-save"
+            class="p-button-sm"
+            @click="save"
+          ></Button>
+        </div>
+      </template>
+    </Dialog>
   </div>
 </template>
 <script>
+import Button from "primevue/button";
 import UserTreeSelect from "../TreeSelect/UserTreeSelect.vue";
+import Dialog from "primevue/dialog";
 
 export default {
-  components: { UserTreeSelect },
+  components: { UserTreeSelect, Button, Dialog },
   props: {
     activity: {
       type: Object,
       default: () => ({}),
-    },
-    required: {
-      type: Boolean,
-      default: () => false,
     },
   },
   data() {
@@ -69,13 +61,13 @@ export default {
       //activeName: [0, 1, 2],
     };
   },
-  computed: {},
+  computed: {
+    visible() {
+      return this.activity;
+    },
+  },
   mounted() {
-    var that = this;
-    $("#myModal-require-sign").modal("show");
-    $("#myModal-require-sign").on("hidden.bs.modal", function (e) {
-      that.$emit("close");
-    });
+    console.log(this.visible);
   },
   methods: {
     save() {
@@ -96,10 +88,8 @@ export default {
       this.activity.event_type = "require_sign";
       this.$emit("save_data");
     },
-    checkModal() {
-      var text = "static";
-      if (!this.required) text = false;
-      return text;
+    close() {
+      this.$emit("close");
     },
   },
 };
