@@ -2,7 +2,7 @@
   <div>
     <div
       class="item-control flex-m"
-      v-for="(element, index) in fields"
+      v-for="element in fields"
       :key="element.id"
     >
       <div class="mb-3 ml-3 flex-m w-100">
@@ -279,7 +279,7 @@
                 <tr>
                   <th
                     class="border-top-0 text-center"
-                    v-for="(column, index1) in element.data_setting.columns"
+                    v-for="column in element.data_setting.columns"
                     :key="column.id"
                   >
                     {{ column.name }}
@@ -296,7 +296,7 @@
                   :key="index1"
                 >
                   <td
-                    v-for="(column, index2) in element.data_setting.columns"
+                    v-for="column in element.data_setting.columns"
                     :key="column.id"
                     class="text-center"
                   >
@@ -450,7 +450,7 @@
                   :key="index1"
                 >
                   <td
-                    v-for="(column, index2) in element.data_setting.columns"
+                    v-for="column in element.data_setting.columns"
                     :key="column.id"
                     class="text-center"
                   >
@@ -491,16 +491,13 @@
 
 import stringMath from "string-math";
 // const emitter = mitt();
-import VueNumberFormat from "@igortrindade/vue-number-format";
 import InputNumber from "primevue/inputnumber";
-import Calendar from "primevue/calendar";
 import { rand } from "../../../utilities/rand";
 import moment from "moment";
 import UserTreeSelect from "../../TreeSelect/UserTreeSelect.vue";
 import DepartmentTreeSelect from "../../TreeSelect/DepartmentTreeSelect.vue";
 export default {
   components: {
-    VueNumberFormat,
     InputNumber,
     UserTreeSelect,
     DepartmentTreeSelect,
@@ -544,34 +541,34 @@ export default {
         }
       });
     }
-    var firstvariable = "!#"; //first input;
-    var secondvariable = "#"; //first in
-    var fields = this.fields;
-    if (fields) {
-      for (var field of fields) {
-        if (field.type == "table" && field.data_setting.columns) {
-          var columns = field.data_setting.columns;
-          for (var column of columns) {
-            if (column.type == "formular") {
-              var text = column.formular.text;
-              var list_id = text.match(
-                new RegExp(
-                  "(?<=" + firstvariable + ")(.*?)(?=" + secondvariable + ")",
-                  "g"
-                )
-              );
-              //console.log(text);
-              //console.log(list_id);
-              //   for (var id of list_id) {
-              //     emitter.on(id, (e) => {
-              //       console.log(e);
-              //     });
-              //   }
-            }
-          }
-        }
-      }
-    }
+    // var firstvariable = "!#"; //first input;
+    // var secondvariable = "#"; //first in
+    // var fields = this.fields;
+    // if (fields) {
+    //   for (var field of fields) {
+    //     if (field.type == "table" && field.data_setting.columns) {
+    //       var columns = field.data_setting.columns;
+    //       for (var column of columns) {
+    //         if (column.type == "formular") {
+    //           var text = column.formular.text;
+    //           var list_id = text.match(
+    //             new RegExp(
+    //               "(?<=" + firstvariable + ")(.*?)(?=" + secondvariable + ")",
+    //               "g"
+    //             )
+    //           );
+    //           //console.log(text);
+    //           //console.log(list_id);
+    //           //   for (var id of list_id) {
+    //           //     emitter.on(id, (e) => {
+    //           //       console.log(e);
+    //           //     });
+    //           //   }
+    //         }
+    //       }
+    //     }
+    //   }
+    // }
   },
   methods: {
     options_formular(column) {
@@ -637,7 +634,7 @@ export default {
               var value = row[_id] ? row[_id] : 0;
               text = text.replace(new RegExp("!#" + _id + "#", "g"), value);
             }
-            var result = stringMath(text, function (err) {
+            var result = stringMath(text, function () {
               return 0;
             });
             console.log(column);
@@ -682,28 +679,28 @@ export default {
             }
           }
           if (field.data_setting.formular.type == 1) {
-            var text = field.data_setting.formular.text;
-            var list_id = text.match(
+            var text1 = field.data_setting.formular.text;
+            var list_id1 = text1.match(
               new RegExp(
                 "(?<=" + firstvariable + ")(.*?)(?=" + secondvariable + ")",
                 "g"
               )
             );
-            if (list_id.indexOf(id) == -1) {
+            if (list_id1.indexOf(id) == -1) {
               continue;
             }
-            for (var _id of list_id) {
+            for (let _id of list_id1) {
               var findindex = this.fields.findIndex(function (item) {
                 return item.id == _id;
               });
               var findField = this.fields[findindex];
-              var value = findField.values.value ? findField.values.value : 0;
-              text = text.replace(new RegExp("!#" + _id + "#", "g"), value);
+              let value = findField.values.value ? findField.values.value : 0;
+              text1 = text1.replace(new RegExp("!#" + _id + "#", "g"), value);
             }
-            var result = stringMath(text, function (err) {
+            var result1 = stringMath(text, function () {
               return 0;
             });
-            field.values.value = result;
+            field.values.value = result1;
           }
         }
       }
