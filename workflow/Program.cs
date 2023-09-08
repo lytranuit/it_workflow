@@ -52,8 +52,9 @@ namespace Vue
             //builder.Services.AddScoped<ViewRender, ViewRender>();
 
             builder.Services.AddScoped<Workflow, Workflow>();
+			builder.Services.AddScoped<LoginMailPyme, LoginMailPyme>();
 
-            builder.Services.Configure<IdentityOptions>(options =>
+			builder.Services.Configure<IdentityOptions>(options =>
             {
                 // Password settings.
                 options.Password.RequireDigit = true;

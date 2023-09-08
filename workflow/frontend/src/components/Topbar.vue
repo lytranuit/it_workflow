@@ -110,7 +110,7 @@ const toggle = (event) => {
     <router-link to="/" class="layout-topbar-logo justify-content-center">
       <span>
         <img
-          src="../assets/images/PMP_Stada_Group.png"
+          src="../assets/images/clientlogo_astahealthcare.com_f1800.png"
           alt="logo-large"
           class="logo-lg logo-light"
         />

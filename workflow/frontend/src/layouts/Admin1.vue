@@ -27,7 +27,7 @@ const user = store.user;
 						<img src="../assets/images/favicon.png" alt="logo-small" class="logo-sm">
 					</span>
 					<span>
-						<img src="../assets/images/PMP_Stada_Group.png" alt="logo-large" class="logo-lg logo-light">
+						<img src="../assets/images/clientlogo_astahealthcare.com_f1800.png" alt="logo-large" class="logo-lg logo-light">
 					</span>
 				</router-link>
 			</div>

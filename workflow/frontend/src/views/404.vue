@@ -8,7 +8,7 @@
 							<div class="card-body">
 								<div class="px-3">
 									<div class="auth-logo-box" style="top:-70px;">
-										<a href="#" class=""><img src="../assets/images/PMP_Stada_Group.png" width="300"
+										<a href="#" class=""><img src="../assets/images/clientlogo_astahealthcare.com_f1800.png"
 												alt="logo" class=""></a>
 									</div><!--end auth-logo-box-->
 									<img src="../assets/images/500.jpg" alt="" class="d-block mx-auto mt-4"

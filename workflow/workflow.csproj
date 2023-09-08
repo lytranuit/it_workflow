@@ -52,6 +52,58 @@
 	<ItemGroup>
 		<_WebToolingArtifacts Remove="Properties\PublishProfiles\Test.pubxml" />
 	</ItemGroup>
+	<ItemGroup>
+	  <None Include="wwwroot\images\EmptyRC1.b451fa24.svg" />
+	  <None Include="wwwroot\images\flow\approve-task.svg" />
+	  <None Include="wwwroot\images\flow\approve-task.webp" />
+	  <None Include="wwwroot\images\flow\approve.svg" />
+	  <None Include="wwwroot\images\flow\end.svg" />
+	  <None Include="wwwroot\images\flow\exclusive-gateway.svg" />
+	  <None Include="wwwroot\images\flow\gateway.svg" />
+	  <None Include="wwwroot\images\flow\inclusive-gateway.svg" />
+	  <None Include="wwwroot\images\flow\java-task.svg" />
+	  <None Include="wwwroot\images\flow\mail-task.svg" />
+	  <None Include="wwwroot\images\flow\message-catch.svg" />
+	  <None Include="wwwroot\images\flow\message-start.svg" />
+	  <None Include="wwwroot\images\flow\parallel-gateway.svg" />
+	  <None Include="wwwroot\images\flow\printSystem.svg" />
+	  <None Include="wwwroot\images\flow\receive-task.svg" />
+	  <None Include="wwwroot\images\flow\script-task.svg" />
+	  <None Include="wwwroot\images\flow\signal-catch.svg" />
+	  <None Include="wwwroot\images\flow\signal-start.svg" />
+	  <None Include="wwwroot\images\flow\start.svg" />
+	  <None Include="wwwroot\images\flow\suggest-task.svg" />
+	  <None Include="wwwroot\images\flow\timer-catch.svg" />
+	  <None Include="wwwroot\images\flow\timer-start.svg" />
+	  <None Include="wwwroot\images\flow\user-task.svg" />
+	  <None Include="wwwroot\images\icons-big.svg" />
+	  <None Include="wwwroot\images\icons-small.svg" />
+	  <None Include="wwwroot\images\icons\flow\approve-task.svg" />
+	  <None Include="wwwroot\images\icons\flow\approve.svg" />
+	  <None Include="wwwroot\images\icons\flow\cancel-icon.svg" />
+	  <None Include="wwwroot\images\icons\flow\icon_java.svg" />
+	  <None Include="wwwroot\images\icons\flow\icon_mail.svg" />
+	  <None Include="wwwroot\images\icons\flow\icon_message.svg" />
+	  <None Include="wwwroot\images\icons\flow\icon_receive.svg" />
+	  <None Include="wwwroot\images\icons\flow\icon_script.svg" />
+	  <None Include="wwwroot\images\icons\flow\icon_setting.svg" />
+	  <None Include="wwwroot\images\icons\flow\icon_signal.svg" />
+	  <None Include="wwwroot\images\icons\flow\icon_timer.svg" />
+	  <None Include="wwwroot\images\icons\flow\icon_user.svg" />
+	  <None Include="wwwroot\images\icons\flow\printSystem.svg" />
+	  <None Include="wwwroot\images\icons\flow\suggest-task.svg" />
+	  <None Include="wwwroot\images\icons\model\icon_arch.svg" />
+	  <None Include="wwwroot\images\icons\model\icon_cluster.svg" />
+	  <None Include="wwwroot\images\icons\model\icon_data.svg" />
+	  <None Include="wwwroot\images\icons\model\icon_decision.svg" />
+	  <None Include="wwwroot\images\icons\model\icon_filtering.svg" />
+	  <None Include="wwwroot\images\icons\model\icon_por-den.svg" />
+	  <None Include="wwwroot\images\icons\model\icon_regression.svg" />
+	  <None Include="wwwroot\images\icons\model\icon_rt-por.svg" />
+	  <None Include="wwwroot\images\icons\model\icon_tree.svg" />
+	  <None Include="wwwroot\images\loading.svg" />
+	  <None Include="wwwroot\images\user.webp" />
+	</ItemGroup>
 	<Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">
 		<!-- Ensure Node.js is installed -->
 		<Exec Command="node --version" ContinueOnError="true">

@@ -3,7 +3,7 @@
 *@
 @page
 @model LoginModel
-
+@inject SignInManager<Vue.Models.UserModel> SignInManager
 @{
 	Layout = null;
 	ViewData["Title"] = "Đăng nhập";
@@ -15,145 +15,39 @@
 	<!-- Required meta tags -->
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-	<meta property="og:title" content="Pymepharco" />
-	<meta property="og:image" content="/images/thumbnail1.png" />
-	<meta property="og:description" content="Trang thông tin về nguyên vật liệu, tồn kho ,số lô ,hạn dùng ở kho Nhà máy." />
-
-
-
-
 	<link rel="shortcut icon" type="image/x-icon" href="/images/favicon.png" />
 	<script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
 	<link href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
 	<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 	<link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous" />
 
+	<link href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
 	<title>@ViewData["Title"]</title>
 	<!------ Include the above in your HEAD tag ---------->
-	<style>
-		.login-block {
-			background-image: url(/images/bg.jpg);
-			background-size: cover;
-			background-position: center center;
-			width: 100%;
-			min-height: 100vh;
-			height: 100%;
-		}
-
-		.banner-sec {
-			background-size: cover;
-			border-radius: 0 10px 10px 0;
-		}
-
-		.box_login {
-			background: #fff;
-			border-radius: 10px;
-			box-shadow: 15px 20px 0px rgb(148 108 108 / 10%)
-		}
-
-		.carousel-inner {
-			border-radius: 0 10px 10px 0;
-		}
-
-		.carousel-caption {
-			text-align: left;
-			left: 5%;
-		}
-
-		.login-sec {
-			padding: 50px 30px;
-			position: relative;
-		}
-
-			.login-sec .copy-text {
-				position: absolute;
-				width: 80%;
-				bottom: 20px;
-				font-size: 13px;
-				text-align: center;
-			}
-
-				.login-sec .copy-text i {
-					color: #FEB58A;
-				}
-
-				.login-sec .copy-text a {
-					color: #E36262;
-				}
-
-			.login-sec h2 {
-				margin-bottom: 30px;
-				font-weight: 800;
-				font-size: 30px;
-				color: #DE6262;
-			}
-
-				.login-sec h2:after {
-					content: " ";
-					width: 100px;
-					height: 5px;
-					background: #FEB58A;
-					display: block;
-					margin-top: 20px;
-					border-radius: 3px;
-					margin-left: auto;
-					margin-right: auto
-				}
-
-		.btn-login {
-			background: #DE6262;
-			color: #fff;
-			font-weight: 600;
-		}
-
-		.banner-text {
-			width: 70%;
-			position: absolute;
-			bottom: 40px;
-			padding-left: 20px;
-		}
-
-			.banner-text h2 {
-				color: #fff;
-				font-weight: 600;
-			}
-
-				.banner-text h2:after {
-					content: " ";
-					width: 100px;
-					height: 5px;
-					background: #FFF;
-					display: block;
-					margin-top: 20px;
-					border-radius: 3px;
-				}
-
-			.banner-text p {
-				color: #fff;
-			}
-	</style>
+	<link rel="stylesheet" href="/css/login.css" />
 </head>
 
 <body>
+	<div class="preloader" style="display:none;">
+		<div class="lds-ripple">
+			<div class="lds-pos"></div>
+			<div class="lds-pos"></div>
+		</div>
+	</div>
 	<section class="login-block">
 		<div class="container">
 			<div class="row" style="">
-				<div class="col-md-6" style="margin: 20px 0;display:flex;justify-content:center;align-self: center;">
-					<img src="~/images/PMP_Stada_Group.png" style="width:300px" />
-				</div>
-				<div class="col-md-6" style="margin: 20px 0;display:flex;justify-content:center">
-					<img src="~/images/v2-stada-logo-main-ui-copy.png" style="width:150px" />
-				</div>
-				<div class="col-12">
-					<h2 class="text-center text-mute">WORKFLOW</h2>
+				<div class="col-md-12" style="margin: 20px 0;display:flex;justify-content:center">
+					<img src="~/images/clientlogo_astahealthcare.com_f1800.png" />
 				</div>
 				<div class="col-md-12">
 					<div class="box_login">
 						<div class="row">
 							<div class="col-md-4 login-sec">
 								<h2 class="text-center">Đăng nhập</h2>
+								<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
 								<form id="account" method="post">
-									<div asp-validation-summary="ModelOnly" class="text-danger"></div>
 									<div class="form-group">
 										<input asp-for="Input.Email" class="form-control form-control-sm" autocomplete="username" placeholder="Email" type="email" required />
 									</div>
@@ -161,14 +55,17 @@
 										<input asp-for="Input.Password" class="form-control form-control-sm" autocomplete="current-password" placeholder="Password" required />
 									</div>
 									<div class="form-check">
-										<div class="checkbox d-none">
+										<div class="checkbox d-inline-block">
 											<label asp-for="Input.RememberMe" class="form-label">
 												<input class="form-check-input" asp-for="Input.RememberMe" />
 												@Html.DisplayNameFor(m => m.Input.RememberMe)
 											</label>
 										</div>
 										<button id="login-submit" type="submit" class="btn btn-sm btn-login float-right">Đăng nhập</button>
-
+									</div>
+									<div>
+										<i class="fas fa-key"></i>
+										<a href="/Identity/Account/ForgotPassword" class="small"> Quên mật khẩu?</a>
 									</div>
 								</form>
 							</div>
@@ -179,7 +76,7 @@
 									</ol>
 									<div class="carousel-inner" role="listbox">
 										<div class="carousel-item active">
-											<img class="d-block img-fluid" src="/images/hinh-nha-may-hoang-van-thu.jpg" alt="First slide">
+											<img class="d-block img-fluid" src="/images/bg.jpg" alt="First slide">
 											<div class="carousel-caption d-none d-md-block">
 												<div class="banner-text">
 												</div>
@@ -194,20 +91,25 @@
 					</div>
 				</div>
 				<div class="col-md-12 mt-5">
-					<p style="text-align:center">Copyright ©2022 <b style="color:#2FA95E">PYMEPHARCO</b>. All Rights Reserved.</p>
+					<p style="text-align:center">Copyright ©2023 <b style="color:#2FA95E">ASTA</b>. All Rights Reserved.</p>
 				</div>
 			</div>
 		</div>
 	</section>
-
-	<script type="text/javascript">
-		$(document).ready(function () {
-			if (window.navigator.userAgent.indexOf("Trident/") > 0) {
-				$(".login-sec").html("<div class='row align-items-center h-100'><div class='col-12'><p class='text-center'>Không hỗ trợ trên trình duyệt IE</p><p class='text-center'>Hãy sử sụng <span style='color:green;'>Chrome</span> hoặc <span style='color:green;'>Firefox</span> để thay thế</p></div></div>")
-			}
-		})
-	</script>
-
-	<partial name="_ValidationScriptsPartial" />
 </body>
 
+
+<script type="text/javascript">
+	$(document).ready(function () {
+		if (window.navigator.userAgent.indexOf("Trident/") > 0) {
+			$(".login-sec").html("<div class='row align-items-center h-100'><div class='col-12'><p class='text-center'>Không hỗ trợ trên trình duyệt IE</p><p class='text-center'>Hãy sử sụng <span style='color:green;'>Chrome</span> hoặc <span style='color:green;'>Firefox</span> để thay thế</p></div></div>")
+		}
+		// $("#loginwithuser").click(function () {
+		// 	$("#account").removeClass("d-none");
+		// });
+		$("#loginwithstada,#login-submit").click(function () {
+			$(".preloader").fadeIn();
+		})
+	})
+</script>
+<partial name="_ValidationScriptsPartial" />
