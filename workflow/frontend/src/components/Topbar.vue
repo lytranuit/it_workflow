@@ -113,6 +113,7 @@ const toggle = (event) => {
           src="../assets/images/clientlogo_astahealthcare.com_f1800.png"
           alt="logo-large"
           class="logo-lg logo-light"
+             width="200"
         />
       </span>
     </router-link>
