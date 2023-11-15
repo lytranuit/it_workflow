@@ -39,14 +39,16 @@ namespace workflow.Areas.V1.Controllers
 
         private readonly IConfiguration _configuration;
         private readonly Workflow _workflow;
+        private readonly ViewRender _view;
 
 
-        public ApiController(ItContext context, IConfiguration configuration, UserManager<UserModel> UserMgr, RoleManager<IdentityRole> RoleMgr, Workflow workflow) : base(context)
+        public ApiController(ItContext context, IConfiguration configuration, UserManager<UserModel> UserMgr, RoleManager<IdentityRole> RoleMgr, Workflow workflow, ViewRender view) : base(context)
         {
             _configuration = configuration;
             UserManager = UserMgr;
             RoleManager = RoleMgr;
             _workflow = workflow;
+            _view = view;
         }
         public async Task<IActionResult> Index()
         {
@@ -129,12 +131,18 @@ namespace workflow.Areas.V1.Controllers
             //var jsonData = new { data = ProcessModel };
             return Json(CustomBlockModel);
         }
-        public async Task<JsonResult> HomeBadge()
+        public async Task<JsonResult> HomeBadge(string? process_id = null)
         {
-            var count = _context.ExecutionModel.Where(d => d.deleted_at == null).Count();
-            var wait_count = _context.ExecutionModel.Where(d => d.deleted_at == null && d.status_id == (int)ExecutionStatus.Executing).Count();
-            var done_count = _context.ExecutionModel.Where(d => d.deleted_at == null && d.status_id == (int)ExecutionStatus.Success).Count();
-            var cancle_count = _context.ExecutionModel.Where(d => d.deleted_at == null && d.status_id == (int)ExecutionStatus.Fail).Count();
+            var c = _context.ProcessVersionModel.Where(d => d.deleted_at == null);
+            if (process_id != null)
+            {
+                c = c.Where(d => d.process_id == process_id);
+            }
+            var list_process = c.Select(d => d.id).ToList();
+            var count = _context.ExecutionModel.Where(d => d.deleted_at == null && list_process.Contains(d.process_version_id)).Count();
+            var wait_count = _context.ExecutionModel.Where(d => d.deleted_at == null && list_process.Contains(d.process_version_id) && d.status_id == (int)ExecutionStatus.Executing).Count();
+            var done_count = _context.ExecutionModel.Where(d => d.deleted_at == null && list_process.Contains(d.process_version_id) && d.status_id == (int)ExecutionStatus.Success).Count();
+            var cancle_count = _context.ExecutionModel.Where(d => d.deleted_at == null && list_process.Contains(d.process_version_id) && d.status_id == (int)ExecutionStatus.Fail).Count();
 
             return Json(new { execution_success = done_count, execution_fail = cancle_count, execution_amount = count, execution_wait = wait_count });
         }
@@ -146,6 +154,7 @@ namespace workflow.Areas.V1.Controllers
             var length = Request.Form["length"].FirstOrDefault();
             int pageSize = length != null ? Convert.ToInt32(length) : 0;
             int skip = start != null ? Convert.ToInt32(start) : 0;
+            var process_id = Request.Form["process_id"].FirstOrDefault();
             //System.Security.Claims.ClaimsPrincipal currentUser = this.User;
             //string user_id = UserManager.GetUserId(currentUser); // Get user id:
             //var user_current = await UserManager.GetUserAsync(currentUser);
@@ -155,8 +164,13 @@ namespace workflow.Areas.V1.Controllers
             //var data = _context.ChartType
             //	 .FromSqlRaw(sql);
             //var d = data.Include(d => d.type).OrderByDescending(d => d.num).ToList();
-
-            var blocking_activity = _context.ActivityModel.Where(d => d.deleted_at == null && d.blocking == true).Select(d => d.block_id + d.execution_id).ToList();
+            var c = _context.ProcessVersionModel.Where(d => d.deleted_at == null);
+            if (process_id != null)
+            {
+                c = c.Where(d => d.process_id == process_id);
+            }
+            var list_process = c.Select(d => d.id).ToList();
+            var blocking_activity = _context.ActivityModel.Include(d => d.execution).Where(d => d.execution.deleted_at == null && d.deleted_at == null && list_process.Contains(d.execution.process_version_id) && d.blocking == true).Select(d => d.block_id + d.execution_id).ToList();
             var custom_block = _context.CustomBlockModel.Where(d => blocking_activity.Contains(d.block_id + d.execution_id)).ToList();
             var list = new List<string>();
             foreach (var block in custom_block)
@@ -204,6 +218,7 @@ namespace workflow.Areas.V1.Controllers
             var length = Request.Form["length"].FirstOrDefault();
             int pageSize = length != null ? Convert.ToInt32(length) : 0;
             int skip = start != null ? Convert.ToInt32(start) : 0;
+            var process_id = Request.Form["process_id"].FirstOrDefault();
             //System.Security.Claims.ClaimsPrincipal currentUser = this.User;
             //string user_id = UserManager.GetUserId(currentUser); // Get user id:
             //var user_current = await UserManager.GetUserAsync(currentUser);
@@ -213,8 +228,13 @@ namespace workflow.Areas.V1.Controllers
             //var data = _context.ChartType
             //	 .FromSqlRaw(sql);
             //var d = data.Include(d => d.type).OrderByDescending(d => d.num).ToList();
-
-            var list = _context.ExecutionModel.Where(d => d.deleted_at == null);
+            var c = _context.ProcessVersionModel.Where(d => d.deleted_at == null);
+            if (process_id != null)
+            {
+                c = c.Where(d => d.process_id == process_id);
+            }
+            var list_process = c.Select(d => d.id).ToList();
+            var list = _context.ExecutionModel.Where(d => d.deleted_at == null && list_process.Contains(d.process_version_id));
             var groupedCustomerList = list
                 .GroupBy(u => u.process_version_id)
                 .Select(grp => new
@@ -252,10 +272,15 @@ namespace workflow.Areas.V1.Controllers
             return Json(jsonData);
             //return Json(new { labels = labels, datasets = datasets });
         }
-        public async Task<JsonResult> datachartDepartment()
+        public async Task<JsonResult> datachartDepartment(string? process_id = null)
         {
-
-            var blocking_activity = _context.ActivityModel.Where(d => d.deleted_at == null && d.blocking == true).Select(d => d.block_id + d.execution_id).ToList();
+            var c = _context.ProcessVersionModel.Where(d => d.deleted_at == null);
+            if (process_id != null)
+            {
+                c = c.Where(d => d.process_id == process_id);
+            }
+            var list_process = c.Select(d => d.id).ToList();
+            var blocking_activity = _context.ActivityModel.Include(d => d.execution).Where(d => d.execution.deleted_at == null && d.deleted_at == null && list_process.Contains(d.execution.process_version_id) && d.blocking == true).Select(d => d.block_id + d.execution_id).ToList();
             var custom_block = _context.CustomBlockModel.Where(d => blocking_activity.Contains(d.block_id + d.execution_id)).ToList();
             var list = new List<int>();
             foreach (var block in custom_block)
@@ -810,7 +835,7 @@ namespace workflow.Areas.V1.Controllers
 
                 }
 
-            end:
+end:
                 Console.WriteLine("End");
             }
             catch (DbUpdateConcurrencyException)
@@ -890,7 +915,7 @@ namespace workflow.Areas.V1.Controllers
                     await _context.SaveChangesAsync();
                 }
             }
-        end:
+end:
             Console.WriteLine("End");
             return Json(new { success = 1 });
 
@@ -965,10 +990,10 @@ namespace workflow.Areas.V1.Controllers
                 string user_id = UserManager.GetUserId(currentUser); // Get user id:
                 string user_id_current = user_id;
 
-                if (ActivityModel.clazz == "parallelGateway" || ActivityModel.clazz == "inclusiveGateway" || ActivityModel.clazz == "success" || ActivityModel.clazz == "fail")
-                {
-                    user_id = "a76834c7-c4b7-48aa-bf95-05dbd33210ff";
-                }
+                //if (ActivityModel.clazz == "parallelGateway" || ActivityModel.clazz == "inclusiveGateway" || ActivityModel.clazz == "success" || ActivityModel.clazz == "fail")
+                //{
+                //    user_id = "a76834c7-c4b7-48aa-bf95-05dbd33210ff";
+                //}
                 ActivityModel.created_at = DateTime.Now;
                 ActivityModel.started_at = DateTime.Now;
                 ActivityModel.created_by = user_id;
@@ -980,6 +1005,10 @@ namespace workflow.Areas.V1.Controllers
                 if (ActivityModel.failed == true)
                 {
                     ActivityModel.fields = null;
+                }
+                if (ActivityModel.clazz == "printSystem")
+                {
+                    ActivityModel.created_by = user_id;
                 }
                 _context.Add(ActivityModel);
                 _context.SaveChanges();
@@ -1001,6 +1030,27 @@ namespace workflow.Areas.V1.Controllers
                         created_at = DateTime.Now,
                     };
                     _context.Add(EventModel);
+
+                    ////Gửi mail quy trình thất bại
+                    var user_id_create = ExecutionModel.user_id;
+                    var user_create = _context.UserModel.Find(user_id_create);
+                    string Domain = (HttpContext.Request.IsHttps ? "https://" : "http://") + HttpContext.Request.Host.Value;
+                    var body = _view.Render("Emails/Cancle", new
+                    {
+                        link_logo = Domain + "/images/clientlogo_astahealthcare.com_f1800.png",
+                        link = Domain + "/execution/details/" + ExecutionModel.process_version_id + "?execution_id=" + ExecutionModel.id,
+                        reason = ActivityModel.note
+                    });
+
+                    var email = new EmailModel
+                    {
+                        email_to = user_create.Email,
+                        subject = "[Thất bại] " + ExecutionModel.title,
+                        body = body,
+                        email_type = "failed_execution",
+                        status = 1
+                    };
+                    _context.Add(email);
                     await _context.SaveChangesAsync();
                 }
                 else if (ActivityModel.clazz == "success")
@@ -1018,11 +1068,35 @@ namespace workflow.Areas.V1.Controllers
                         created_at = DateTime.Now,
                     };
                     _context.Add(EventModel);
+
+                    ////Gửi mail quy trình thành công đến người tạo quy trình
+                    var user_id_create = ExecutionModel.user_id;
+                    var user_create = _context.UserModel.Find(user_id_create);
+                    string Domain = (HttpContext.Request.IsHttps ? "https://" : "http://") + HttpContext.Request.Host.Value;
+                    var body = _view.Render("Emails/Success", new
+                    {
+                        link_logo = Domain + "/images/clientlogo_astahealthcare.com_f1800.png",
+                        link = Domain + "/execution/details/" + ExecutionModel.process_version_id + "?execution_id=" + ExecutionModel.id,
+                    });
+
+                    var email = new EmailModel
+                    {
+                        email_to = user_create.Email,
+                        subject = "[Hoàn thành] " + ExecutionModel.title,
+                        body = body,
+                        email_type = "success_execution",
+                        status = 1
+                    };
+                    _context.Add(email);
                     await _context.SaveChangesAsync();
                 }
                 else if (ActivityModel.clazz == "printSystem")
                 {
                     await _workflow.PrintTask(ActivityModel);
+                }
+                else if (ActivityModel.clazz == "outputSystem")
+                {
+                    await _workflow.OutputTask(ActivityModel);
                 }
                 else if (ActivityModel.blocking == false)
                 {
@@ -1040,36 +1114,36 @@ namespace workflow.Areas.V1.Controllers
 
 
                 /////GỬI MAIL THEO MẪU
-                if (ActivityModel.blocking == true)
-                {
-                    var data_setting = ActivityModel.data_setting;
-                    var mail = data_setting.mail;
-                    if (mail == null)
-                    {
-                        goto end;
-                    }
-                    mail = _workflow.fillMail(mail, ActivityModel);
-                    //data_setting.mail = mail;
-                    //ActivityModel.data_setting = data_setting;
-                    //_context.Update(ActivityModel);
+                //if (ActivityModel.blocking == true)
+                //{
+                //    var data_setting = ActivityModel.data_setting;
+                //    var mail = data_setting.mail;
+                //    if (mail == null)
+                //    {
+                //        goto end;
+                //    }
+                //    mail = _workflow.fillMail(mail, ActivityModel);
+                //    //data_setting.mail = mail;
+                //    //ActivityModel.data_setting = data_setting;
+                //    //_context.Update(ActivityModel);
 
-                    var email = new EmailModel
-                    {
-                        email_to = mail.to,
-                        subject = mail.title,
-                        body = mail.content,
-                        data_attachments = mail.filecontent.Split(",").ToList(),
-                        email_type = "forward_step",
-                        status = 1
-                    };
-                    _context.Add(email);
-                    await _context.SaveChangesAsync();
-                }
+                //    var email = new EmailModel
+                //    {
+                //        email_to = mail.to,
+                //        subject = mail.title,
+                //        body = mail.content,
+                //        data_attachments = mail.filecontent.Split(",").ToList(),
+                //        email_type = "forward_step",
+                //        status = 1
+                //    };
+                //    _context.Add(email);
+                //    await _context.SaveChangesAsync();
+                //}
 
-            /////
+                /////
 
-            end:
-                Console.WriteLine("End");
+                //end:
+                //                Console.WriteLine("End");
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -1094,10 +1168,10 @@ namespace workflow.Areas.V1.Controllers
                 CopyValues(ActivityModel_old, ActivityModel);
                 if (is_change_blocking)
                 {
-                    if (ActivityModel_old.clazz == "parallelGateway" || ActivityModel_old.clazz == "inclusiveGateway" || ActivityModel_old.clazz == "success" || ActivityModel_old.clazz == "fail")
-                    {
-                        user_id = "a76834c7-c4b7-48aa-bf95-05dbd33210ff";
-                    }
+                    //if (ActivityModel_old.clazz == "parallelGateway" || ActivityModel_old.clazz == "inclusiveGateway" || ActivityModel_old.clazz == "success" || ActivityModel_old.clazz == "fail")
+                    //{
+                    //    user_id = "a76834c7-c4b7-48aa-bf95-05dbd33210ff";
+                    //}
                     ActivityModel_old.created_at = DateTime.Now;
                     ActivityModel_old.created_by = user_id;
 
@@ -1130,9 +1204,13 @@ namespace workflow.Areas.V1.Controllers
                         };
                         _context.Add(EventModel);
                         await _context.SaveChangesAsync();
+
+                        //// delete all activities from next
+                        //var next = 
                     }
                     else
                     {
+                        ////ADD EVENT
                         var user = _context.UserModel.Find(user_id);
                         EventModel EventModel = new EventModel
                         {
@@ -1142,6 +1220,30 @@ namespace workflow.Areas.V1.Controllers
                         };
                         _context.Add(EventModel);
                         await _context.SaveChangesAsync();
+                    }
+
+
+                    //// CHECK PREVIOUS
+                    var prev_transitions = _context.TransitionModel.Where(d => d.to_activity_id == ActivityModel.id).ToList();
+                    foreach (var transition in prev_transitions)
+                    {
+
+                        var prev_activity = _context.ActivityModel.Where(d => d.id == transition.from_activity_id).FirstOrDefault();
+                        if (prev_activity != null && prev_activity.clazz == "exclusiveGateway")
+                        {
+                            var transitions = _context.TransitionModel.Where(d => d.from_activity_id == prev_activity.id).ToList();
+                            foreach (var transition1 in transitions)
+                            {
+                                var activity = _context.ActivityModel.Where(d => d.id == transition1.to_activity_id).FirstOrDefault();
+                                if (activity.blocking == true)
+                                {
+                                    _context.Remove(activity);
+                                    _context.Remove(transition1);
+                                    await _context.SaveChangesAsync();
+                                }
+                            }
+
+                        }
                     }
                 }
 
@@ -1191,7 +1293,7 @@ namespace workflow.Areas.V1.Controllers
 
                 await _context.SaveChangesAsync();
             }
-        end:
+end:
             Console.WriteLine("End");
             return Json(new { success = 1 });
 

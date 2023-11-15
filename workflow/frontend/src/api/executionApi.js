@@ -3,7 +3,12 @@ import repository from "../service/repository";
 const resoure = "execution";
 export default {
   get() {
-    return repository.get(`/v1/${resoure}/get`).then((res) => res.data);
+    return repository.get(`/v1/${resoure}/get`).then((res) => {
+      var url = "/Identity/Account/Login";
+      if (res.request.responseURL.indexOf(url) != -1)
+        location.reload();
+      return res.data
+    });;
   },
   table(params) {
     return repository
@@ -12,7 +17,12 @@ export default {
           "Content-Type": "multipart/form-data",
         },
       })
-      .then((res) => res.data);
+      .then((res) => {
+      var url = "/Identity/Account/Login";
+      if (res.request.responseURL.indexOf(url) != -1)
+        location.reload();
+      return res.data
+    });;
   },
   delete(id) {
     return repository
@@ -25,6 +35,11 @@ export default {
           },
         }
       )
-      .then((res) => res.data);
+      .then((res) => {
+      var url = "/Identity/Account/Login";
+      if (res.request.responseURL.indexOf(url) != -1)
+        location.reload();
+      return res.data
+    });;
   },
 };

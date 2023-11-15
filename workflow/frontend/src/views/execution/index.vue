@@ -3,110 +3,63 @@
     <div class="col-12">
       <section class="card card-fluid">
         <div class="card-body" style="overflow: auto; position: relative">
-          <DataTable
-            class="p-datatable-customers"
-            showGridlines
-            :value="datatable"
-            :lazy="true"
-            ref="dt"
-            scrollHeight="70vh"
-            v-model:selection="selectedProducts"
-            :paginator="true"
-            :rowsPerPageOptions="[10, 50, 100]"
-            :rows="rows"
-            :totalRecords="totalRecords"
-            @page="onPage($event)"
-            :rowHover="true"
-            :loading="loading"
-            responsiveLayout="scroll"
-            :resizableColumns="true"
-            columnResizeMode="expand"
-            v-model:filters="filters"
-            filterDisplay="menu"
-          >
+          <DataTable class="p-datatable-customers" showGridlines :value="datatable" :lazy="true" ref="dt"
+            scrollHeight="70vh" v-model:selection="selectedProducts" :paginator="true" :rowsPerPageOptions="[10, 50, 100]"
+            :rows="rows" :totalRecords="totalRecords" @page="onPage($event)" :rowHover="true" :loading="loading"
+            responsiveLayout="scroll" :resizableColumns="true" columnResizeMode="expand" v-model:filters="filters"
+            filterDisplay="menu">
             <template #header>
               <div style="width: 200px">
-                <TreeSelect
-                  :options="columns"
-                  v-model="showing"
-                  multiple
-                  :limit="0"
-                  :limitText="(count) => 'Hiển thị: ' + count + ' cột'"
-                >
+                <TreeSelect :options="columns" v-model="showing" multiple :limit="0"
+                  :limitText="(count) => 'Hiển thị: ' + count + ' cột'">
                 </TreeSelect>
               </div>
             </template>
 
             <template #empty> Không có dữ liệu. </template>
-            <Column
-              v-for="col of selectedColumns"
-              :field="col.data"
-              :header="col.label"
-              :key="col.data"
-              :showFilterMatchModes="false"
-              :class="col.className"
-            >
+            <Column v-for="col of selectedColumns" :field="col.data" :header="col.label" :key="col.data"
+              :showFilterMatchModes="false" :class="col.className">
               <template #body="slotProps">
                 <template v-if="col.data == 'id'">
-                  <RouterLink
-                    :to="
-                      '/execution/details/' +
-                      slotProps.data['process_version_id'] +
-                      '?execution_id=' +
-                      slotProps.data['id']
-                    "
-                  >
+                  <RouterLink :to="'/execution/details/' +
+                    slotProps.data['process_version_id'] +
+                    '?execution_id=' +
+                    slotProps.data['id']
+                    ">
                     <i class="fas fa-pencil-alt mr-2"></i>
                     {{ slotProps.data[col.data] }}
                   </RouterLink>
                 </template>
                 <template v-else-if="col.data == 'status_id'">
-                  <Button
-                    :label="slotProps.data['status']"
-                    :class="
-                      'p-button-sm status status_' + slotProps.data['status_id']
-                    "
-                  ></Button>
+                  <Button :label="slotProps.data['status']" :class="'p-button-sm status status_' + slotProps.data['status_id']
+                    "></Button>
                 </template>
                 <template v-else-if="col.data == 'activities'">
-                  <div
-                    style="position: relative; margin: 0 auto"
-                    :id="'conta_' + slotProps.data[col.data]"
-                  >
-                    <span
-                      v-for="activity of slotProps.data.activities"
-                      v-tooltip.top="activity.label"
-                      :class="{
-                        e_activity: true,
-                        e_activity_success:
-                          !activity.blocking && !activity.failed,
-                        e_activity_blocking: activity.blocking,
-                        e_activity_fail: activity.failed,
-                      }"
-                    ></span>
+                  <div style="position: relative; margin: 0 auto" :id="'conta_' + slotProps.data[col.data]">
+                    <span v-for="activity of slotProps.data.activities" v-tooltip.top="activity.label" :class="{
+                      e_activity: true,
+                      e_activity_success:
+                        !activity.blocking && !activity.failed,
+                      e_activity_blocking: activity.blocking,
+                      e_activity_fail: activity.failed,
+                    }"></span>
                   </div>
                 </template>
                 <div v-else v-html="slotProps.data[col.data]"></div>
               </template>
-              <template
-                #filter="{ filterModel, filterCallback }"
-                v-if="col.filter == true"
-              >
-                <InputText
-                  type="text"
-                  v-model="filterModel.value"
-                  @keydown.enter="filterCallback()"
-                  class="p-column-filter"
-                />
+              <template #filter="{ filterModel, filterCallback }" v-if="col.filter == true">
+                <select v-if="col.data == 'status_id'" class="form-control" v-model="filterModel.value">
+                  <option value="2">Đang thực hiện</option>
+                  <option value="3">Hoàn thành</option>
+                  <option value="4">Thất bại</option>
+                </select>
+                <InputText type="text" v-else v-model="filterModel.value" class="p-column-filter" />
               </template>
             </Column>
             <Column style="width: 1rem">
               <template #body="slotProps">
-                <Button
-                  icon="pi pi-trash"
-                  class="p-button p-button-danger p-button-sm"
-                  @click="confirmDelete(slotProps.data['id'])"
-                ></Button>
+                <Button icon="pi pi-trash" class="p-button p-button-danger p-button-sm"
+                  @click="confirmDelete(slotProps.data['id'])"></Button>
               </template>
             </Column>
           </DataTable>
@@ -170,6 +123,7 @@ const columns = ref([
     label: "Trạng thái",
     data: "status_id",
     className: "text-center",
+    filter: true,
   },
   {
     id: 6,
@@ -180,8 +134,8 @@ const columns = ref([
 ]);
 const filters = ref({
   id: { value: null, matchMode: FilterMatchMode.CONTAINS },
-  name: { value: null, matchMode: FilterMatchMode.CONTAINS },
-  group_id: { value: null, matchMode: FilterMatchMode.CONTAINS },
+  title: { value: null, matchMode: FilterMatchMode.CONTAINS },
+  process: { value: null, matchMode: FilterMatchMode.CONTAINS },
   status_id: { value: null, matchMode: FilterMatchMode.CONTAINS },
 });
 const totalRecords = ref(0);
@@ -259,6 +213,7 @@ watch(filters, async (newa, old) => {
 .status {
   border: 0px;
 }
+
 .status_2 {
   background-color: #d8f4ff;
   color: #0c9cdd;

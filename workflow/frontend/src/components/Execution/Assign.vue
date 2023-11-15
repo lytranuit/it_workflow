@@ -1,51 +1,28 @@
 ﻿<template>
   <div id="popup-assign">
-    <Dialog
-      v-model:visible="visible"
-      header="Phân công"
-      modal
-      :closable="!required"
-      class="p-fluid"
-      style="width: 50vw"
-      @update:visible="close"
-    >
+    <Dialog v-model:visible="visible" header="Phân công" modal :closable="!required" class="p-fluid"
+      :style="{ width: '50vw' }" :breakpoints="{ '1199px': '75vw', '575px': '95vw' }" @update:visible="close">
       <div class="row">
         <form id="form-assign" class="col-12">
           <Accordion :activeIndex="activeName" multiple>
-            <AccordionTab
-              :header="element.block.label"
-              :key="index"
-              v-for="(element, index) in data_custom_block"
-            >
+            <AccordionTab :header="element.block.label" :key="index" v-for="(element, index) in data_custom_block">
               <div class="row bg-white">
-                <div class="col-12">Người thực hiện:</div>
-                <div class="col-3">
-                  <select
-                    class="form-control"
-                    :name="'sel_' + index"
-                    v-model="element.data_setting.type_performer"
-                    required
-                  >
+                <div class="col-12 mb-2">Người thực hiện:</div>
+                <div class="col-lg-3 mb-2">
+                  <select class="form-control" :name="'sel_' + index" v-model="element.data_setting.type_performer"
+                    required>
                     <option value="3">Bộ phận</option>
                     <option value="4">Người dùng</option>
                   </select>
                 </div>
-                <div class="col-9">
+                <div class="col-lg-9 mb-2">
                   <div v-if="element.data_setting.type_performer == 4">
-                    <UserTreeSelect
-                      multiple
-                      required
-                      v-model="element.data_setting.listuser"
-                      :name="'user_' + index"
-                    ></UserTreeSelect>
+                    <UserTreeSelect multiple required v-model="element.data_setting.listuser" :name="'user_' + index">
+                    </UserTreeSelect>
                   </div>
                   <div v-if="element.data_setting.type_performer == 3">
-                    <DepartmentTreeSelect
-                      multiple
-                      required
-                      v-model="element.data_setting.listdepartment"
-                      :name="'dep_' + index"
-                    ></DepartmentTreeSelect>
+                    <DepartmentTreeSelect multiple required v-model="element.data_setting.listdepartment"
+                      :name="'dep_' + index"></DepartmentTreeSelect>
                   </div>
                 </div>
               </div>
@@ -55,19 +32,9 @@
       </div>
       <template #footer>
         <div class="text-center mt-3">
-          <Button
-            label="Hủy"
-            icon="pi pi-times"
-            class="p-button-sm p-button-danger"
-            @click="close"
-            v-if="!required"
-          ></Button>
-          <Button
-            label="Lưu lại"
-            icon="pi pi-save"
-            class="p-button-sm"
-            @click="save"
-          ></Button>
+          <Button label="Hủy" icon="pi pi-times" class="p-button-sm p-button-danger mr-2" @click="close"
+            v-if="!required"></Button>
+          <Button label="Lưu lại" icon="pi pi-save" class="p-button-sm" @click="save"></Button>
         </div>
       </template>
     </Dialog>
@@ -107,7 +74,7 @@ export default {
       });
     },
   },
-  mounted() {},
+  mounted() { },
   methods: {
     save() {
       var vaild = $("#form-assign").valid();

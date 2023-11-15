@@ -1,10 +1,10 @@
 ﻿<template>
   <div>
     <div class="item-control flex-m" v-for="element in fields" :key="element.id">
-      <div class="mb-3 ml-3 flex-m w-100">
-        <div class="form-input-data-preview mr-3 w-100">
-          <div class="mb-2 form-input-control flex-m">
-            <div class="custom-title-inline" style="width: 200px">
+      <div class="mb-3 flex-m w-100">
+        <div class="form-input-data-preview w-100">
+          <div class="mb-2 form-input-control flex-wrap-m">
+            <div class="custom-title-inline">
               <div class="container-label">
                 <div class="container-left">
                   <div id="idControlName" class="font-weight-bold font-14 pr-2 d-inline-block">
@@ -23,122 +23,131 @@
                 </div>
               </div>
             </div>
-            <div class="form-input-control-left w-100" v-if="element.type != 'table' && !readonly">
-              <div v-if="element.type == 'number'">
-                <input @change="signalChange(element.id)" class="form-control form-control-sm number" type="number"
-                  v-model="element.values.value" :required="element.is_require" :name="element.id" />
-              </div>
-              <div v-if="element.type == 'formular'">
-                <InputNumber class="w-100" v-model="element.values.value" :name="element.id"
-                  :required="element.is_require" readonly="" v-bind="options_formular2(element.data_setting)" />
-              </div>
-              <div v-if="element.type == 'currency'">
-                <InputNumber class="w-100" :name="element.id" :required="element.is_require"
-                  v-model="element.values.value" :suffix="element.data_setting.currency || 'VND'" locale="de-DE"
-                  :minFractionDigits="2" inputClass="p-inputtext-sm" @update:model-value="signalChange(element.id)" />
-              </div>
+            <div class="custom-field-inline">
+              <div class="form-input-control-left w-100" v-if="element.type != 'table' && !readonly">
+                <div v-if="element.type == 'number'">
+                  <input @change="signalChange(element.id)" class="form-control form-control-sm number" type="number"
+                    v-model="element.values.value" :required="element.is_require" :name="element.id" />
+                </div>
+                <div v-if="element.type == 'formular'">
+                  <InputNumber class="w-100" v-model="element.values.value" :name="element.id" :pt="{
+                    input: { required: element.is_require },
+                  }" readonly="" v-bind="options_formular2(element.data_setting)" />
+                </div>
+                <div v-if="element.type == 'currency'">
+                  <InputNumber class="w-100" :name="element.id" :required="element.is_require" :pt="{
+                    input: { required: element.is_require },
+                  }" v-model="element.values.value" :suffix="' ' + element.data_setting.currency || 'VND'"
+                    locale="de-DE" :minFractionDigits="0" inputClass="p-inputtext-sm"
+                    @update:model-value="signalChange(element.id)" />
+                </div>
 
-              <div v-if="element.type == 'text'">
-                <input class="form-control form-control-sm text" type="text" v-model="element.values.value"
-                  :required="element.is_require" :name="element.id" />
-              </div>
-              <div v-if="element.type == 'yesno'">
-                <div class="custom-control custom-switch switch-success">
-                  <input type="checkbox" class="custom-control-input" :id="'customSwitch_' + element.id"
-                    v-model="element.values.value" :name="element.id" value="1" />
-                  <label class="custom-control-label" :for="'customSwitch_' + element.id"></label>
+                <div v-if="element.type == 'text'">
+                  <input class="form-control form-control-sm text" type="text" v-model="element.values.value"
+                    :required="element.is_require" :name="element.id" />
+                </div>
+                <div v-if="element.type == 'yesno'">
+                  <div class="custom-control custom-switch switch-success">
+                    <input type="checkbox" class="custom-control-input" :id="'customSwitch_' + element.id"
+                      v-model="element.values.value" :name="element.id" value="1" />
+                    <label class="custom-control-label" :for="'customSwitch_' + element.id"></label>
+                  </div>
+                </div>
+                <div v-if="element.type == 'email'">
+                  <input class="form-control form-control-sm email" type="email" v-model="element.values.value"
+                    :required="element.is_require" :name="element.id" />
+                </div>
+                <div v-if="element.type == 'file'">
+                  <input class="form-control form-control-sm file" type="file" :required="element.is_require"
+                    :name="element.id" :accept="accept_file(element)" />
+                </div>
+                <div v-if="element.type == 'file_multiple'">
+                  <input class="form-control form-control-sm file" type="file" :required="element.is_require"
+                    :name="element.id" multiple :accept="accept_file(element)" />
+                </div>
+                <div v-if="element.type == 'date'">
+                  <Calendar class="w-100" v-model="element.values.value" dateFormat="yy-mm-dd" :pt="{
+                    input: { required: element.is_require },
+                  }" :name="element.id" />
+                </div>
+                <div v-if="element.type == 'date_month'">
+                  <Calendar class="w-100" v-model="element.values.value" view="month" dateFormat="yy-mm" :pt="{
+                    input: { required: element.is_require },
+                  }" :name="element.id" />
+                </div>
+
+                <div v-if="element.type == 'date_time'">
+                  <Calendar class="w-100" :id="element.id" v-model="element.values.value" showTime hourFormat="24" :pt="{
+                    input: { required: element.is_require },
+                  }" :name="element.id" dateFormat="yy-mm-dd" :hideOnDateTimeSelect="true" :stepMinute="30"
+                    :stepHour="1"></Calendar>
+                </div>
+
+                <div v-if="element.type == 'textarea'">
+                  <textarea class="form-control form-control-sm textarea" v-model="element.values.value"
+                    :required="element.is_require" :name="element.id"></textarea>
+                </div>
+
+                <div v-if="element.type == 'select'">
+                  <TreeSelect :options="get_options(element.data_setting.options)" v-model="element.values.value"
+                    :required="element.is_require" name="tran"></TreeSelect>
+                </div>
+
+                <div v-if="element.type == 'select_multiple'">
+                  <TreeSelect :options="get_options(element.data_setting.options)" v-model="element.values.value_array"
+                    multiple :required="element.is_require" name="tran2"></TreeSelect>
+                </div>
+
+                <div v-if="element.type == 'employee'">
+                  <UserTreeSelect v-model="element.values.value" :required="element.is_require" :name="element.id">
+                  </UserTreeSelect>
+                </div>
+
+                <div v-if="element.type == 'employee_multiple'">
+                  <UserTreeSelect v-model="element.values.value_array" :required="element.is_require" :name="element.id"
+                    multiple></UserTreeSelect>
+                </div>
+                <div v-if="element.type == 'radio'">
+                  <div class="radio radio-success radio-circle" v-for="option in element.data_setting.options"
+                    :key="option.id">
+                    <input :id="'radio-' + option.id" type="radio" :name="'radio-' + element.id" :value="option.id"
+                      v-model="element.values.value" />
+                    <label :for="'radio-' + option.id">
+                      {{ option.name }}
+                    </label>
+                  </div>
+                </div>
+
+                <div v-if="element.type == 'checkbox'">
+                  <div class="checkbox checkbox-success" v-for="option in element.data_setting.options" :key="option.id">
+                    <input :id="'checkbox-' + option.id" type="checkbox" :value="option.id"
+                      v-model="element.values.value_array" />
+                    <label :for="'checkbox-' + option.id">
+                      {{ option.name }}
+                    </label>
+                  </div>
+                </div>
+                <div v-if="element.type == 'department'">
+                  <DepartmentTreeSelect v-model="element.values.value" :required="element.is_require" :name="element.id">
+                  </DepartmentTreeSelect>
+                </div>
+
+                <div v-if="element.type == 'department_multiple'">
+                  <DepartmentTreeSelect v-model="element.values.value_array" :required="element.is_require"
+                    :name="element.id" multiple></DepartmentTreeSelect>
+                </div>
+                <div v-if="element.type == 'task'">
+                  <div class="checkbox checkbox-success checkbox-circle" v-for="element in element.data_setting.options"
+                    :key="element.id">
+                    <input :id="'task-' + element.id" type="checkbox" />
+                    <label :for="'task-' + element.id">
+                      {{ element.name }}
+                    </label>
+                  </div>
                 </div>
               </div>
-              <div v-if="element.type == 'email'">
-                <input class="form-control form-control-sm email" type="email" v-model="element.values.value"
-                  :required="element.is_require" :name="element.id" />
-              </div>
-              <div v-if="element.type == 'file'">
-                <input class="form-control form-control-sm file" type="file" :required="element.is_require"
-                  :name="element.id" />
-              </div>
-              <div v-if="element.type == 'file_multiple'">
-                <input class="form-control form-control-sm file" type="file" :required="element.is_require"
-                  :name="element.id" multiple />
-              </div>
-              <div v-if="element.type == 'date'">
-                <Calendar class="w-100" v-model="element.values.value" dateFormat="yy-mm-dd"
-                  :required="element.is_require" :name="element.id" />
-              </div>
-              <div v-if="element.type == 'date_month'">
-                <Calendar class="w-100" v-model="element.values.value" view="month" dateFormat="yy-mm"
-                  :required="element.is_require" :name="element.id" />
-              </div>
-
-              <div v-if="element.type == 'date_time'">
-                <Calendar class="w-100" id="calendar-24h" v-model="element.values.value" showTime hourFormat="24"
-                  :required="element.is_require" :name="element.id"></Calendar>
-              </div>
-
-              <div v-if="element.type == 'textarea'">
-                <textarea class="form-control form-control-sm textarea" v-model="element.values.value"
-                  :required="element.is_require" :name="element.id"></textarea>
-              </div>
-
-              <div v-if="element.type == 'select'">
-                <TreeSelect :options="get_options(element.data_setting.options)" v-model="element.values.value"
-                  :required="element.is_require" name="tran"></TreeSelect>
-              </div>
-
-              <div v-if="element.type == 'select_multiple'">
-                <TreeSelect :options="get_options(element.data_setting.options)" v-model="element.values.value_array"
-                  multiple :required="element.is_require" name="tran2"></TreeSelect>
-              </div>
-
-              <div v-if="element.type == 'employee'">
-                <UserTreeSelect v-model="element.values.value" :required="element.is_require" :name="element.id">
-                </UserTreeSelect>
-              </div>
-
-              <div v-if="element.type == 'employee_multiple'">
-                <UserTreeSelect v-model="element.values.value_array" :required="element.is_require" :name="element.id"
-                  multiple></UserTreeSelect>
-              </div>
-              <div v-if="element.type == 'radio'">
-                <div class="radio radio-success radio-circle" v-for="option in element.data_setting.options"
-                  :key="option.id">
-                  <input :id="'radio-' + option.id" type="radio" :name="'radio-' + element.id" :value="option.id"
-                    v-model="element.values.value" />
-                  <label :for="'radio-' + option.id">
-                    {{ option.name }}
-                  </label>
-                </div>
-              </div>
-
-              <div v-if="element.type == 'checkbox'">
-                <div class="checkbox checkbox-success" v-for="option in element.data_setting.options" :key="option.id">
-                  <input :id="'checkbox-' + option.id" type="checkbox" :value="option.id"
-                    v-model="element.values.value_array" />
-                  <label :for="'checkbox-' + option.id">
-                    {{ option.name }}
-                  </label>
-                </div>
-              </div>
-              <div v-if="element.type == 'department'">
-                <DepartmentTreeSelect v-model="element.values.value" :required="element.is_require" :name="element.id">
-                </DepartmentTreeSelect>
-              </div>
-
-              <div v-if="element.type == 'department_multiple'">
-                <DepartmentTreeSelect v-model="element.values.value_array" :required="element.is_require"
-                  :name="element.id" multiple></DepartmentTreeSelect>
-              </div>
-              <div v-if="element.type == 'task'">
-                <div class="checkbox checkbox-success checkbox-circle" v-for="element in element.data_setting.options"
-                  :key="element.id">
-                  <input :id="'task-' + element.id" type="checkbox" />
-                  <label :for="'task-' + element.id">
-                    {{ element.name }}
-                  </label>
-                </div>
-              </div>
+              <div class="w-100" v-else v-html="display(element)"></div>
             </div>
-            <div class="w-100" v-else v-html="display(element)"></div>
           </div>
           <div v-if="element.type == 'table'">
             <table class="table table-bordered mb-0 bg-white" style="outline: 1px solid #dee2e6 !important">
@@ -158,8 +167,9 @@
                       {{ row[column.id] }}
                     </div>
                     <div v-if="column.type == 'formular'">
-                      <InputNumber class="w-100" v-model="row[column.id]" :name="column.id + '_' + index1"
-                        :required="column.is_require" readonly="" v-bind="options_formular2(column)" />
+                      <InputNumber class="w-100" v-model="row[column.id]" :name="column.id + '_' + index1" :pt="{
+                        input: { required: column.is_require },
+                      }" readonly="" v-bind="options_formular2(column)" />
                     </div>
                     <div v-if="column.type == 'number'">
                       <input class="form-control form-control-sm number" type="number" v-model="row[column.id]"
@@ -173,9 +183,10 @@
                           " />
                     </div>
                     <div v-if="column.type == 'currency'">
-                      <InputNumber class="w-100" v-model="row[column.id]" :name="column.id + '_' + index1"
-                        :required="column.is_require" :suffix="column.currency || 'VND'" locale="de-DE"
-                        :minFractionDigits="2" inputClass="p-inputtext-sm" @update:model-value="
+                      <InputNumber class="w-100" v-model="row[column.id]" :name="column.id + '_' + index1" :pt="{
+                        input: { required: column.is_require },
+                      }" :suffix="' ' + column.currency || 'VND'" locale="de-DE" :minFractionDigits="0"
+                        inputClass="p-inputtext-sm" @update:model-value="
                           signalChange(
                             column.id,
                             index1,
@@ -201,17 +212,20 @@
                         :name="column.id + '_' + index1" :required="column.is_require" />
                     </div>
                     <div v-if="column.type == 'date'">
-                      <input class="form-control form-control-sm date" type="text" v-model="row[column.id]"
-                        :name="column.id + '_' + index1" :required="column.is_require" />
+                      <Calendar class="w-100" v-model="row[column.id]" dateFormat="yy-mm-dd" :pt="{
+                        input: { required: column.is_require },
+                      }" :name="column.id + '_' + index1" />
                     </div>
                     <div v-if="column.type == 'date_month'">
-                      <input class="form-control form-control-sm date_month" type="text" v-model="row[column.id]"
-                        :name="column.id + '_' + index1" :required="column.is_require" />
+                      <Calendar class="w-100" v-model="row[column.id]" view="month" dateFormat="yy-mm" :pt="{
+                        input: { required: column.is_require },
+                      }" :name="column.id + '_' + index1" />
                     </div>
 
                     <div v-if="column.type == 'date_time'">
-                      <input class="form-control form-control-sm date_time" type="text" v-model="row[column.id]"
-                        :name="column.id + '_' + index1" :required="column.is_require" />
+                      <Calendar class="w-100" id="calendar-24h" v-model="row[column.id]" showTime hourFormat="24" :pt="{
+                        input: { required: column.is_require },
+                      }" :name="column.id + '_' + index1" :manualInput="true"></Calendar>
                     </div>
                     <div v-if="column.type == 'textarea'">
                       <textarea class="form-control form-control-sm textarea" v-model="row[column.id]"
@@ -270,6 +284,9 @@ import { rand } from "../../../utilities/rand";
 import moment from "moment";
 import UserTreeSelect from "../../TreeSelect/UserTreeSelect.vue";
 import DepartmentTreeSelect from "../../TreeSelect/DepartmentTreeSelect.vue";
+import { useAuth } from "../../../stores/auth";
+
+var store_auth = useAuth();
 export default {
   components: {
     InputNumber,
@@ -303,6 +320,11 @@ export default {
       change: 1,
     };
   },
+  computed: {
+    current_user() {
+      return store_auth.user;
+    },
+  },
   mounted() {
     var index = 0;
     $(".vue-TreeSelect__input").each(function () {
@@ -315,52 +337,121 @@ export default {
         }
       });
     }
-    // var firstvariable = "!#"; //first input;
-    // var secondvariable = "#"; //first in
-    // var fields = this.fields;
-    // if (fields) {
-    //   for (var field of fields) {
-    //     if (field.type == "table" && field.data_setting.columns) {
-    //       var columns = field.data_setting.columns;
-    //       for (var column of columns) {
-    //         if (column.type == "formular") {
-    //           var text = column.formular.text;
-    //           var list_id = text.match(
-    //             new RegExp(
-    //               "(?<=" + firstvariable + ")(.*?)(?=" + secondvariable + ")",
-    //               "g"
-    //             )
-    //           );
-    //           //console.log(text);
-    //           //console.log(list_id);
-    //           //   for (var id of list_id) {
-    //           //     emitter.on(id, (e) => {
-    //           //       console.log(e);
-    //           //     });
-    //           //   }
-    //         }
-    //       }
-    //     }
-    //   }
-    // }
+    this.fill_field();
   },
   methods: {
-    options_formular(column) {
-      var suffix = "";
-      if (column.formular.type_return == "percent") {
-        suffix = " %";
-      } else if (column.formular.type_return == "currency") {
-        suffix = " VND";
+    fill_field() {
+      var firstvariable = "!#"; //first input;
+      var secondvariable = "#"; //first in
+      var fields = this.fields;
+      if (this.readonly == false && fields) {
+        for (var field of fields) {
+          if (field.variable == "created_by_ngaynghi") {
+            field.values.value = this.current_user.ngaynghi ? this.current_user.ngaynghi : 0;
+          }
+          var list_data = field.values.list_data || [];
+          // console.log(list_data);
+          if (field.type == "table" && field.data_setting.columns) {
+            var columns = field.data_setting.columns;
+            for (var column of columns) {
+              if (column.type == "formular") {
+                var text = column.formular.text;
+                var list_id = text.match(
+                  new RegExp(
+                    "(?<=" + firstvariable + ")(.*?)(?=" + secondvariable + ")",
+                    "g"
+                  )
+                );
+                for (var id of list_id) {
+                  $("input[name='" + id + "']").trigger("change");
+                }
+              }
+            }
+          }
+          if (field.type == "formular") {
+            if (
+              field.data_setting.formular.type == 2
+            ) {
+
+              var operator_column = field.data_setting.formular.operator_column;
+              var operator_type = field.data_setting.formular.operator_type;
+              var arr = list_data.map(function (item) {
+                return item[operator_column];
+              });
+              switch (operator_type) {
+                case "sum":
+                  field.values.value = arr.reduce((a, b) => a + b, 0);
+                  //console.log(arr);
+                  break;
+                case "avg":
+                  field.values.value =
+                    arr.length > 0
+                      ? arr.reduce((a, b) => a + b, 0) / arr.length
+                      : 0;
+                  break;
+                case "min":
+                  field.values.value = Math.min(...arr);
+                  break;
+                case "max":
+                  field.values.value = Math.max(...arr);
+                  break;
+              }
+            }
+            if (field.data_setting.formular.type == 1) {
+              var text1 = field.data_setting.formular.text;
+              var list_id1 = text1.match(
+                new RegExp(
+                  "(?<=" + firstvariable + ")(.*?)(?=" + secondvariable + ")",
+                  "g"
+                )
+              );
+
+              // console.log(list_id1);
+              // if (list_id1.indexOf(id) == -1) {
+              //   continue;
+              // }
+              for (let _id of list_id1) {
+                var findindex = this.fields.findIndex(function (item) {
+                  return item.id == _id;
+                });
+                var findField = this.fields[findindex];
+                // console.log(this.fields);
+                // console.log(_id);
+                let value = findField.values.value ? findField.values.value : 0;
+                text1 = text1.replace(new RegExp("!#" + _id + "#", "g"), value);
+              }
+              var result1 = stringMath(text1, function () {
+                return 0;
+              });
+              // console.log(result1);
+              field.values.value = result1;
+            }
+          }
+
+
+        }
       }
-      return {
-        precision: column.formular.decimal_number,
-        prefix: "",
-        suffix: suffix,
-        decimal: ",",
-        thousand: ".",
-        acceptNegative: false,
-        isInteger: false,
+    },
+    accept_file(element) {
+      var data_setting = element.data_setting;
+      var accept = data_setting.accept_file;
+      var ret = null;
+      if (accept == "pdf") {
+        ret = "application/pdf"
+      } else if (accept == "image") {
+        ret = "image/*"
+      }
+      return ret;
+    },
+    options_formular(column) {
+      var data_return = {
+        style: column.formular.type_return,
+        minimumFractionDigits: column.formular.decimal_number
       };
+      if (column.formular.type_return == "currency") {
+        data_return.currency = "VND";
+      }
+      return data_return;
     },
 
     options_formular2(column) {
@@ -370,6 +461,7 @@ export default {
       } else if (column.formular.type_return == "currency") {
         suffix = " VND";
       }
+      // console.log(column.formular.decimal_number);
       return {
         suffix: suffix,
         locale: "de-DE",
@@ -411,7 +503,7 @@ export default {
             var result = stringMath(text, function () {
               return 0;
             });
-            console.log(column);
+            // console.log(column);
             row[column_id] = result;
             this.signalChange(column_id, index, columns, list_data);
             //console.log(text);
@@ -640,9 +732,9 @@ export default {
           : "";
       } else if (field.type == "formular") {
         text = field.values.value
-          ? VueNumberFormat.format(
+          ? this.format_formular(
             field.values.value,
-            this.options_formular(field.data_setting)
+            this.options_formular(data_setting)
           )
           : "";
       } else if (field.type == "yesno") {
@@ -662,8 +754,8 @@ export default {
     },
 
     format_formular(value, option) {
-      console.log(value);
-      return VueNumberFormat.format(value, option);
+      // console.log(value);
+      return new Intl.NumberFormat("de-DE", option).format(value)
     },
   },
 };

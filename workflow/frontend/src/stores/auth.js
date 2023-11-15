@@ -64,6 +64,12 @@ export const useAuth = defineStore("auth", () => {
       return response;
     });
   }
+  async function fetchDataAuth() {
+    return authApi.get(user.value.id).then((response) => {
+      data.value = response;
+      return response;
+    });
+  }
   function in_groups(groups) {
     let re = false;
     let user_roles = user.value.roles;
@@ -89,5 +95,6 @@ export const useAuth = defineStore("auth", () => {
     fetchRoles,
     fetchDepartment,
     fetchData,
+    fetchDataAuth
   };
 });

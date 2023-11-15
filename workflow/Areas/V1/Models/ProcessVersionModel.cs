@@ -36,6 +36,7 @@ namespace workflow.Areas.V1.Models
             }
         }
         public DateTime? created_at { get; set; }
+        public DateTime? deleted_at { get; set; }
 
     }
 }

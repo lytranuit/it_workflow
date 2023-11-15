@@ -34,10 +34,18 @@ namespace workflow.Areas.V1.Controllers
             try
             {
                 var list = _context.ProcessModel.Where(d => item.Contains(d.id)).ToList();
-                _context.RemoveRange(list);
+                foreach (var i in list)
+                {
+                    i.deleted_at = DateTime.Now;
+                }
+                _context.UpdateRange(list);
                 _context.SaveChanges();
                 var list2 = _context.ProcessVersionModel.Where(d => item.Contains(d.process_id)).ToList();
-                _context.RemoveRange(list2);
+                foreach (var i in list2)
+                {
+                    i.deleted_at = DateTime.Now;
+                }
+                _context.UpdateRange(list2);
                 _context.SaveChanges();
             }
             catch (Exception ex)

@@ -56,6 +56,7 @@ namespace workflow.Areas.V1.Models
         public List<Option>? options { get; set; }
         public List<Column>? columns { get; set; }
 
+        public string accept_file { get; set; }
         public Formular formular { get; set; }
     }
     public class Option

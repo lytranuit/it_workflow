@@ -9,6 +9,7 @@ namespace workflow.Areas.V1.Models
         [Key]
         public string id { get; set; }
 
+
         public int execution_id { get; set; }
         public string? from_block_id { get; set; }
         public string? to_block_id { get; set; }
@@ -22,6 +23,8 @@ namespace workflow.Areas.V1.Models
 
         public string? label { get; set; }
 
+        [ForeignKey("execution_id")]
+        public ExecutionModel? ExecutionModel { get; set; }
         public string? created_by { get; set; }
         public DateTime? created_at { get; set; }
 

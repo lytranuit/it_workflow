@@ -7,11 +7,15 @@ export default function (G6) {
     },
     getEvents() {
       return {
+        
+        "node:touchend": "onClick",
+        "edge:touchend": "onClick",
         "node:click": "onClick",
         "edge:click": "onClick",
         "edge:mouseover": "onEdgeMouseOver",
         "edge:mouseleave": "onEdgeMouseLeave",
         "canvas:click": "onCanvasClick",
+        "canvas:touchend": "onCanvasClick",
         "node:mouseover": "onNodeMouseOver",
       };
     },

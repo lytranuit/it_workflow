@@ -2,46 +2,27 @@
   <Sidebar v-model:visible="visible" :position="position" style="width: 50rem">
     <template #header>
       <div class="control ml-auto flex-m">
-        <a
-          class="nav-link cursor-pointer flex-m items-center font-13"
-          href="#"
-          @click="assign_again(selectedModel.block_id)"
-          v-if="
-            selectedModel.blocking &&
+        <a class="nav-link cursor-pointer flex-m items-center font-13" href="#"
+          @click="assign_again(selectedModel.block_id)" v-if="selectedModel.blocking &&
             (hasPermission() || model.user_id == current_user.id)
-          "
-        >
+            ">
           <i class="fas fa-share font-16"></i>
           <div class="ml-2">Phân công lại</div>
         </a>
-        <a
-          class="nav-link cursor-pointer flex-m items-center font-13"
-          href="#"
-          @click="require_sign(selectedModel)"
-          v-if="
-            selectedModel.blocking &&
-            hasPermission() &&
-            selectedModel.clazz == 'approveTask'
-          "
-        >
+        <a class="nav-link cursor-pointer flex-m items-center font-13" href="#" @click="require_sign(selectedModel)" v-if="selectedModel.blocking &&
+          hasPermission() &&
+          selectedModel.clazz == 'approveTask'
+          ">
           <i class="fas fa-signature"></i>
           <div class="ml-2">Yêu cầu phê duyệt</div>
         </a>
-        <a
-          class="nav-link cursor-pointer flex-m items-center font-13"
-          href="#"
-          v-if="isPopup == true"
-          @click="setIsPopup(false)"
-        >
+        <a class="nav-link cursor-pointer flex-m items-center font-13" href="#" v-if="isPopup == true"
+          @click="setIsPopup(false)">
           <i class="fas fa-expand font-16"></i>
           <div class="ml-2">Phóng to</div>
         </a>
-        <a
-          class="nav-link cursor-pointer flex-m items-center font-13"
-          href="#"
-          v-if="isPopup == false"
-          @click="setIsPopup(true)"
-        >
+        <a class="nav-link cursor-pointer flex-m items-center font-13" href="#" v-if="isPopup == false"
+          @click="setIsPopup(true)">
           <i class="fas fa-location-arrow font-16"></i>
           <div class="ml-2">Thu lại</div>
         </a>
@@ -59,91 +40,39 @@
             </div>
           </div>
         </div>
-        <div
-          class="box_transition"
-          v-if="selectedModel.blocking && hasPermission()"
-        >
-          <button
-            class="mr-2"
-            :class="{
-              'btn-reverse': item.reverse,
-              'btn-next': !item.reverse,
-            }"
-            tabindex="1"
-            type="button"
-            name="button"
-            v-for="item in selectedModel.outEdges"
-            :key="item.id"
-            @click="execute_transition(selectedModel.id, item.id)"
-          >
+        <div class="box_transition" v-if="selectedModel.blocking && hasPermission()">
+          <button class="mr-2" :class="{
+            'btn-reverse': item.reverse,
+            'btn-next': !item.reverse,
+          }" tabindex="1" type="button" name="button" v-for="item in selectedModel.outEdges" :key="item.id"
+            @click="execute_transition(selectedModel.id, item.id)">
             {{ item.label }}
           </button>
         </div>
-        <div
-          class="box_transition"
-          v-if="selectedModel.blocking && !hasPermission() && !hasRequireSign()"
-        >
-          <span class="text-danger"
-            >Bạn không có quyền thực hiện bước này.</span
-          >
+        <div class="box_transition" v-if="selectedModel.blocking && !hasPermission() && !hasRequireSign()">
+          <span class="text-danger">Bạn không có quyền thực hiện bước này.</span>
         </div>
-        <div
-          class="box_transition"
-          v-if="selectedModel.blocking && !hasPermission() && hasRequireSign()"
-        >
-          <button
-            class="mr-2 btn-reverse"
-            type="button"
-            name="button"
-            @click="disagree()"
-          >
+        <div class="box_transition" v-if="selectedModel.blocking && !hasPermission() && hasRequireSign()">
+          <button class="mr-2 btn-reverse" type="button" name="button" @click="disagree()">
             Không đồng ý
           </button>
-          <button
-            class="mr-2 btn-next"
-            type="button"
-            name="button"
-            @click="agree()"
-          >
+          <button class="mr-2 btn-next" type="button" name="button" @click="agree()">
             Đồng ý
           </button>
         </div>
       </div>
-      <div
-        class="body"
-        v-if="
-          (selectedModel.blocking && hasPermission()) ||
-          selectedModel.executed ||
-          hasRequireSign()
-        "
-      >
-        <FormTask
-          :departments="departments"
-          :users="users"
-          :fields="fields"
-          :readonly="readonly"
-          v-if="selectedModel.clazz == 'formTask'"
-        ></FormTask>
-        <ApproveTask
-          :departments="departments"
-          :users="users"
-          :nodes="nodes"
-          :readonly="readonly"
-          v-if="selectedModel.clazz == 'approveTask'"
-          :model="selectedModel"
-          @require_sign="require_sign"
-        ></ApproveTask>
-        <SuggestTask
-          :nodes="nodes"
-          :readonly="readonly"
-          v-if="selectedModel.clazz == 'suggestTask'"
-          :model="selectedModel"
-        ></SuggestTask>
-        <PrintSystem
-          v-if="selectedModel.clazz == 'printSystem'"
-          :nodes="nodes"
-          :model="selectedModel"
-        ></PrintSystem>
+      <div class="body" v-if="(selectedModel.blocking && hasPermission()) ||
+        selectedModel.executed ||
+        hasRequireSign()
+        ">
+        <FormTask :departments="departments" :users="users" :fields="fields" :readonly="readonly"
+          v-if="selectedModel.clazz == 'formTask'"></FormTask>
+        <ApproveTask :departments="departments" :users="users" :nodes="nodes" :readonly="readonly"
+          v-if="selectedModel.clazz == 'approveTask'" :model="selectedModel" @require_sign="require_sign"></ApproveTask>
+        <SuggestTask :nodes="nodes" :readonly="readonly" v-if="selectedModel.clazz == 'suggestTask'"
+          :model="selectedModel"></SuggestTask>
+        <PrintSystem v-if="selectedModel.clazz == 'printSystem'" :nodes="nodes" :model="selectedModel"></PrintSystem>
+        <OutputSystem v-if="selectedModel.clazz == 'outputSystem'" :nodes="nodes" :model="selectedModel"></OutputSystem>
       </div>
     </form>
   </Sidebar>
@@ -154,6 +83,7 @@ import FormTask from "./FormTask.vue";
 import ApproveTask from "./ApproveTask.vue";
 import SuggestTask from "./SuggestTask.vue";
 import PrintSystem from "./PrintSystem.vue";
+import OutputSystem from "./OutputSystem.vue";
 import Sidebar from "primevue/sidebar";
 import { useProcess } from "../../../stores/process";
 import { useAuth } from "../../../stores/auth";
@@ -166,6 +96,7 @@ export default {
     ApproveTask,
     SuggestTask,
     PrintSystem,
+    OutputSystem,
   },
   data() {
     return {
@@ -381,8 +312,8 @@ export default {
             var findUser =
               that.users != null
                 ? that.users.findLastIndex(function (user) {
-                    return user.id == item;
-                  })
+                  return user.id == item;
+                })
                 : -1;
             if (findUser == -1) return null;
             var user = that.users[findUser];
@@ -401,8 +332,8 @@ export default {
             var findDepartment =
               departments != null
                 ? departments.findLastIndex(function (user) {
-                    return user.id == item;
-                  })
+                  return user.id == item;
+                })
                 : -1;
             if (findDepartment == -1) return null;
             var department = departments[findDepartment];
@@ -490,6 +421,7 @@ export default {
 #sidebar-right {
   height: 100%;
 }
+
 .header {
   padding: 0px 0px 10px;
   border-bottom: 1px solid #d5d5d5;

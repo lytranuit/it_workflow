@@ -1,15 +1,7 @@
 <template>
-  <TreeSelect
-    :options="departments"
-    :multiple="multiple"
-    :modelValue="modelValue"
-    :flat="flat"
-    :name="name"
-    :required="required"
-    :value-consists-of="valueConsistsOf"
-    :append-to-body="true"
-    @update:modelValue="emit('update:modelValue', $event)"
-  ></TreeSelect>
+  <TreeSelect :options="departments" :multiple="multiple" :modelValue="modelValue" :flat="flat" :name="name"
+    :required="required" :value-consists-of="valueConsistsOf" :append-to-body="true"
+    @update:modelValue="emit('update:modelValue', $event)"></TreeSelect>
 </template>
 
 <script setup>
@@ -17,6 +9,7 @@
 import { useAuth } from "../../stores/auth";
 import { storeToRefs } from "pinia";
 import { computed, onMounted } from "vue";
+import { useProcess } from "../../stores/process";
 const props = defineProps({
   modelValue: {
     type: [String, Array],
@@ -40,9 +33,10 @@ const props = defineProps({
   },
 });
 const emit = defineEmits(["update:modelValue"]);
-const store = useAuth();
+
+const store = useProcess();
 const { departments } = storeToRefs(store);
 onMounted(() => {
-  store.fetchDepartment();
+  store.fetchDepartments();
 });
 </script>

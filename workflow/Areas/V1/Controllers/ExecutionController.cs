@@ -73,6 +73,12 @@ namespace workflow.Areas.V1.Controllers
             var length = Request.Form["length"].FirstOrDefault();
             var user_id = Request.Form["user_id"].FirstOrDefault();
             var searchValue = Request.Form["search[value]"].FirstOrDefault();
+            var status_id_text = Request.Form["filters[status_id]"].FirstOrDefault();
+            var id_text = Request.Form["filters[id]"].FirstOrDefault();
+            var title = Request.Form["filters[title]"].FirstOrDefault();
+
+            int status_id = status_id_text != null ? Convert.ToInt32(status_id_text) : 0;
+            int id = id_text != null ? Convert.ToInt32(id_text) : 0;
             int pageSize = length != null ? Convert.ToInt32(length) : 0;
             int skip = start != null ? Convert.ToInt32(start) : 0;
             System.Security.Claims.ClaimsPrincipal currentUser = this.User;
@@ -100,6 +106,19 @@ namespace workflow.Areas.V1.Controllers
             if (!string.IsNullOrEmpty(searchValue))
             {
                 customerData = customerData.Where(m => m.title.Contains(searchValue));
+            }
+            if (id > 0)
+            {
+                customerData = customerData.Where(d => d.id == id);
+            }
+            if (title != null && title != "")
+            {
+                customerData = customerData.Where(d => d.title.Contains(title));
+            }
+
+            if (status_id > 0)
+            {
+                customerData = customerData.Where(d => d.status_id == status_id);
             }
             int recordsFiltered = customerData.Count();
             //customerData = customerData.Include(m => m.group);
@@ -202,6 +221,8 @@ namespace workflow.Areas.V1.Controllers
 
         public bool check_department(List<int> departments, List<int> in_departments)
         {
+            if (departments == null)
+                return false;
             foreach (var department in departments)
             {
                 if (in_departments.Contains(department))

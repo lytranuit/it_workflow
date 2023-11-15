@@ -47,6 +47,7 @@ app.mount("#app");
 
 import "../src/assets/js/jquery.min.js";
 import "../src/assets/js/jquery-ui.min.js";
+import "../src/assets/js/jquery.ui.touch-punch.min.js";
 import "../src/assets/js/bootstrap.bundle.min.js";
 import "../src/assets/js/metisMenu.min.js";
 

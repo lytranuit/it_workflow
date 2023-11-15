@@ -46,6 +46,7 @@
     "scriptTask": "Script Task",
     "scriptTask.script": "Script",
     "esign": "Chữ ký điện tử",
+    "notification": "Thông báo",
     "javaTask.javaClass": "Java Class Name",
     "mailTask": "Mail Task",
     "mailTask.to": "To",
@@ -100,6 +101,7 @@
     "tooltip.allFlow": "Tất cả các bước",
     "tooltip.currentFlow": "Bước hiện tại",
     "tooltip.successFlow": "Quy trình hoàn thành",
+    "output": "Đầu ra",
     "process": "Workflow",
     "process.category": "Category",
     "process.id": "Workflow ID",
@@ -111,6 +113,6 @@
     "detail.fields": "Trường dữ liệu",
     "detail.user_performer": "Người thực hiện",
     "detail.template": "Biểu mẫu",
-    "detail.time": "Thời hạn"
-
+    "detail.time": "Thời hạn",
+    "detail.output": "Đầu ra"
 }

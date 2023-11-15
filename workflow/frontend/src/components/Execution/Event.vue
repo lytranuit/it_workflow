@@ -21,7 +21,7 @@
                   formatDate(event.created_at, "HH:mm DD/MM/YYYY")
                 }}</span>
               </div>
-              <h5 v-html="event.event_content"></h5>
+              <h5 v-html="event.event_content" style="font-size: 13px;"></h5>
             </div>
           </div>
         </div>

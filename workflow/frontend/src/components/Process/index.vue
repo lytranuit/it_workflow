@@ -4,43 +4,23 @@
       <i class="mdi mdi-close alert-icon"></i>
       <div v-for="error in errors" v-html="error"></div>
     </div>
-    <Button
-      label="Lưu lại"
-      icon="pi pi-save"
-      class="p-button-success p-button-sm"
-      style="float: right; margin-top: 4px; margin-right: 4px"
-      @click="save_data"
-    ></Button>
+    <Button label="Lưu lại" icon="pi pi-save" class="p-button-success p-button-sm"
+      style="float: right; margin-top: 4px; margin-right: 4px" @click="save_data"></Button>
     <DataFields></DataFields>
+    <DataConfig @save="save_config"></DataConfig>
     <div class="root">
       <ToolbarPanel ref="toolbar_ref" :mode="mode" />
       <div style="display: flex">
-        <ItemPanel
-          ref="addItemPanel_ref"
-          :height="height"
-          :model="data.model"
-          v-if="mode == 'edit'"
-        />
-        <div
-          ref="canvas"
-          class="canvasPanel"
-          :style="{
-            height: height + 'px',
-            width: mode != 'edit' ? '100%' : '65%',
-          }"
-        ></div>
-        <DetailPanel
-          ref="detailPanel"
-          v-if="mode == 'edit'"
-          :height="height"
-          :model="selectedModel"
-          :readOnly="mode !== 'edit'"
-          :onChange="
-            (key, val) => {
-              onItemCfgChange(key, val);
-            }
-          "
-        />
+        <ItemPanel ref="addItemPanel_ref" :height="height" :model="data.model" v-if="mode == 'edit'" />
+        <div ref="canvas" class="canvasPanel" :style="{
+          height: height + 'px',
+          width: mode != 'edit' ? '100%' : '65%',
+        }"></div>
+        <DetailPanel ref="detailPanel" v-if="mode == 'edit'" :height="height" :model="selectedModel"
+          :readOnly="mode !== 'edit'" :onChange="(key, val) => {
+            onItemCfgChange(key, val);
+          }
+            " />
       </div>
     </div>
   </div>
@@ -66,6 +46,7 @@ import Toolbar from "../../plugins/toolbar";
 import AddItemPanel from "../../plugins/addItemPanel";
 import CanvasPanel from "../../plugins/canvasPanel";
 import DataFields from "./DataFields.vue";
+import DataConfig from "./DataConfig.vue";
 registerShape(G6);
 registerBehavior(G6);
 const router = useRouter();
@@ -199,7 +180,7 @@ const toolbar_ref = ref();
 const addItemPanel_ref = ref();
 
 const graph = ref();
-const { departments, users, groups, data, selectedModel } = storeToRefs(store);
+const { departments, users, groups, data, selectedModel, data_temp } = storeToRefs(store);
 // const {} = store;
 const props = defineProps({
   process_id: String,
@@ -260,6 +241,28 @@ const vaild = () => {
   errors.value = [];
   return true;
 };
+const save_config = () => {
+  let res = $.extendext(true, 'replace', {}, data_temp.value);
+  let data_tmp = {};
+  data_tmp.edges = res.links;
+  var blocks = res.blocks.map(function (item) {
+    var default_setting = { data_setting: {} };
+    delete item.process;
+    item = $.extendext(true, "replace", default_setting, item);
+    return item;
+  });
+  data_tmp.nodes = blocks;
+  delete res.blocks;
+  delete res.links;
+  delete res.fields;
+  data_tmp.model = res;
+  data.value = data_tmp;
+  // console.log(data.value);
+  // console.log(data_temp.value);
+  graph.value.clear();
+  $(canvas.value).empty();
+  init()
+}
 const init = () => {
   let plugins = [];
   var cmdPlugin = new Command();
@@ -312,16 +315,19 @@ const init = () => {
   // }
 };
 const initShape = (data) => {
-  if (data && data.nodes) {
-    //var edges = $.extendext(true, 'replace', [], data.edges);
+  if (data && data.nodes.length) {
+
+    // console.log(data);
+    var edges = $.extendext(true, 'replace', [], data.edges);
+    var nodes = data.nodes.map((node) => {
+      return {
+        type: getShapeName(node.clazz),
+        ...node,
+      };
+    });
     return {
-      nodes: data.nodes.map((node) => {
-        return {
-          type: getShapeName(node.clazz),
-          ...node,
-        };
-      }),
-      edges: data.edges,
+      nodes: nodes,
+      edges: edges,
     };
   }
   return data;
@@ -440,27 +446,29 @@ onMounted(async () => {
   store.fetchGroups();
   init();
 });
-watch(
-  () => data,
-  (newValue, oldValue) => {
-    if (oldValue != newValue) {
-      changeGraph();
-    }
-  },
-  { deep: true }
-);
+// watch(
+//   () => data,
+//   (newValue, oldValue) => {
+//     if (oldValue != newValue) {
+//       changeGraph();
+//     }
+//   },
+//   { deep: true }
+// );
 </script>
 <style scoped>
 #app {
   color: #2c3e50;
   border: 1px solid #e1e1e1;
 }
+
 .root {
   width: 100%;
   height: 100%;
   background-color: #fff;
   display: block;
 }
+
 .canvasPanel {
   flex: 0 0 auto;
   float: left;

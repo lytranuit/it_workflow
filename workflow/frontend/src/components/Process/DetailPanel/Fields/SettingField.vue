@@ -642,13 +642,24 @@
             <label class="mb-0" for="inlineRadio2"> Chọn nhiều </label>
           </div>
         </div>
-
         <div
           class="col-lg-12 mt-2"
           v-if="temp_add.type == 'file' || temp_add.type == 'file_multiple'"
         >
+        
+          <b class="col-form-label mr-3">Chấp nhận:</b>
+          <select class="form-control" v-model="temp_add.data_setting.accept_file">
+            <option value="all">Tất cả</option>
+            <option value="pdf">PDF</option>
+            <option value="image">Hình ảnh</option>
+          </select>
+        </div>
+        <div
+          class="col-lg-12 mt-2"
+          v-if="temp_add.type == 'file' || temp_add.type == 'file_multiple'"
+        >
+        
           <b class="col-form-label mr-3">Kiểu chọn giá trị:</b>
-
           <div class="radio radio-primary form-check-inline">
             <input
               type="radio"

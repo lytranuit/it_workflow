@@ -13,6 +13,7 @@ export function getShapeName(clazz) {
         case 'approveTask': return 'approve-task-node';
         case 'mailSystem': return 'mail-system-node';
         case 'printSystem': return 'print-system-node';
+        case 'outputSystem': return 'output-system-node';
         case 'subProcess': return 'sub-process-node';
         case 'suggestTask': return 'suggest-task-node';
         default: return 'task-node';

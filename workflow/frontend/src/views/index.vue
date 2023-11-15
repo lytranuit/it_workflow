@@ -127,9 +127,7 @@
                   <td v-html="tr.version"></td>
                   <td v-html="tr.count"></td>
                   <td>
-                    <a href="#" @click="exportVersion(tr.id)"
-                      ><i class="fas fa-download"></i
-                    ></a>
+                    <a href="#" @click="exportVersion(tr.id)"><i class="fas fa-download"></i></a>
                   </td>
                 </tr>
               </tbody>
@@ -151,6 +149,10 @@ import Chart from "primevue/chart";
 import Api from "../api/Api";
 import processApi from "../api/processApi";
 import Loading from "../components/Loading.vue";
+import { useAuth } from "../stores/auth";
+import { useRouter } from "vue-router";
+
+const store = useAuth();
 const execution_success = ref(0);
 const execution_fail = ref(0);
 const execution_amount = ref(0);
@@ -170,6 +172,8 @@ const chartData = ref({
 });
 const datatableUser = ref([]);
 const datatableProcess = ref([]);
+const router = useRouter();
+
 const exportVersion = (id) => {
   waiting.value = true;
   processApi.exportVersion(id).then((res) => {
@@ -183,21 +187,29 @@ const exportVersion = (id) => {
   });
 };
 onMounted(() => {
-  Api.HomeBadge().then((res) => {
-    execution_amount.value = res.execution_amount;
-    execution_wait.value = res.execution_wait;
-    execution_success.value = res.execution_success;
-    execution_fail.value = res.execution_fail;
-  });
-  Api.datachartDepartment().then((res) => {
-    chartData.value.labels = res.labels;
-    chartData.value.datasets = res.datasets;
-  });
-  Api.tableUser().then((res) => {
-    datatableUser.value = res.data;
-  });
-  Api.tableProcess().then((res) => {
-    datatableProcess.value = res.data;
-  });
+  var is_first = localStorage.getItem("is_first") || 0;
+  if (!is_first) {
+    // localStorage.setItem("is_first", 1);
+    router.push("/member");
+  } else if (!store.is_admin) {
+    router.push("/execution/wait");
+  } else {
+    Api.HomeBadge().then((res) => {
+      execution_amount.value = res.execution_amount;
+      execution_wait.value = res.execution_wait;
+      execution_success.value = res.execution_success;
+      execution_fail.value = res.execution_fail;
+    });
+    Api.datachartDepartment().then((res) => {
+      chartData.value.labels = res.labels;
+      chartData.value.datasets = res.datasets;
+    });
+    Api.tableUser().then((res) => {
+      datatableUser.value = res.data;
+    });
+    Api.tableProcess().then((res) => {
+      datatableProcess.value = res.data;
+    });
+  }
 });
 </script>

@@ -5,7 +5,8 @@
       header="Yêu cầu ký tên"
       modal
       class="p-fluid"
-      style="width: 50vw"
+      :breakpoints="{ '1199px': '75vw', '575px': '95vw' }"
+      :style="{ width: '50vw' }"
       @update:visible="close"
     >
       <div class="row">
@@ -28,7 +29,7 @@
           <Button
             label="Hủy"
             icon="pi pi-times"
-            class="p-button-sm p-button-danger"
+            class="p-button-sm p-button-danger mr-3"
             @click="close"
           ></Button>
           <Button

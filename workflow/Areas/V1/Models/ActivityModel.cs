@@ -21,6 +21,8 @@ namespace workflow.Areas.V1.Models
         public bool? failed { get; set; }
 
         public bool? blocking { get; set; }
+        public int? status_notification { get; set; }
+        public string? error_notification { get; set; }
 
         public int stt { get; set; }
         public string? note { get; set; }

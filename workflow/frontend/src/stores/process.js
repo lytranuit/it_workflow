@@ -19,6 +19,7 @@ export const useProcess = defineStore("process", () => {
   const selectedModel = ref({});
   const editTitle = ref(false);
   const graph = ref();
+  const data_temp = ref();
   const nodes = computed(() => {
     return data.value.nodes;
   });
@@ -32,7 +33,7 @@ export const useProcess = defineStore("process", () => {
   });
   const prev_nodes_print = computed(() => {
     return nodes.value.filter(function (item) {
-      return item.stt < selectedModel.value.stt && item.clazz == "printSystem";
+      return item.stt < selectedModel.value.stt && (item.clazz == "printSystem" || item.clazz == "outputSystem");
     });
   });
   const prev_nodes_form = computed(() => {
@@ -40,8 +41,21 @@ export const useProcess = defineStore("process", () => {
       return item.stt < selectedModel.value.stt && item.clazz == "formTask";
     });
   });
+  const prev_fields_file = computed(() => {
+    var list = [];
+    for (var item of prev_nodes_form.value) {
+      var fields = item.fields || [];
+      for (var item1 of fields) {
+        if (item1.type == "file") {
+          list.push(item1);
+        }
+      }
+    }
+    return list;
+  });
   const init = (process_id) => {
     return Api.process(process_id).then((res) => {
+      data_temp.value = $.extendext(true, 'replace', {}, res);
       let data_tmp = {};
       data_tmp.edges = res.links;
       var blocks = res.blocks.map(function (item) {
@@ -153,7 +167,8 @@ export const useProcess = defineStore("process", () => {
             target.get("model").clazz == "approveTask" ||
             target.get("model").clazz == "suggestTask" ||
             target.get("model").clazz == "mailSystem" ||
-            target.get("model").clazz == "printSystem"
+            target.get("model").clazz == "printSystem" ||
+            target.get("model").clazz == "outputSystem"
           ) {
             blocking = true;
           }
@@ -189,7 +204,7 @@ export const useProcess = defineStore("process", () => {
             var data_setting_block = target.get("model").data_setting || {};
             var type_performer = target.get("model").type_performer;
             var data_setting = {};
-            if (type_performer == 1 && data_setting_block.block_id == null) {
+            if (type_performer == null || (type_performer == 1 && data_setting_block.block_id == null)) {
               data_setting.type_performer = 4;
               data_setting.listuser = [user.value.id];
             } else if (
@@ -227,18 +242,20 @@ export const useProcess = defineStore("process", () => {
     var node_blocks = graph.value.findAll("node", (node) => {
       return node.get("model").active == true;
     });
-    for (var node of node_blocks) {
-      var index_activity_block = data_activity.value.findLastIndex(function (
-        i
-      ) {
-        return i.block_id == node.get("model").id;
-      });
-      if (index_activity_block == -1) {
-        continue;
-      }
-      var activity = data_activity.value[index_activity_block];
-      if (hasPermission(activity)) {
-        graph.value.emit("node:click", { item: node });
+    if (node_blocks.length == 1) {
+      for (var node of node_blocks) {
+        var index_activity_block = data_activity.value.findLastIndex(function (
+          i
+        ) {
+          return i.block_id == node.get("model").id;
+        });
+        if (index_activity_block == -1) {
+          continue;
+        }
+        var activity = data_activity.value[index_activity_block];
+        if (hasPermission(activity)) {
+          graph.value.emit("node:click", { item: node });
+        }
       }
     }
   };
@@ -297,7 +314,7 @@ export const useProcess = defineStore("process", () => {
     });
   };
   return {
-    data,
+    data, data_temp,
     data_transition,
     data_activity,
     data_custom_block,
@@ -313,6 +330,7 @@ export const useProcess = defineStore("process", () => {
     prev_nodes,
     prev_nodes_print,
     prev_nodes_form,
+    prev_fields_file,
     selectedModel,
     init,
     findIndexNode,

@@ -1,35 +1,19 @@
 <template>
   <div>
     <div class="text-center mt-3">
-      <button
-        class="btn btn-success btn-sm"
-        type="button"
-        data-toggle="modal"
-        data-target="#myModal1"
-      >
+      <button class="btn btn-success btn-sm" type="button" data-toggle="modal" data-target="#myModal1">
         <i class="fas fa-pencil-alt mr-1"></i>
         Thiết lập
       </button>
     </div>
-    <div
-      id="myModal1"
-      class="modal modal-fullscreen"
-      tabindex="-1"
-      role="dialog"
-      data-backdrop="static"
-    >
+    <div id="myModal1" class="modal modal-fullscreen" tabindex="-1" role="dialog" data-backdrop="static">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
             <b class="modal-title font-16">
               {{ model.label }}
             </b>
-            <button
-              type="button"
-              class="close"
-              data-dismiss="modal"
-              aria-label="Close"
-            >
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
@@ -38,17 +22,10 @@
               <div class="col-9">
                 <div class="card">
                   <div class="card-body">
-                    <b class="col-form-label"
-                      >Người nhận:<span class="text-danger">*</span></b
-                    >
+                    <b class="col-form-label">Người nhận:<span class="text-danger">*</span></b>
                     <div class="pt-1">
-                      <DxHtmlEditor
-                        v-model:value="mail.to"
-                        ref="editor_to"
-                        :hover-state-enabled="read"
-                        @focus-in="out($event, 'to')"
-                        :mentions="mentions_employee"
-                      >
+                      <DxHtmlEditor v-model:value="mail.to" ref="editor_to" :hover-state-enabled="read"
+                        @focus-in="out($event, 'to')" :mentions="mentions_employee">
                       </DxHtmlEditor>
                       <!--<input class="form-control form-control-sm" type='text' name="to" required="" v-model="model.data_setting.mail.to" placeholder="Người nhận" autocomplete="off" />-->
                     </div>
@@ -56,35 +33,20 @@
                 </div>
                 <div class="card">
                   <div class="card-body">
-                    <b class="col-form-label"
-                      >Tiêu đề:<span class="text-danger">*</span></b
-                    >
+                    <b class="col-form-label">Tiêu đề:<span class="text-danger">*</span></b>
                     <div class="pt-1">
-                      <DxHtmlEditor
-                        v-model:value="mail.title"
-                        ref="editor_title"
-                        :hover-state-enabled="read"
-                        @focus-in="out($event, 'title')"
-                        :mentions="mentions"
-                      >
+                      <DxHtmlEditor v-model:value="mail.title" ref="editor_title" :hover-state-enabled="read"
+                        @focus-in="out($event, 'title')" :mentions="mentions">
                       </DxHtmlEditor>
                     </div>
                   </div>
                 </div>
                 <div class="card mb-0">
                   <div class="card-body">
-                    <b class="col-form-label"
-                      >Nội dung:<span class="text-danger">*</span></b
-                    >
+                    <b class="col-form-label">Nội dung:<span class="text-danger">*</span></b>
                     <div class="pt-1">
-                      <DxHtmlEditor
-                        v-model:value="mail.content"
-                        ref="editor_content"
-                        :hover-state-enabled="read"
-                        @focus-in="out($event, 'content')"
-                        :mentions="mentions"
-                        style="min-height: 370px"
-                      >
+                      <DxHtmlEditor v-model:value="mail.content" ref="editor_content" :hover-state-enabled="read"
+                        @focus-in="out($event, 'content')" :mentions="mentions" style="min-height: 370px">
                         <DxToolbar>
                           <DxItem name="undo" />
                           <DxItem name="redo" />
@@ -105,13 +67,8 @@
                     <div class="row pt-3">
                       <b class="col-form-label col-2">File đính kèm:</b>
                       <div class="col-10">
-                        <DxHtmlEditor
-                          v-model:value="mail.filecontent"
-                          ref="editor_filecontent"
-                          :hover-state-enabled="read"
-                          @focus-in="out($event, 'filecontent')"
-                          :mentions="mentions_file"
-                        >
+                        <DxHtmlEditor v-model:value="mail.filecontent" ref="editor_filecontent"
+                          :hover-state-enabled="read" @focus-in="out($event, 'filecontent')" :mentions="mentions_file">
                         </DxHtmlEditor>
                       </div>
                     </div>
@@ -124,12 +81,7 @@
                     <div v-for="[Key, Value] in groups()">
                       <b>{{ Key }}</b>
                       <div class="ml-3">
-                        <a
-                          class="d-block"
-                          href="#"
-                          v-for="field in Value"
-                          @click="add_field(field)"
-                        >
+                        <a class="d-block" href="#" v-for="field in Value" @click="add_field(field)">
                           {{ field.text }}
                         </a>
                       </div>
@@ -140,18 +92,10 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-primary"
-              @click="save_settings()"
-            >
+            <button type="button" class="btn btn-primary" @click="save_settings()">
               Lưu lại
             </button>
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-dismiss="modal"
-            >
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">
               Hủy bỏ
             </button>
           </div>
@@ -255,6 +199,14 @@ export default {
         group: label,
         id: "created_at_" + node.variable,
       });
+      if (node.clazz == "outputSystem" || node.clazz == "printSystem") {
+        this.data.push({
+          text: "File",
+          type: "file",
+          group: label,
+          id: "file_" + node.variable,
+        });
+      }
       for (var field of fields) {
         this.data.push({
           text: field.name,
@@ -316,16 +268,16 @@ export default {
         `">﻿<span contenteditable="false"><span>#</span>` +
         d.text +
         `</span>﻿</span>`;
-      mail.content = mail.content.replace(
+      mail.content = mail.content ? mail.content.replace(
         new RegExp("!#" + id + "#", "g"),
         html
-      );
+      ) : mail.content;
       mail.to = mail.to.replace(new RegExp("!#" + id + "#", "g"), html);
       mail.title = mail.title.replace(new RegExp("!#" + id + "#", "g"), html);
-      mail.filecontent = mail.filecontent.replace(
+      mail.filecontent = mail.filecontent ? mail.filecontent.replace(
         new RegExp("!#" + id + "#", "g"),
         html
-      );
+      ) : mail.filecontent;
     }
     this.mail = mail;
   },
@@ -335,7 +287,7 @@ export default {
       var model = this.model;
       // console.log(nodes);
       return nodes.filter(function (item) {
-        return item.stt < model.stt;
+        return item.stt > 0 && item.stt < model.stt;
       });
     },
     out(event, tab) {

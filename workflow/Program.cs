@@ -8,6 +8,7 @@ using System.Text.Json.Serialization;
 using Vue.Data;
 using Vue.Models;
 using it.Services;
+using System.Net;
 //using Vue.Middleware;
 
 namespace Vue
@@ -49,12 +50,12 @@ namespace Vue
              options.UseSqlServer(EsignConnectionString)
              );
 
-            //builder.Services.AddScoped<ViewRender, ViewRender>();
+            builder.Services.AddScoped<ViewRender, ViewRender>();
 
             builder.Services.AddScoped<Workflow, Workflow>();
-			builder.Services.AddScoped<LoginMailPyme, LoginMailPyme>();
+            builder.Services.AddScoped<LoginMailPyme, LoginMailPyme>();
 
-			builder.Services.Configure<IdentityOptions>(options =>
+            builder.Services.Configure<IdentityOptions>(options =>
             {
                 // Password settings.
                 options.Password.RequireDigit = true;
@@ -122,16 +123,6 @@ namespace Vue
 
             app.UseAuthentication();
             app.UseAuthorization();
-
-            //app.UseStaticFiles(new StaticFileOptions
-            //{
-
-            //    FileProvider = new PhysicalFileProvider(Path.Combine(builder.Environment.ContentRootPath, "frontend", "src")),
-            //    RequestPath = "/src",
-            //    OnPrepareResponse = ctx =>
-            //    {
-            //    }
-            //});
             app.UseStaticFiles(new StaticFileOptions
             {
                 FileProvider = new PhysicalFileProvider(builder.Configuration["Source:Path_Private"]),
@@ -209,6 +200,9 @@ namespace Vue
                     //spa.UseVueDevelopmentServer();
                 }
             });
+            //IWebHostEnvironment env = app.Environment;
+            //RotativaConfiguration.Setup((Microsoft.AspNetCore.Hosting.IHostingEnvironment)env);
+
             app.Run();
         }
     }

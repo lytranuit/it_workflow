@@ -19,6 +19,7 @@ using NuGet.Packaging;
 using Spire.Xls;
 using workflow.Areas.V1.Models;
 using workflow.Models;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace workflow.Areas.V1.Controllers
 {
@@ -115,12 +116,21 @@ namespace workflow.Areas.V1.Controllers
         public async Task<JsonResult> Edit(UserModel User, List<string> roles, List<int> departments)
         {
             UserModel User_old = await UserManager.FindByIdAsync(User.Id);
+            if (User_old == null)
+            {
+                return Json(new { success = false, message = "Fail" });
+            }
             var OldValues = JsonConvert.SerializeObject(User_old);
             User_old.Email = User.Email;
             User_old.UserName = User.Email;
             User_old.FullName = User.FullName;
             User_old.image_url = User.image_url;
             User_old.image_sign = User.image_sign;
+            User_old.PhoneNumber = User.PhoneNumber;
+            User_old.reportId = User.reportId;
+            User_old.department_text = User.department_text;
+            User_old.msnv = User.msnv;
+            User_old.ngaynghi = User.ngaynghi;
 
             _context.Update(User_old);
             _context.SaveChanges();
@@ -197,13 +207,14 @@ namespace workflow.Areas.V1.Controllers
             }
             return Ok();
         }
+
         public async Task<JsonResult> Get(string id)
         {
             UserModel User = await _context.UserModel.Where(d => d.Id == id).Include(d => d.departments).FirstOrDefaultAsync();
             var role_avaliable = _configuration.GetSection("Roles").Get<string[]>().ToList();
             var roles_old = RoleManager.Roles.Where(d => role_avaliable.Contains(d.Name)).Select(a => a.Id).ToList();
             var roles = _context.UserRoleModel.Where(d => d.UserId == id && roles_old.Contains(d.RoleId)).Select(d => d.RoleId).ToList();
-            return Json(new { success = true, id = User.Id, roles = roles, departments = User.departments.Select(d => d.department_id.ToString()).ToList(), email = User.Email, FullName = User.FullName, image_url = User.image_url, image_sign = User.image_sign });
+            return Json(new { success = true, id = User.Id, roles = roles, departments = User.departments.Select(d => d.department_id.ToString()).ToList(), email = User.Email, FullName = User.FullName, image_url = User.image_url, image_sign = User.image_sign, PhoneNumber = User.PhoneNumber, department_text = User.department_text, reportId = User.reportId, ngaynghi = User.ngaynghi, msnv = User.msnv });
         }
 
         [HttpPost]
@@ -369,7 +380,7 @@ namespace workflow.Areas.V1.Controllers
         [HttpPost]
         public async Task<JsonResult> sync()
         {
-            var user_esign = _esignContext.UserEsignModel.Where(d => d.deleted_at == null && d.image_sign != "/private/images/tick.png").ToList();
+            var user_esign = _esignContext.UserEsignModel.Where(d => d.deleted_at == null).ToList();
 
             foreach (var user in user_esign)
             {
@@ -402,6 +413,26 @@ namespace workflow.Areas.V1.Controllers
             return Json(new { success = true });
         }
 
+        public async Task<JsonResult> active()
+        {
+            var users = _context.UserModel.Where(d => d.deleted_at == null && d.image_sign != "/private/images/tick.png").ToList();
+            var role_user = await RoleManager.FindByNameAsync("User");
+            if (role_user == null)
+                return Json(new { success = false });
+            foreach (var item in users)
+            {
+                var in_user = await UserManager.IsInRoleAsync(item, "User");
+                if (in_user)
+                    continue;
+                _context.Add(new UserRoleModel()
+                {
+                    UserId = item.Id,
+                    RoleId = role_user.Id,
+                });
+            }
+            await _context.SaveChangesAsync();
+            return Json(new { success = true });
+        }
         [HttpPost]
         public async Task<JsonResult> excel()
         {

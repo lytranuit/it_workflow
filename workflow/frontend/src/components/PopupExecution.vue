@@ -1,19 +1,10 @@
 ﻿<template>
-  <div id="popup-execution">
-    <button
-      @click="visible = true"
-      class="btn btn-secondary text-white"
-      style="padding: 10px 30px; margin: 13px 20px; border-radius: 5px"
-    >
-      <i class="far fa-paper-plane mr-1"></i>
-      Chạy quy trình
-    </button>
-    <Dialog
-      v-model:visible="visible"
-      modal
-      header="Chọn quy trình"
-      :style="{ width: '50vw' }"
-    >
+  <li>
+    <a href="#" @click="visible = true">
+      <i class="far fa-paper-plane"></i>
+      <span>Chạy quy trình</span>
+    </a>
+    <Dialog v-model:visible="visible" modal header="Chọn quy trình" style="" :breakpoints="{ '1199px': '75vw', '575px': '95vw' }">
       <div class="row">
         <div class="col-9">
           <div class="input-group">
@@ -22,58 +13,27 @@
                 <i class="fas fa-search"></i>
               </button>
             </span>
-            <input
-              type="text"
-              id="example-input1-group2"
-              name="example-input1-group2"
-              class="form-control"
-              placeholder="Tìm kiếm"
-              v-model="search"
-              v-on:keydown="change"
-            />
+            <input type="text" id="example-input1-group2" name="example-input1-group2" class="form-control"
+              placeholder="Tìm kiếm" v-model="search" v-on:keydown="change" />
           </div>
         </div>
         <div class="col-3">
-          <select
-            class="form-control form-control-sm"
-            v-model="selected"
-            v-on:change="change"
-          >
+          <select class="form-control form-control-sm" v-model="selected" v-on:change="change">
             <option value="-1">Tất cả các nhóm</option>
-            <option
-              v-for="option in groups"
-              :key="option.id"
-              :value="option.id"
-            >
+            <option v-for="option in groups" :key="option.id" :value="option.id">
               {{ option.name }}
             </option>
           </select>
         </div>
         <div class="col-12 mt-3">
           <div class="accordion" id="accordionselect">
-            <div
-              class="process-group"
-              v-for="group in groups_filter"
-              :key="group.id"
-            >
-              <div
-                class="h-acc"
-                data-toggle="collapse"
-                :data-target="'#group_' + group.id"
-                aria-expanded="true"
-              >
+            <div class="process-group" v-for="group in groups_filter" :key="group.id">
+              <div class="h-acc" data-toggle="collapse" :data-target="'#group_' + group.id" aria-expanded="true">
                 {{ group.name }}
               </div>
               <div :id="'group_' + group.id" class="collapse show" style="">
-                <template
-                  v-for="process_version in group.list_process_version"
-                  :key="process_version.id"
-                >
-                  <a
-                    class="process d-block"
-                    @click="execute(process_version.id)"
-                    v-if="!process_version.hidden"
-                  >
+                <template v-for="process_version in group.list_process_version" :key="process_version.id">
+                  <a class="process d-block" @click="execute(process_version.id)" v-if="!process_version.hidden">
                     {{ process_version.process.name }}
                   </a>
                 </template>
@@ -83,7 +43,7 @@
         </div>
       </div>
     </Dialog>
-  </div>
+  </li>
 </template>
 
 <script setup>

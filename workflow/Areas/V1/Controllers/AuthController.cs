@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace workflow.Areas.V1.Controllers
 {
@@ -16,16 +17,18 @@ namespace workflow.Areas.V1.Controllers
     {
         private readonly ItContext _context;
         private readonly UserManager<UserModel> UserManager;
+        private RoleManager<IdentityRole> RoleManager;
 
         private readonly IConfiguration _configuration;
         private readonly SignInManager<UserModel> _signInManager;
 
-        public AuthController(ItContext context, UserManager<UserModel> UserMgr, SignInManager<UserModel> signInManager, IConfiguration configuration)
+        public AuthController(ItContext context, UserManager<UserModel> UserMgr, RoleManager<IdentityRole> RoleMgr, SignInManager<UserModel> signInManager, IConfiguration configuration)
         {
             UserManager = UserMgr;
             _configuration = configuration;
             _signInManager = signInManager;
             _context = context;
+            RoleManager = RoleMgr;
         }
         public class InputModel
         {
@@ -120,6 +123,37 @@ namespace workflow.Areas.V1.Controllers
             return Json(new { success = true, message = StatusMessage });
         }
 
+        public async Task<JsonResult> Get(string id)
+        {
+            UserModel User = await _context.UserModel.Where(d => d.Id == id).Include(d => d.departments).FirstOrDefaultAsync();
+            var role_avaliable = _configuration.GetSection("Roles").Get<string[]>().ToList();
+            var roles_old = RoleManager.Roles.Where(d => role_avaliable.Contains(d.Name)).Select(a => a.Id).ToList();
+            var roles = _context.UserRoleModel.Where(d => d.UserId == id && roles_old.Contains(d.RoleId)).Select(d => d.RoleId).ToList();
+            return Json(new { success = true, id = User.Id, roles = roles, departments = User.departments.Select(d => d.department_id.ToString()).ToList(), email = User.Email, FullName = User.FullName, image_url = User.image_url, image_sign = User.image_sign, PhoneNumber = User.PhoneNumber, department_text = User.department_text, reportId = User.reportId, ngaynghi = User.ngaynghi, msnv = User.msnv });
+        }
+        [HttpPost]
+        public async Task<JsonResult> edit(UserModel UserModel)
+        {
+            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+            string id = UserManager.GetUserId(currentUser); // Get user id:
+
+            var user = await UserManager.GetUserAsync(currentUser);
+            if (user == null)
+            {
+                return Json(new { success = false, message = $"Unable to load user with ID '{UserManager.GetUserId(User)}'." });
+            }
+            var OldValues = JsonConvert.SerializeObject(user);
+            user.image_url = UserModel.image_url;
+            user.PhoneNumber = UserModel.PhoneNumber;
+            user.department_text = UserModel.department_text;
+            user.msnv = UserModel.msnv;
+
+            _context.Update(user);
+            _context.SaveChanges();
+
+            return Json(new { success = true, message = "Cập nhật thành công" });
+        }
+
         public async Task<JsonResult> TokenInfo(string token)
         {
             var find = _context.TokenModel.Where(d => d.deleted_at == null && d.token == token && d.vaild_to > DateTime.Now).FirstOrDefault();
@@ -146,6 +180,7 @@ namespace workflow.Areas.V1.Controllers
                         departments = user.departments,
                         id = user.Id,
                         token = token,
+                        ngaynghi = user.ngaynghi,
                         vaild_to = find.vaild_to.Value.ToString("yyyy-MM-dd HH:mm:ss")
                     }); ;
                 }

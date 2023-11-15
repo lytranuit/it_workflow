@@ -6,11 +6,7 @@
         <section class="card card-fluid">
           <div class="card-header">
             <div class="d-inline-block w-100">
-              <button
-                type="submit"
-                class="btn btn-sm btn-primary float-right"
-                @click.prevent="submit()"
-              >
+              <button type="submit" class="btn btn-sm btn-primary float-right" @click.prevent="submit()">
                 Save
               </button>
             </div>
@@ -19,107 +15,79 @@
             <div class="row">
               <div class="col-md-8">
                 <div class="form-group row">
-                  <b class="col-12 col-lg-2 col-form-label"
-                    >Email:<i class="text-danger">*</i></b
-                  >
+                  <b class="col-12 col-lg-2 col-form-label">Email:<i class="text-danger">*</i></b>
                   <div class="col-12 col-lg-4 pt-1">
-                    <input
-                      class="form-control form-control-sm"
-                      type="text"
-                      name="email"
-                      placeholder="Email"
-                      v-model="data.email"
-                      required
-                    />
+                    <input class="form-control form-control-sm" type="text" name="email" v-model="data.email" required />
                   </div>
                 </div>
                 <div class="form-group row">
-                  <b class="col-12 col-lg-2 col-form-label"
-                    >Mât khẩu:<i class="text-danger">*</i></b
-                  >
+                  <b class="col-12 col-lg-2 col-form-label">Mât khẩu:<i class="text-danger">*</i></b>
                   <div class="col-12 col-lg-4 pt-1">
-                    <input
-                      type="password"
-                      id="password"
-                      class="form-control"
-                      name="password"
-                      minlength="6"
-                      required=""
-                      autocomplete="off"
-                    />
+                    <input type="password" id="password" class="form-control" name="password" minlength="6" required=""
+                      autocomplete="off" />
                   </div>
-                  <b class="col-12 col-lg-2 col-form-label"
-                    >Xác nhận mật khẩu:<i class="text-danger">*</i></b
-                  >
+                  <b class="col-12 col-lg-2 col-form-label">Xác nhận mật khẩu:<i class="text-danger">*</i></b>
                   <div class="col-12 col-lg-4 pt-1">
-                    <input
-                      type="password"
-                      class="form-control"
-                      name="confirmpassword"
-                      minlength="6"
-                      data-rule-equalTo="#password"
-                      required=""
-                      autocomplete="off"
-                    />
+                    <input type="password" class="form-control" name="confirmpassword" minlength="6"
+                      data-rule-equalTo="#password" required="" autocomplete="off" />
                   </div>
                 </div>
                 <div class="form-group row">
-                  <b class="col-12 col-lg-2 col-form-label"
-                    >Họ và tên:<i class="text-danger">*</i></b
-                  >
+                  <b class="col-12 col-lg-2 col-form-label">Họ và tên:<i class="text-danger">*</i></b>
                   <div class="col-12 col-lg-4 pt-1">
-                    <input
-                      class="form-control form-control-sm"
-                      type="text"
-                      name="fullName"
-                      required=""
-                      placeholder="FullName"
-                      v-model="data.fullName"
-                    />
+                    <input class="form-control form-control-sm" type="text" name="fullName" required=""
+                      v-model="data.fullName" />
                   </div>
                   <b class="col-12 col-lg-2 col-form-label">Nhóm:</b>
                   <div class="col-lg-4 pt-1">
-                    <RoleTreeSelect
-                      v-model="data.roles"
-                      multiple
-                    ></RoleTreeSelect>
-                    <select
-                      name="roles[]"
-                      v-model="data.roles"
-                      multiple
-                      class="d-none"
-                    >
-                      <option
-                        v-for="option in data.roles"
-                        :key="option"
-                        :value="option"
-                      ></option>
+                    <RoleTreeSelect v-model="data.roles" multiple></RoleTreeSelect>
+                    <select name="roles[]" v-model="data.roles" multiple class="d-none">
+                      <option v-for="option in data.roles" :key="option" :value="option"></option>
                     </select>
                   </div>
                 </div>
                 <div class="form-group row">
                   <b class="col-12 col-lg-2 col-form-label">Bộ phận:</b>
                   <div class="col-lg-10 pt-1">
-                    <DepartmentTreeSelect
-                      v-model="data.departments"
-                      valueConsistsOf="ALL_WITH_INDETERMINATE"
-                      :flat="false"
-                      multiple
-                    ></DepartmentTreeSelect>
-                    <select
-                      name="departments[]"
-                      v-model="data.departments"
-                      multiple
-                      class="d-none"
-                    >
-                      <option
-                        v-for="option in data.departments"
-                        :key="option"
-                        :value="option"
-                      ></option>
+                    <DepartmentTreeSelect v-model="data.departments" valueConsistsOf="ALL_WITH_INDETERMINATE"
+                      :flat="false" multiple></DepartmentTreeSelect>
+                    <select name="departments[]" v-model="data.departments" multiple class="d-none">
+                      <option v-for="option in data.departments" :key="option" :value="option"></option>
                     </select>
                   </div>
                 </div>
+                <hr>
+
+                <div class="form-group row">
+                  <b class="col-12 col-lg-2 col-form-label">Số điện thoại</b>
+                  <div class="col-12 col-lg-4 pt-1">
+                    <input class="form-control form-control-sm" type="text" name="phoneNumber"
+                      v-model="data.phoneNumber" />
+                  </div>
+                  <b class="col-12 col-lg-2 col-form-label">Phòng/Bộ phận</b>
+                  <div class="col-12 col-lg-4 pt-1">
+                    <input class="form-control form-control-sm" type="text" name="department_text"
+                      v-model="data.department_text" />
+                  </div>
+                </div>
+
+                <div class="form-group row">
+                  <b class="col-12 col-lg-2 col-form-label">Mã số nhân viên</b>
+                  <div class="col-12 col-lg-4 pt-1">
+                    <input class="form-control form-control-sm" type="text" name="msnv" v-model="data.msnv" />
+                  </div>
+                  <b class="col-12 col-lg-2 col-form-label">Quản lý trực tiếp:</b>
+                  <div class="col-lg-4 pt-1">
+                    <UserTreeSelect v-model="data.reportId"></UserTreeSelect>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <b class="col-12 col-lg-2 col-form-label">Số ngày nghĩ phép năm</b>
+                  <div class="col-12 col-lg-4 pt-1">
+                    <input class="form-control form-control-sm" type="number" name="ngaynghi" v-model="data.ngaynghi" />
+                  </div>
+                </div>
+
               </div>
               <div class="col-md-4">
                 <div class="form-group row">
@@ -127,11 +95,7 @@
                     <div class="card no-shadow border">
                       <div class="card-header">Hình đại diện</div>
                       <div class="card-body text-center">
-                        <input
-                          type="hidden"
-                          name="image_url"
-                          v-model="data.image_url"
-                        />
+                        <input type="hidden" name="image_url" v-model="data.image_url" />
                         <ImageManager @choose="choose" :image="data.image_url">
                         </ImageManager>
                       </div>
@@ -141,15 +105,8 @@
                     <div class="card no-shadow border">
                       <div class="card-header">Chữ ký</div>
                       <div class="card-body text-center">
-                        <input
-                          type="hidden"
-                          name="image_sign"
-                          v-model="data.image_sign"
-                        />
-                        <ImageManager
-                          @choose="chooseSign"
-                          :image="data.image_sign"
-                        >
+                        <input type="hidden" name="image_sign" v-model="data.image_sign" />
+                        <ImageManager @choose="chooseSign" :image="data.image_sign">
                         </ImageManager>
                       </div>
                     </div>
@@ -175,6 +132,7 @@ import userApi from "../../api/userApi";
 import ImageManager from "../../components/ImageManager.vue";
 import RoleTreeSelect from "../../components/TreeSelect/RoleTreeSelect.vue";
 import DepartmentTreeSelect from "../../components/TreeSelect/DepartmentTreeSelect.vue";
+import UserTreeSelect from "../../components/TreeSelect/UserTreeSelect.vue";
 const router = useRouter();
 const messageError = ref();
 const store = useAuth();
@@ -197,8 +155,7 @@ const submit = () => {
   if (!vaild) {
     return;
   }
-  let formData = $("#form").serialize();
-  userApi.create(formData).then((response) => {
+  userApi.create(data.value).then((response) => {
     messageError.value = "";
     if (response.success) {
       router.push("/user");

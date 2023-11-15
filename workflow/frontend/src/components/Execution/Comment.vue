@@ -53,7 +53,7 @@
             alt=""
           />
           <div class="media-body border-bottom" style="display: grid">
-            <h5 class="mt-0 mb-1">
+            <h5 class="mt-0 mb-1" style="font-size: 14px;">
               {{ comment.user.fullName }}
               <small class="text-muted">
                 -

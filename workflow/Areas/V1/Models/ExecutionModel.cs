@@ -41,6 +41,8 @@ namespace workflow.Areas.V1.Models
         public ProcessVersionModel process_version { get; set; }
 
         public virtual List<ActivityModel>? activities { get; set; }
+        public virtual List<TransitionModel>? transitions { get; set; }
+        public List<ExecutionFieldModel>? fields { get; set; }
         public DateTime? created_at { get; set; }
 
         public DateTime? updated_at { get; set; }

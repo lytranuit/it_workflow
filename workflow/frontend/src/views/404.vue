@@ -7,18 +7,17 @@
 						<div class="card auth-card shadow-lg">
 							<div class="card-body">
 								<div class="px-3">
-									<div class="auth-logo-box" style="top:-70px;">
-										<a href="#" class=""><img src="../assets/images/clientlogo_astahealthcare.com_f1800.png"
+									<div class="auth-logo-box" style="top:-70px;text-align: center;">
+										<a href="#" class=""><img
+												src="../assets/images/clientlogo_astahealthcare.com_f1800.png" width="200"
 												alt="logo" class=""></a>
 									</div><!--end auth-logo-box-->
-									<img src="../assets/images/500.jpg" alt="" class="d-block mx-auto mt-4"
-										height="250">
+									<img src="../assets/images/500.jpg" alt="" class="d-block mx-auto mt-4" height="250">
 									<div class="text-center auth-logo-text mb-4">
 										<h4 class="mt-0 mb-3 mt-5">Không có quyền truy cập</h4>
-										<form id="logoutForm" class="text-center" action="/V1/Auth/Logout"
-											method="post">
-											<a class="btn btn-sm btn-gradient-primary text-white"
-												style="cursor:pointer;" @click="store.logout()">Đăng xuất</a>
+										<form id="logoutForm" class="text-center" action="/V1/Auth/Logout" method="post">
+											<a class="btn btn-sm btn-gradient-primary text-white" style="cursor:pointer;"
+												@click="store.logout()">Đăng xuất</a>
 										</form>
 									</div> <!--end auth-logo-text-->
 								</div><!--end /div-->

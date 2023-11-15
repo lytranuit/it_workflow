@@ -3,7 +3,6 @@ import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import { useLayout } from "../layouts/composables/layout";
 import { useRouter } from "vue-router";
 import { useAuth } from "../stores/auth";
-import PopupExecution from "./PopupExecution.vue";
 import TieredMenu from "primevue/tieredmenu";
 const store = useAuth();
 const user = store.user;
@@ -17,8 +16,8 @@ onMounted(() => {
   bindOutsideClickListener();
   var is_first = localStorage.getItem("is_first") || 0;
   if (!is_first) {
-    localStorage.setItem("is_first", 1);
-    router.push("/member/changepassword");
+    // localStorage.setItem("is_first", 1);
+    router.push("/member");
   }
 });
 
@@ -113,7 +112,7 @@ const toggle = (event) => {
           src="../assets/images/clientlogo_astahealthcare.com_f1800.png"
           alt="logo-large"
           class="logo-lg logo-light"
-             width="200"
+             width="110"
         />
       </span>
     </router-link>
@@ -132,7 +131,6 @@ const toggle = (event) => {
       <i class="pi pi-ellipsis-v"></i>
     </button>
 
-    <PopupExecution></PopupExecution>
     <TieredMenu
       id="overlay_tmenu"
       ref="menu1"

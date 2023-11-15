@@ -40,6 +40,7 @@
 		<PackageReference Include="Microsoft.IdentityModel.Abstractions" Version="6.30.1" />
 		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="6.0.11" />
 		<PackageReference Include="System.Drawing.Common" Version="7.0.0" />
+		<PackageReference Include="System.Text.Encoding.CodePages" Version="7.0.0" />
 	</ItemGroup>
 
 
@@ -51,6 +52,14 @@
 	</ItemGroup>
 	<ItemGroup>
 		<_WebToolingArtifacts Remove="Properties\PublishProfiles\Test.pubxml" />
+	</ItemGroup>
+	<ItemGroup>
+	  <None Include="Views\Emails\Cancle.cshtml" />
+	  <None Include="Views\Emails\NewComment.cshtml" />
+	  <None Include="Views\Emails\NewUser.cshtml" />
+	  <None Include="Views\Emails\RemindDocument.cshtml" />
+	  <None Include="Views\Emails\ResetPassword.cshtml" />
+	  <None Include="Views\Emails\Success.cshtml" />
 	</ItemGroup>
 	<Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">
 		<!-- Ensure Node.js is installed -->

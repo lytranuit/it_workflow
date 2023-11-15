@@ -24,7 +24,7 @@ const router = createRouter({
 router.beforeEach((toRoute, fromRoute, next) => {
   i18n.global.locale.value = localStorage.getItem("language") || "vi";
   const title =
-    toRoute.meta && toRoute.meta.title ? toRoute.meta.title : "Pymepharco";
+    toRoute.meta && toRoute.meta.title ? toRoute.meta.title : "AstaCorp";
   document.title = title;
   next();
 });

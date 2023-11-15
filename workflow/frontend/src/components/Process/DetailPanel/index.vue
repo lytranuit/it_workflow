@@ -1,69 +1,22 @@
 <template>
-  <div class="detailPanel" :style="{ height: height + 'px' }">
-    <FormTaskDetail
-      v-if="model.clazz === 'formTask'"
-      :model="model"
-      :onChange="onChange"
-      :readOnly="readOnly"
-    />
-    <GatewayDetail
-      v-else-if="
-        model.clazz === 'gateway' ||
-        model.clazz === 'exclusiveGateway' ||
-        model.clazz === 'parallelGateway' ||
-        model.clazz === 'inclusiveGateway'
-      "
-      :model="model"
-      :onChange="onChange"
-      :readOnly="readOnly"
-    />
-    <FlowDetail
-      v-else-if="model.clazz === 'flow'"
-      :model="model"
-      :onChange="onChange"
-      :readOnly="readOnly"
-    />
-    <StartEventDetail
-      v-else-if="model.clazz === 'start'"
-      :model="model"
-      :onChange="onChange"
-      :readOnly="readOnly"
-    />
-    <FailEventDetail
-      v-else-if="model.clazz === 'fail'"
-      :model="model"
-      :onChange="onChange"
-      :readOnly="readOnly"
-    />
-    <SuccessEventDetail
-      v-else-if="model.clazz === 'success'"
-      :model="model"
-      :onChange="onChange"
-      :readOnly="readOnly"
-    />
-    <ApproveTaskDetail
-      v-else-if="model.clazz === 'approveTask'"
-      :model="model"
-      :onChange="onChange"
-      :readOnly="readOnly"
-    />
-    <SuggestTaskDetail
-      v-else-if="model.clazz === 'suggestTask'"
-      :model="model"
-      :onChange="onChange"
-      :readOnly="readOnly"
-    />
-    <MailDetail
-      v-else-if="model.clazz === 'mailSystem'"
-      :model="model"
-      :onChange="onChange"
-      :readOnly="readOnly"
-    />
-    <PrintDetail
-      v-else-if="model.clazz === 'printSystem'"
-      :model="model"
-      :onChange="onChange"
-    />
+  <div class="detailPanel" :style="{ height: height + 'px' }" :key="model.id">
+    <FormTaskDetail v-if="model.clazz === 'formTask'" :model="model" :onChange="onChange" :readOnly="readOnly" />
+    <GatewayDetail v-else-if="model.clazz === 'gateway' ||
+      model.clazz === 'exclusiveGateway' ||
+      model.clazz === 'parallelGateway' ||
+      model.clazz === 'inclusiveGateway'
+      " :model="model" :onChange="onChange" :readOnly="readOnly" />
+    <FlowDetail v-else-if="model.clazz === 'flow'" :model="model" :onChange="onChange" :readOnly="readOnly" />
+    <StartEventDetail v-else-if="model.clazz === 'start'" :model="model" :onChange="onChange" :readOnly="readOnly" />
+    <FailEventDetail v-else-if="model.clazz === 'fail'" :model="model" :onChange="onChange" :readOnly="readOnly" />
+    <SuccessEventDetail v-else-if="model.clazz === 'success'" :model="model" :onChange="onChange" :readOnly="readOnly" />
+    <ApproveTaskDetail v-else-if="model.clazz === 'approveTask'" :model="model" :onChange="onChange"
+      :readOnly="readOnly" />
+    <SuggestTaskDetail v-else-if="model.clazz === 'suggestTask'" :model="model" :onChange="onChange"
+      :readOnly="readOnly" />
+    <MailDetail v-else-if="model.clazz === 'mailSystem'" :model="model" :onChange="onChange" :readOnly="readOnly" />
+    <PrintDetail v-else-if="model.clazz === 'printSystem'" :model="model" :onChange="onChange" />
+    <OutputDetail v-else-if="model.clazz === 'outputSystem'" :model="model" :onChange="onChange" />
   </div>
 </template>
 <script>
@@ -82,6 +35,7 @@ import FlowDetail from "./FlowDetail.vue";
 
 import MailDetail from "./MailDetail.vue";
 import PrintDetail from "./PrintDetail.vue";
+import OutputDetail from "./OutputDetail.vue";
 
 export default {
   components: {
@@ -96,6 +50,7 @@ export default {
     SuggestTaskDetail,
     MailDetail,
     PrintDetail,
+    OutputDetail
   },
   props: {
     height: {
@@ -108,7 +63,7 @@ export default {
     },
     onChange: {
       type: Function,
-      default: () => {},
+      default: () => { },
     },
     readOnly: {
       type: Boolean,

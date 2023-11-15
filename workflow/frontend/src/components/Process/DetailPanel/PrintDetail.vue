@@ -9,33 +9,41 @@
         <AccordionTab :header="$t('detail.template')">
           <div class="form-group">
             <div class="col-12 mt-2">
+              <b class="col-form-label">Loại</b>
+              <div class="pt-1 flex-m">
+                <select class="form-control form-control-sm" v-model="model.data_setting.type_template">
+                  <option value="html">HTML</option>
+                  <option value="word">Word</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="form-group" v-if="model.data_setting.type_template == 'html'">
+            <div class="col-12 mt-2">
+              <b class="col-form-label">Mẫu</b>
+              <div class="pt-1 flex-m">
+                <select class="form-control form-control-sm" v-model="model.data_setting.type_template_html">
+                  <option value="nghiphep">Nghĩ phép</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="form-group" v-if="model.data_setting.type_template == 'word'">
+            <div class="col-12 mt-2">
               <b class="col-form-label">Mẫu：</b>
               <div class="pt-1 flex-m" v-if="file_template">
                 <div class="file-icon" data-type="docx"></div>
-                <a
-                  :href="file_template.url"
-                  :download="file_template.name"
-                  style="margin-left: 5px"
-                >
+                <a :href="file_template.url" :download="file_template.name" style="margin-left: 5px">
                   {{ file_template.name }}
                 </a>
               </div>
             </div>
             <div class="text-center mt-3">
-              <button
-                class="btn btn-success btn-sm"
-                @click="open_select_file()"
-              >
+              <button class="btn btn-success btn-sm" @click="open_select_file()">
                 <i class="fas fa-plus mr-1"></i>
                 Upload
               </button>
-              <input
-                type="file"
-                class="d-none"
-                ref="file"
-                accept=".docx"
-                @change="upload_file()"
-              />
+              <input type="file" class="d-none" ref="file" accept=".docx" @change="upload_file()" />
             </div>
           </div>
         </AccordionTab>
@@ -73,7 +81,7 @@ export default {
     },
     onChange: {
       type: Function,
-      default: () => {},
+      default: () => { },
     },
   },
   computed: {
@@ -84,7 +92,7 @@ export default {
       return store.data.nodes;
     },
   },
-  mounted() {},
+  mounted() { },
   methods: {
     open_select_file() {
       $(this.$refs["file"]).trigger("click");

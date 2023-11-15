@@ -18,6 +18,8 @@ namespace workflow.Areas.V1.Models
         public int? stt { get; set; }
         public string? variable { get; set; }
 
+        public string? process_field_id { get; set; }
+
         [ForeignKey("activity_id")]
         public virtual ActivityModel activity { get; set; }
 

@@ -11,7 +11,7 @@
         </RouterLink>
         <Button
           label="Xuất Excel"
-          icon="pi pi-excel"
+          icon="pi pi-file-excel"
           class="p-button-primary p-button-sm mr-2"
           @click="excel"
         ></Button>

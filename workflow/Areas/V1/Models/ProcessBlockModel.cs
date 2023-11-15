@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Vue.Models;
 
 namespace workflow.Areas.V1.Models
 {
@@ -53,8 +54,13 @@ namespace workflow.Areas.V1.Models
         public int days { get; set; }
         public int hours { get; set; }
         public int minutes { get; set; }
+        public string type_template { get; set; }
+
+        public string type_template_html { get; set; }
         public FileUp file_template { get; set; }
 
+        public string type_output { get; set; }
+        public string field_output { get; set; }
         /// <summary>
         /// (printTask)
         /// </summary>
@@ -68,6 +74,7 @@ namespace workflow.Areas.V1.Models
         /// Ký nháy (approveTask)
         /// </summary>
         public List<Signature> listusersign { get; set; }
+        public bool has_notification { get; set; }
         /// <summary>
         /// (mailTask)
         /// </summary>
@@ -117,6 +124,25 @@ namespace workflow.Areas.V1.Models
 
 
 
+
+    }
+
+    public class Nghiphep
+    {
+        public string user_id { get; set; }
+        public UserModel user { get; set; }
+        public DateTime tu_ngay { get; set; }
+        public DateTime den_ngay { get; set; }
+
+        public double tongngaynghi { get; set; } = 0;
+
+        public double tongngayphepdasudung { get; set; } = 0;
+
+        public double tongngayphepconlai { get; set; } = 12;
+
+        public List<string> loaiphep { get; set; }
+
+        public string ly_do { get; set; }
 
     }
 }

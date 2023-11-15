@@ -402,7 +402,44 @@ export default function (G6) {
     },
     "base-node"
   );
-
+  G6.registerNode(
+    "output-system-node",
+    {
+      shapeType: "rect",
+      labelPosition: "bottom",
+      options: $.extendext(true, "replace", {}, taskDefaultOptions, {
+        icon: "/images/icons/flow/output.png",
+        iconStyle: {
+          width: 48,
+          height: 48,
+          left: 10,
+          top: 5,
+        },
+        style: {
+          fill: "white",
+        },
+        stateStyles: {
+          selected: {
+            fill: "aliceblue",
+          },
+        },
+      }),
+      getShapeStyle(cfg) {
+        cfg.size = [70, 60];
+        const width = cfg.size[0];
+        const height = cfg.size[1];
+        const style = {
+          x: 0 - width / 2,
+          y: 0 - height / 2,
+          width,
+          height,
+          ...this.options.style,
+        };
+        return style;
+      },
+    },
+    "base-node"
+  );
   G6.registerNode(
     "start-node",
     {

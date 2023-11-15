@@ -3,33 +3,32 @@
     <div class="panelTitle">{{ $t("sequenceFlow") }}</div>
     <div class="panelBody">
       <DefaultDetail :model="model" :onChange="onChange" :readOnly="readOnly" />
-      <div>
+      <div class="row ml-3 align-items-center">
         <b class="col-form-label">{{ $t("sequenceFlow.reverse") }}:</b>
-        <Checkbox
-          v-model="model.reverse"
-          @change="(value) => onChange('reverse', value)"
-          :disabled="readOnly"
-        />
+        <div class="ml-3">
+          <div class="custom-control custom-switch switch-primary">
+            <input type="checkbox" class="custom-control-input" id="check-reverse" v-model="model.reverse" />
+            <label class="custom-control-label" for="check-reverse"></label>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 <script>
 import DefaultDetail from "./DefaultDetail.vue";
-import Checkbox from "primevue/checkbox";
 export default {
   components: {
     DefaultDetail,
-    Checkbox,
   },
-  props: {
+  props: { 
     model: {
       type: Object,
       default: () => ({}),
     },
     onChange: {
       type: Function,
-      default: () => {},
+      default: () => { },
     },
     readOnly: {
       type: Boolean,
