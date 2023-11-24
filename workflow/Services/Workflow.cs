@@ -549,6 +549,7 @@ namespace it.Services
                                 text = field.id;
 
                                 Table table = section.AddTable(true);
+                                //table.Width = 100;
                                 table.ResetCells(list_data.Count + 1, columns.Count);
                                 //Set the first row as table header
                                 TableRow FRow = table.Rows[0];
@@ -634,6 +635,8 @@ namespace it.Services
 
                                     foreach (var column in columns)
                                     {
+                                        if (column.variable == null)
+                                            continue;
                                         string value_column = data.ContainsKey(column.id) ? data[column.id] : "";
                                         if (column.type == "currency")
                                         {
