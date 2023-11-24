@@ -272,6 +272,58 @@ namespace workflow.Areas.V1.Controllers
             return Json(jsonData);
             //return Json(new { labels = labels, datasets = datasets });
         }
+
+        [HttpPost]
+        public async Task<JsonResult> tableExecution()
+        {
+
+            var draw = Request.Form["draw"].FirstOrDefault();
+            var start = Request.Form["start"].FirstOrDefault();
+            var length = Request.Form["length"].FirstOrDefault();
+            int pageSize = length != null ? Convert.ToInt32(length) : 0;
+            int skip = start != null ? Convert.ToInt32(start) : 0;
+            var process_id = Request.Form["process_id"].FirstOrDefault();
+            //System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+            //string user_id = UserManager.GetUserId(currentUser); // Get user id:
+            //var user_current = await UserManager.GetUserAsync(currentUser);
+            //var subsql = "";
+            //var sql = $"select type_id,COUNT(1) as num from document where deleted_at is null and status_id IN(4,5,6,7) {subsql} GROUP BY type_id";
+
+            //var data = _context.ChartType
+            //	 .FromSqlRaw(sql);
+            //var d = data.Include(d => d.type).OrderByDescending(d => d.num).ToList();
+            var c = _context.ProcessVersionModel.Where(d => d.deleted_at == null);
+            if (process_id != null)
+            {
+                c = c.Where(d => d.process_id == process_id);
+            }
+            var list_process = c.Select(d => d.id).ToList();
+            var list = _context.ExecutionModel.Where(d => d.deleted_at == null && list_process.Contains(d.process_version_id));
+
+            var records = list.Include(d => d.user).OrderByDescending(d => d.created_at).Skip(skip)
+                .ToList();
+
+            int recordsTotal = list.Count();
+            int recordsFiltered = list.Count();
+            var data = new ArrayList();
+
+            //foreach (var record in records)
+            //{
+            //    //var data1 = new
+            //    //{
+            //    //    name = $"<a href='#'>{process.name}</a>",
+            //    //    version = process_version.version,
+            //    //    count = record.count,
+            //    //    id = process_version.id,
+            //    //    excel = $"<a href='/v1/process/exportVersion?process_version_id={process_version.id}' class='export'><i class=\"fas fa-download\"></i></a>",
+            //    //};
+            //    //data.Add(data1);
+            //}
+
+            var jsonData = new { draw = draw, recordsFiltered = recordsFiltered, recordsTotal = recordsTotal, data = records };
+            return Json(jsonData);
+            //return Json(new { labels = labels, datasets = datasets });
+        }
         public async Task<JsonResult> datachartDepartment(string? process_id = null)
         {
             var c = _context.ProcessVersionModel.Where(d => d.deleted_at == null);
@@ -562,13 +614,14 @@ namespace workflow.Areas.V1.Controllers
             return list;
         }
         [HttpPost]
+        [RequestFormLimits(ValueCountLimit = 5000)]
         public async Task<JsonResult> Saveprocess(string id, ProcessModel ProcessModel, List<ProcessBlockModel> blocks, List<ProcessLinkModel> links)
         {
             var fields = new List<ProcessFieldModel>();
-            if (id != ProcessModel.id)
-            {
-                return Json(new { success = 0 });
-            }
+            //if (id != ProcessModel.id)
+            //{
+            //    return Json(new { success = 0 });
+            //}
             try
             {
                 ProcessModel.blocks = null;
@@ -1051,6 +1104,34 @@ end:
                         status = 1
                     };
                     _context.Add(email);
+
+
+                    //////Nếu có thông báo gửi mail
+                    var data_setting = ActivityModel.data_setting;
+                    if (data_setting.has_notification == true)
+                    {
+                        var mail = data_setting.mail;
+                        if (mail == null)
+                        {
+                            goto end;
+                        }
+                        mail = _workflow.fillMail(mail, ActivityModel);
+                        //data_setting.mail = mail;
+                        //ActivityModel.data_setting = data_setting;
+                        //_context.Update(ActivityModel);
+
+                        var email1 = new EmailModel
+                        {
+                            email_to = mail.to,
+                            subject = mail.title,
+                            body = mail.content,
+                            data_attachments = mail.filecontent.Split(",").ToList(),
+                            email_type = "forward_step",
+                            status = 1
+                        };
+                        _context.Add(email1);
+                    }
+
                     await _context.SaveChangesAsync();
                 }
                 else if (ActivityModel.clazz == "success")
@@ -1088,6 +1169,33 @@ end:
                         status = 1
                     };
                     _context.Add(email);
+
+                    //////Nếu có thông báo gửi mail
+                    var data_setting = ActivityModel.data_setting;
+                    if (data_setting.has_notification == true)
+                    {
+                        var mail = data_setting.mail;
+                        if (mail == null)
+                        {
+                            goto end;
+                        }
+                        mail = _workflow.fillMail(mail, ActivityModel);
+                        //data_setting.mail = mail;
+                        //ActivityModel.data_setting = data_setting;
+                        //_context.Update(ActivityModel);
+
+                        var email1 = new EmailModel
+                        {
+                            email_to = mail.to,
+                            subject = mail.title,
+                            body = mail.content,
+                            data_attachments = mail.filecontent.Split(",").ToList(),
+                            email_type = "forward_step",
+                            status = 1
+                        };
+                        _context.Add(email1);
+                    }
+
                     await _context.SaveChangesAsync();
                 }
                 else if (ActivityModel.clazz == "printSystem")
@@ -1113,37 +1221,37 @@ end:
                 }
 
 
-                /////GỬI MAIL THEO MẪU
-                //if (ActivityModel.blocking == true)
-                //{
-                //    var data_setting = ActivityModel.data_setting;
-                //    var mail = data_setting.mail;
-                //    if (mail == null)
-                //    {
-                //        goto end;
-                //    }
-                //    mail = _workflow.fillMail(mail, ActivityModel);
-                //    //data_setting.mail = mail;
-                //    //ActivityModel.data_setting = data_setting;
-                //    //_context.Update(ActivityModel);
+/////GỬI MAIL THEO MẪU
+//if (ActivityModel.blocking == true)
+//{
+//    var data_setting = ActivityModel.data_setting;
+//    var mail = data_setting.mail;
+//    if (mail == null)
+//    {
+//        goto end;
+//    }
+//    mail = _workflow.fillMail(mail, ActivityModel);
+//    //data_setting.mail = mail;
+//    //ActivityModel.data_setting = data_setting;
+//    //_context.Update(ActivityModel);
 
-                //    var email = new EmailModel
-                //    {
-                //        email_to = mail.to,
-                //        subject = mail.title,
-                //        body = mail.content,
-                //        data_attachments = mail.filecontent.Split(",").ToList(),
-                //        email_type = "forward_step",
-                //        status = 1
-                //    };
-                //    _context.Add(email);
-                //    await _context.SaveChangesAsync();
-                //}
+//    var email = new EmailModel
+//    {
+//        email_to = mail.to,
+//        subject = mail.title,
+//        body = mail.content,
+//        data_attachments = mail.filecontent.Split(",").ToList(),
+//        email_type = "forward_step",
+//        status = 1
+//    };
+//    _context.Add(email);
+//    await _context.SaveChangesAsync();
+//}
 
-                /////
+/////
 
-                //end:
-                //                Console.WriteLine("End");
+end:
+                Console.WriteLine("End");
             }
             catch (DbUpdateConcurrencyException)
             {

@@ -507,6 +507,9 @@ namespace workflow.Areas.V1.Controllers
 
                 foreach (var version in ProcessVersion)
                 {
+                    var executions = version.executions.Where(d => d.deleted_at == null).ToList();
+                    if (executions.Count() == 0)
+                        continue;
                     Worksheet newSheet = workbook.CreateEmptySheet("Version " + version.version);
                     newSheet.CopyFrom(sheet);
 
@@ -576,7 +579,7 @@ namespace workflow.Areas.V1.Controllers
 
                     }
                     var user_create = _context.UserModel.Where(d => d.Id == process.user_id).FirstOrDefault();
-                    var executions = version.executions.Where(d => d.deleted_at == null).ToList();
+
                     var start_r = 3;
                     foreach (var execution in executions)
                     {

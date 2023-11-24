@@ -363,7 +363,8 @@ namespace it.Services
 
                 Dictionary<string, Table> replacements_table = new Dictionary<string, Table>(StringComparer.OrdinalIgnoreCase) { };
 
-                foreach (var activity in ExecutionModel.activities)
+                var activities = ExecutionModel.activities.Where(d => d.deleted_at == null).ToList();
+                foreach (var activity in activities)
                 {
                     if (activity.variable != null && activity.variable != "")
                     {
@@ -870,7 +871,8 @@ namespace it.Services
                 replacements.Add("reciever", String.Join(",", list_FullName));
                 replacements_email.Add("reciever", String.Join(",", list_Email));
             }
-            foreach (var activity in ExecutionModel.activities)
+            var activities = ExecutionModel.activities.Where(d => d.deleted_at == null).ToList();
+            foreach (var activity in activities)
             {
                 if (activity.variable != null && activity.variable != "")
                 {
@@ -1046,6 +1048,7 @@ namespace it.Services
 
                 }
             }
+
             var firstChar = "!#";
             var lastChar = "#";
             var to = replacements_email.Aggregate(mail.to, (current, value) =>

@@ -140,12 +140,47 @@
       </div>
       <!--end card-->
     </div>
+    <div class="col-lg-6">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="header-title mt-0 mb-3">Lượt chạy</h4>
+          <div class="">
+            <table class="table mb-0" id="table_execution">
+              <thead class="thead-light">
+                <tr>
+                  <th class="border-top-0">ID</th>
+                  <th class="border-top-0">Tiêu đề</th>
+                  <th class="border-top-0">Người tạo</th>
+                  <th class="border-top-0">Trạng thái</th>
+                </tr>
+                <!--end tr-->
+              </thead>
+              <tbody>
+                <tr v-for="tr of datatableExecution">
+                  <td><a :href="'/execution/details/' + tr.process_version_id + '?execution_id=' + tr.id">{{ tr.id }}</a>
+                  </td>
+                  <td v-html="tr.title"></td>
+                  <td v-html="tr.user.fullName"></td>
+                  <td>
+                    <Button :label="tr.status" :class="'p-button-sm status status_' + tr.status_id"></Button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <!--end table-->
+          </div>
+          <!--end /div-->
+        </div>
+        <!--end card-body-->
+      </div>
+    </div>
   </div>
   <Loading :waiting="waiting"></Loading>
 </template>
 <script setup>
 import { onMounted, ref } from "vue";
 import Chart from "primevue/chart";
+import Button from "primevue/button";
 import Api from "../../../api/Api"
 import processApi from "../../../api/processApi";
 import Loading from "../../../components/Loading.vue";
@@ -169,6 +204,7 @@ const chartData = ref({
 });
 const datatableUser = ref([]);
 const datatableProcess = ref([]);
+const datatableExecution = ref([]);
 const route = useRoute();
 const exportVersion = (id) => {
   waiting.value = true;
@@ -201,5 +237,28 @@ onMounted(() => {
   Api.tableProcess(process_id).then((res) => {
     datatableProcess.value = res.data;
   });
+  Api.tableExecution(process_id).then((res) => {
+    datatableExecution.value = res.data;
+  });
 });
 </script>
+<style scoped>
+.status {
+  border: 0px;
+}
+
+.status_2 {
+  background-color: #d8f4ff;
+  color: #0c9cdd;
+}
+
+.status_3 {
+  background-color: #1ecab8;
+  color: white;
+}
+
+.status_4 {
+  background-color: #f1646c;
+  color: white;
+}
+</style>

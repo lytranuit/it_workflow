@@ -6,11 +6,11 @@ export default {
     return repository
       .get(`/v1/${resoure}/process`, { params: { id: id } })
       .then((res) => {
-      var url = "/Identity/Account/Login";
-      if (res.request.responseURL.indexOf(url) != -1)
-        location.reload();
-      return res.data
-    });;
+        var url = "/Identity/Account/Login";
+        if (res.request.responseURL.indexOf(url) != -1)
+          location.reload();
+        return res.data
+      });;
   },
   department() {
     return repository.get(`/v1/${resoure}/department`).then((res) => {
@@ -32,41 +32,41 @@ export default {
     return repository
       .get(`/v1/${resoure}/ProcessGroupWithProcess`)
       .then((res) => {
-      var url = "/Identity/Account/Login";
-      if (res.request.responseURL.indexOf(url) != -1)
-        location.reload();
-      return res.data
-    });;
+        var url = "/Identity/Account/Login";
+        if (res.request.responseURL.indexOf(url) != -1)
+          location.reload();
+        return res.data
+      });;
   },
   processgroup() {
     return repository
       .get(`/v1/${resoure}/processgroup`)
       .then((res) => {
-      var url = "/Identity/Account/Login";
-      if (res.request.responseURL.indexOf(url) != -1)
-        location.reload();
-      return res.data
-    });;
+        var url = "/Identity/Account/Login";
+        if (res.request.responseURL.indexOf(url) != -1)
+          location.reload();
+        return res.data
+      });;
   },
   ProcessVersion(id) {
     return repository
       .get(`/v1/${resoure}/ProcessVersion`, { params: { id: id } })
       .then((res) => {
-      var url = "/Identity/Account/Login";
-      if (res.request.responseURL.indexOf(url) != -1)
-        location.reload();
-      return res.data
-    });;
+        var url = "/Identity/Account/Login";
+        if (res.request.responseURL.indexOf(url) != -1)
+          location.reload();
+        return res.data
+      });;
   },
   execution(execution_id) {
     return repository
       .get(`/v1/${resoure}/execution`, { params: { id: execution_id } })
       .then((res) => {
-      var url = "/Identity/Account/Login";
-      if (res.request.responseURL.indexOf(url) != -1)
-        location.reload();
-      return res.data
-    });;
+        var url = "/Identity/Account/Login";
+        if (res.request.responseURL.indexOf(url) != -1)
+          location.reload();
+        return res.data
+      });;
   },
   TransitionByExecution(execution_id) {
     return repository
@@ -74,11 +74,11 @@ export default {
         params: { execution_id: execution_id },
       })
       .then((res) => {
-      var url = "/Identity/Account/Login";
-      if (res.request.responseURL.indexOf(url) != -1)
-        location.reload();
-      return res.data
-    });;
+        var url = "/Identity/Account/Login";
+        if (res.request.responseURL.indexOf(url) != -1)
+          location.reload();
+        return res.data
+      });;
   },
   ActivityByExecution(execution_id) {
     return repository
@@ -86,11 +86,11 @@ export default {
         params: { execution_id: execution_id },
       })
       .then((res) => {
-      var url = "/Identity/Account/Login";
-      if (res.request.responseURL.indexOf(url) != -1)
-        location.reload();
-      return res.data
-    });;
+        var url = "/Identity/Account/Login";
+        if (res.request.responseURL.indexOf(url) != -1)
+          location.reload();
+        return res.data
+      });;
   },
   CustomBlockByExecution(execution_id) {
     return repository
@@ -98,11 +98,11 @@ export default {
         params: { execution_id: execution_id },
       })
       .then((res) => {
-      var url = "/Identity/Account/Login";
-      if (res.request.responseURL.indexOf(url) != -1)
-        location.reload();
-      return res.data
-    });;
+        var url = "/Identity/Account/Login";
+        if (res.request.responseURL.indexOf(url) != -1)
+          location.reload();
+        return res.data
+      });;
   },
   HomeBadge(process_id = null) {
     return repository.get(`/v1/${resoure}/HomeBadge`, {
@@ -120,11 +120,11 @@ export default {
         params: { process_id: process_id },
       })
       .then((res) => {
-      var url = "/Identity/Account/Login";
-      if (res.request.responseURL.indexOf(url) != -1)
-        location.reload();
-      return res.data
-    });;
+        var url = "/Identity/Account/Login";
+        if (res.request.responseURL.indexOf(url) != -1)
+          location.reload();
+        return res.data
+      });;
   },
 
   tableUser(process_id = null) {
@@ -139,11 +139,11 @@ export default {
         }
       )
       .then((res) => {
-      var url = "/Identity/Account/Login";
-      if (res.request.responseURL.indexOf(url) != -1)
-        location.reload();
-      return res.data
-    });;
+        var url = "/Identity/Account/Login";
+        if (res.request.responseURL.indexOf(url) != -1)
+          location.reload();
+        return res.data
+      });;
   },
 
   tableProcess(process_id = null) {
@@ -158,11 +158,29 @@ export default {
         }
       )
       .then((res) => {
-      var url = "/Identity/Account/Login";
-      if (res.request.responseURL.indexOf(url) != -1)
-        location.reload();
-      return res.data
-    });;
+        var url = "/Identity/Account/Login";
+        if (res.request.responseURL.indexOf(url) != -1)
+          location.reload();
+        return res.data
+      });;
+  },
+  tableExecution(process_id = null) {
+    return repository
+      .post(
+        `/v1/${resoure}/tableExecution`,
+        { process_id: process_id },
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      )
+      .then((res) => {
+        var url = "/Identity/Account/Login";
+        if (res.request.responseURL.indexOf(url) != -1)
+          location.reload();
+        return res.data
+      });;
   },
   saveprocess(params) {
     return repository
@@ -172,11 +190,11 @@ export default {
         },
       })
       .then((res) => {
-      var url = "/Identity/Account/Login";
-      if (res.request.responseURL.indexOf(url) != -1)
-        location.reload();
-      return res.data
-    });;
+        var url = "/Identity/Account/Login";
+        if (res.request.responseURL.indexOf(url) != -1)
+          location.reload();
+        return res.data
+      });;
   },
   morecomment(execution_id, from_id) {
     return repository
@@ -184,11 +202,11 @@ export default {
         params: { execution_id: execution_id, from_id: from_id },
       })
       .then((res) => {
-      var url = "/Identity/Account/Login";
-      if (res.request.responseURL.indexOf(url) != -1)
-        location.reload();
-      return res.data
-    });;
+        var url = "/Identity/Account/Login";
+        if (res.request.responseURL.indexOf(url) != -1)
+          location.reload();
+        return res.data
+      });;
   },
   events(execution_id) {
     return repository
@@ -196,11 +214,11 @@ export default {
         params: { execution_id: execution_id },
       })
       .then((res) => {
-      var url = "/Identity/Account/Login";
-      if (res.request.responseURL.indexOf(url) != -1)
-        location.reload();
-      return res.data
-    });;
+        var url = "/Identity/Account/Login";
+        if (res.request.responseURL.indexOf(url) != -1)
+          location.reload();
+        return res.data
+      });;
   },
   saveprocess(params) {
     return repository
@@ -210,11 +228,11 @@ export default {
         },
       })
       .then((res) => {
-      var url = "/Identity/Account/Login";
-      if (res.request.responseURL.indexOf(url) != -1)
-        location.reload();
-      return res.data
-    });;
+        var url = "/Identity/Account/Login";
+        if (res.request.responseURL.indexOf(url) != -1)
+          location.reload();
+        return res.data
+      });;
   },
 
   updateexecution(params) {
@@ -225,11 +243,11 @@ export default {
         },
       })
       .then((res) => {
-      var url = "/Identity/Account/Login";
-      if (res.request.responseURL.indexOf(url) != -1)
-        location.reload();
-      return res.data
-    });;
+        var url = "/Identity/Account/Login";
+        if (res.request.responseURL.indexOf(url) != -1)
+          location.reload();
+        return res.data
+      });;
   },
   createexecution(params) {
     return repository
@@ -239,11 +257,11 @@ export default {
         },
       })
       .then((res) => {
-      var url = "/Identity/Account/Login";
-      if (res.request.responseURL.indexOf(url) != -1)
-        location.reload();
-      return res.data
-    });;
+        var url = "/Identity/Account/Login";
+        if (res.request.responseURL.indexOf(url) != -1)
+          location.reload();
+        return res.data
+      });;
   },
   createcustomblock(params) {
     return repository
@@ -253,11 +271,11 @@ export default {
         },
       })
       .then((res) => {
-      var url = "/Identity/Account/Login";
-      if (res.request.responseURL.indexOf(url) != -1)
-        location.reload();
-      return res.data
-    });;
+        var url = "/Identity/Account/Login";
+        if (res.request.responseURL.indexOf(url) != -1)
+          location.reload();
+        return res.data
+      });;
   },
   updatecustomblock(params) {
     return repository
@@ -267,11 +285,11 @@ export default {
         },
       })
       .then((res) => {
-      var url = "/Identity/Account/Login";
-      if (res.request.responseURL.indexOf(url) != -1)
-        location.reload();
-      return res.data
-    });;
+        var url = "/Identity/Account/Login";
+        if (res.request.responseURL.indexOf(url) != -1)
+          location.reload();
+        return res.data
+      });;
   },
   createactivity(params) {
     return repository
@@ -281,11 +299,11 @@ export default {
         },
       })
       .then((res) => {
-      var url = "/Identity/Account/Login";
-      if (res.request.responseURL.indexOf(url) != -1)
-        location.reload();
-      return res.data
-    });;
+        var url = "/Identity/Account/Login";
+        if (res.request.responseURL.indexOf(url) != -1)
+          location.reload();
+        return res.data
+      });;
   },
   updateactivity(params) {
     return repository
@@ -295,11 +313,11 @@ export default {
         },
       })
       .then((res) => {
-      var url = "/Identity/Account/Login";
-      if (res.request.responseURL.indexOf(url) != -1)
-        location.reload();
-      return res.data
-    });;
+        var url = "/Identity/Account/Login";
+        if (res.request.responseURL.indexOf(url) != -1)
+          location.reload();
+        return res.data
+      });;
   },
   createtransition(params) {
     return repository
@@ -309,11 +327,11 @@ export default {
         },
       })
       .then((res) => {
-      var url = "/Identity/Account/Login";
-      if (res.request.responseURL.indexOf(url) != -1)
-        location.reload();
-      return res.data
-    });;
+        var url = "/Identity/Account/Login";
+        if (res.request.responseURL.indexOf(url) != -1)
+          location.reload();
+        return res.data
+      });;
   },
   uploadFile(params) {
     return repository
@@ -323,11 +341,11 @@ export default {
         },
       })
       .then((res) => {
-      var url = "/Identity/Account/Login";
-      if (res.request.responseURL.indexOf(url) != -1)
-        location.reload();
-      return res.data
-    });;
+        var url = "/Identity/Account/Login";
+        if (res.request.responseURL.indexOf(url) != -1)
+          location.reload();
+        return res.data
+      });;
   },
   addcomment(params) {
     return repository
@@ -337,11 +355,11 @@ export default {
         },
       })
       .then((res) => {
-      var url = "/Identity/Account/Login";
-      if (res.request.responseURL.indexOf(url) != -1)
-        location.reload();
-      return res.data
-    });;
+        var url = "/Identity/Account/Login";
+        if (res.request.responseURL.indexOf(url) != -1)
+          location.reload();
+        return res.data
+      });;
   },
   SaveSign(params) {
     return repository
@@ -351,10 +369,10 @@ export default {
         },
       })
       .then((res) => {
-      var url = "/Identity/Account/Login";
-      if (res.request.responseURL.indexOf(url) != -1)
-        location.reload();
-      return res.data
-    });;
+        var url = "/Identity/Account/Login";
+        if (res.request.responseURL.indexOf(url) != -1)
+          location.reload();
+        return res.data
+      });;
   },
 };
