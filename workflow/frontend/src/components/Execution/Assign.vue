@@ -7,7 +7,6 @@
           <Accordion :activeIndex="activeName" multiple>
             <AccordionTab :header="element.block.label" :key="index" v-for="(element, index) in data_custom_block">
               <div class="row bg-white">
-                <div class="col-12 mb-2">Người thực hiện:</div>
                 <div class="col-lg-3 mb-2">
                   <select class="form-control" :name="'sel_' + index" v-model="element.data_setting.type_performer"
                     required>

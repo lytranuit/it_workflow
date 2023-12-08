@@ -12,7 +12,7 @@
       <div class="row">
         <form id="form-require-sign" class="col-12">
           <div class="row bg-white flex-m">
-            <div class="col-3">Người thực hiện:</div>
+            <div class="col-3">Yêu cầu ký nháy:</div>
             <div class="col-9">
               <UserTreeSelect
                 multiple

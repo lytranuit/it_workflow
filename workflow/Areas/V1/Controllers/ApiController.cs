@@ -1393,7 +1393,7 @@ end:
                     email_to = string.Join(",", list1),
                     subject = "[Yêu cầu ký nháy]" + mail.title,
                     body = mail.content,
-                    data_attachments = mail.filecontent.Split(",").ToList(),
+                    data_attachments = mail.filecontent != null || mail.filecontent != "" ? mail.filecontent.Split(",").ToList() : null,
                     email_type = "forward_step",
                     status = 1
                 };
