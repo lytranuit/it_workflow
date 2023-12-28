@@ -380,7 +380,7 @@ namespace workflow.Areas.V1.Controllers
         [HttpPost]
         public async Task<JsonResult> sync()
         {
-            var user_esign = _esignContext.UserEsignModel.Where(d => d.deleted_at == null).ToList();
+            var user_esign = _esignContext.UserEsignModel.ToList();
 
             foreach (var user in user_esign)
             {
@@ -391,7 +391,9 @@ namespace workflow.Areas.V1.Controllers
                     find.image_sign = user.image_sign;
                     find.image_url = user.image_url;
                     find.signature = $"/private/pfx/{user.Id}.pfx";
-                    _context.Update(find);
+					find.deleted_at = user.deleted_at;
+					find.LockoutEnd = user.LockoutEnd;
+					_context.Update(find);
                     _context.SaveChanges();
                 }
                 else
@@ -404,8 +406,10 @@ namespace workflow.Areas.V1.Controllers
                         FullName = user.FullName,
                         image_url = user.image_url,
                         image_sign = user.image_sign,
-                        signature = $"/private/pfx/{user.Id}.pfx"
-                    };
+                        signature = $"/private/pfx/{user.Id}.pfx",
+						deleted_at = user.deleted_at,
+						LockoutEnd = user.LockoutEnd,
+					};
                     IdentityResult result = await UserManager.CreateAsync(newuser, "!PMP_it123456");
 
                 }

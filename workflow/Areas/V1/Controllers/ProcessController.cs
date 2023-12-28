@@ -86,7 +86,8 @@ namespace workflow.Areas.V1.Controllers
                     .ThenInclude(d => d.fields.OrderBy(x => x.stt))
                     .Include(x => x.links)
                     .FirstOrDefault();
-                var ProcessVersionModel = new ProcessVersionModel()
+                json.versions = null;
+				var ProcessVersionModel = new ProcessVersionModel()
                 {
                     id = Guid.NewGuid().ToString(),
                     process_id = ProcessModel.id,
@@ -289,7 +290,7 @@ namespace workflow.Areas.V1.Controllers
                             var field_ac = activity.fields.Where(d => d.name == field.name).FirstOrDefault();
                             var values = field_ac.values;
                             var text = values.value;
-                            if (field.type == "select")
+                            if (field.type == "select" || field.type == "radio")
                             {
                                 var options = data_setting.options;
                                 var option = options.Where(d => d.id == values.value).FirstOrDefault();
@@ -359,7 +360,7 @@ namespace workflow.Areas.V1.Controllers
                                 //text = String.Join(", ", files);
                                 //row.Cells[(start_col_field - 1)].Value = text;
                             }
-                            else if (field.type == "select_multiple")
+                            else if (field.type == "select_multiple" || field.type == "checkbox")
                             {
                                 var options = data_setting.options;
                                 var option = options.Where(d => values.value_array.Contains(d.id)).Select(d => d.name).ToList();
@@ -617,7 +618,7 @@ namespace workflow.Areas.V1.Controllers
                                 var field_ac = activity.fields.Where(d => d.name == field.name).FirstOrDefault();
                                 var values = field_ac.values;
                                 var text = values.value;
-                                if (field.type == "select")
+                                if (field.type == "select" || field.type == "radio")
                                 {
                                     var options = data_setting.options;
                                     var option = options.Where(d => d.id == values.value).FirstOrDefault();
@@ -687,7 +688,7 @@ namespace workflow.Areas.V1.Controllers
                                     //text = String.Join(", ", files);
                                     //row.Cells[(start_col_field - 1)].Value = text;
                                 }
-                                else if (field.type == "select_multiple")
+                                else if (field.type == "select_multiple" || field.type == "checkbox")
                                 {
                                     var options = data_setting.options;
                                     var option = options.Where(d => values.value_array.Contains(d.id)).Select(d => d.name).ToList();

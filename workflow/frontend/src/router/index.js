@@ -21,11 +21,21 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: routes_1,
 });
+window.popStateDetected = false
+window.addEventListener('popstate', () => {
+  window.popStateDetected = true
+})
 router.beforeEach((toRoute, fromRoute, next) => {
   i18n.global.locale.value = localStorage.getItem("language") || "vi";
   const title =
     toRoute.meta && toRoute.meta.title ? toRoute.meta.title : "AstaCorp";
   document.title = title;
-  next();
+  const IsItABackButton = window.popStateDetected
+  window.popStateDetected = false
+  if (IsItABackButton && fromRoute.meta.someLogica) {
+    next(false)
+    return ''
+  }
+  next()
 });
 export default router;
