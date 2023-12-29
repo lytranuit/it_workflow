@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Vue.Data;
 using Vue.Models;
 using System.Collections;
+using workflow.Models;
 
 namespace workflow.Areas.V1.Controllers
 {
@@ -18,7 +19,7 @@ namespace workflow.Areas.V1.Controllers
             UserManager = UserMgr;
         }
         [HttpPost]
-        public async Task<JsonResult> Save(DepartmentModel DepartmentModel)
+        public async Task<JsonResult> Save(DepartmentModel DepartmentModel, List<string> list_users_id)
         {
             var jsonData = new { success = true, message = "" };
             try
@@ -26,6 +27,10 @@ namespace workflow.Areas.V1.Controllers
                 if (DepartmentModel.id > 0)
                 {
                     _context.Update(DepartmentModel);
+
+                    var list_old = _context.UserDepartmentModel.Where(d => d.department_id == DepartmentModel.id).ToList();
+                    _context.RemoveRange(list_old);
+
                     _context.SaveChanges();
                 }
                 else
@@ -33,6 +38,16 @@ namespace workflow.Areas.V1.Controllers
                     _context.Add(DepartmentModel);
                     _context.SaveChanges();
                 }
+                foreach (var item in list_users_id)
+                {
+                    var UserDepartmentModel = new UserDepartmentModel()
+                    {
+                        user_id = item,
+                        department_id = DepartmentModel.id
+                    };
+                    _context.Add(UserDepartmentModel);
+                }
+                _context.SaveChanges();
             }
             catch (Exception ex)
             {
@@ -84,7 +99,7 @@ namespace workflow.Areas.V1.Controllers
             _context.SaveChanges();
             return Json(new { success = 1 });
         }
-        
+
         public async Task<JsonResult> Get()
         {
             var All = GetChild(0);
@@ -93,7 +108,7 @@ namespace workflow.Areas.V1.Controllers
         }
         private List<DepartmentModel> GetChild(int parent)
         {
-            var DepartmentModel = _context.DepartmentModel.Where(d => d.deleted_at == null && d.parent == parent).OrderBy(d => d.stt).ToList();
+            var DepartmentModel = _context.DepartmentModel.Where(d => d.deleted_at == null && d.parent == parent).Include(d => d.list_users).OrderBy(d => d.stt).ToList();
             var list = new List<DepartmentModel>();
             if (DepartmentModel.Count() > 0)
             {
@@ -104,6 +119,7 @@ namespace workflow.Areas.V1.Controllers
                     {
                         var child = GetChild(department.id);
                         department.children = child;
+
                     }
                     list.Add(department);
                 }

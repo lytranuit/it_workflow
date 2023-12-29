@@ -4,81 +4,51 @@
     <ConfirmDialog></ConfirmDialog>
     <div class="col-12">
       <h5 class="card-header drag-handle">
-        <Button
-          label="Tạo mới"
-          icon="pi pi-plus"
-          class="p-button-success p-button-sm mr-2"
-          @click="openNew"
-        ></Button>
-        <Button
-          label="Lưu lại"
-          icon="pi pi-save"
-          class="p-button-primary p-button-sm float-right"
-          @click="saveorder"
-        ></Button>
+        <Button label="Tạo mới" icon="pi pi-plus" class="p-button-success p-button-sm mr-2" @click="openNew"></Button>
+        <Button label="Lưu lại" icon="pi pi-save" class="p-button-primary p-button-sm float-right"
+          @click="saveorder"></Button>
       </h5>
       <section class="card card-fluid">
         <div class="card-body" style="overflow: auto; position: relative">
           <div class="dd" id="nestable_list_1">
             <ol class="dd-list ui-sortable" id="nestable">
-              <TreeDepartment
-                v-for="node in datatable"
-                :key="node.id"
-                :node="node"
-                @edit="edit"
-                @remove="confirmDelete"
-              />
+              <TreeDepartment v-for="node in datatable" :key="node.id" :node="node" @edit="edit"
+                @remove="confirmDelete" />
             </ol>
           </div>
         </div>
       </section>
     </div>
 
-    <Dialog
-      v-model:visible="productDialog"
-      :header="headerForm"
-      :modal="true"
-      class="p-fluid"
-    >
+    <Dialog v-model:visible="productDialog" :header="headerForm" :modal="true" class="p-fluid" :style="{ width: '50vw' }"
+      :breakpoints="{ '1199px': '75vw', '575px': '95vw' }">
       <div class="row mb-2">
         <div class="field col">
           <label for="name">Tên <span class="text-danger">*</span></label>
-          <InputText
-            id="name"
-            class="p-inputtext-sm"
-            v-model.trim="model.name"
-            required="true"
-            :class="{ 'p-invalid': submitted && !model.name }"
-          />
-          <small class="p-error" v-if="submitted && !model.name"
-            >Required.</small
-          >
+          <InputText id="name" class="p-inputtext-sm" v-model.trim="model.name" required="true"
+            :class="{ 'p-invalid': submitted && !model.name }" />
+          <small class="p-error" v-if="submitted && !model.name">Required.</small>
         </div>
         <div class="field col">
           <label for="name">Màu sắc</label>
           <div>
-            <input
-              type="color"
-              class="form-control form-control-sm"
-              v-model="model.color"
-            />
+            <input type="color" class="form-control form-control-sm" v-model="model.color" />
+          </div>
+        </div>
+      </div>
+      <div class="row mb-2">
+        <div class="field col">
+          <label for="name">Danh sách</label>
+          <div>
+            <Usertreeselect multiple v-model="model.list_users_id" zIndex="3000">
+            </UserTreeSelect>
           </div>
         </div>
       </div>
 
       <template #footer>
-        <Button
-          label="Cancel"
-          icon="pi pi-times"
-          class="p-button-text"
-          @click="hideDialog"
-        ></Button>
-        <Button
-          label="Save"
-          icon="pi pi-check"
-          class="p-button-text"
-          @click="saveProduct"
-        ></Button>
+        <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="hideDialog"></Button>
+        <Button label="Save" icon="pi pi-check" class="p-button-text" @click="saveProduct"></Button>
       </template>
     </Dialog>
     <Loading :waiting="waiting"></Loading>
@@ -100,6 +70,7 @@ import ConfirmDialog from "primevue/confirmdialog";
 import { useToast } from "primevue/usetoast";
 import departmentApi from "../../api/departmentApi";
 import { useConfirm } from "primevue/useconfirm";
+import Usertreeselect from "../../components/Treeselect/UserTreeselect.vue";
 const toast = useToast();
 const confirm = useConfirm();
 
@@ -171,7 +142,7 @@ const saveProduct = () => {
 };
 const old_key = ref();
 const edit = (m) => {
-  console.log(m.id);
+  // console.log(m.id);
   old_key.value = m.id;
   headerForm.value = m.id;
   model.value = { ...m };

@@ -1,5 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using NuGet.Configuration;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using workflow.Areas.V1.Models;
+using workflow.Models;
 namespace Vue.Models
 {
     [Table("department")]
@@ -19,7 +22,16 @@ namespace Vue.Models
 
         public DateTime? deleted_at { get; set; }
 
+        public virtual List<UserDepartmentModel>? list_users { get; set; }
         [NotMapped]
         public List<DepartmentModel>? children { get; set; }
+        [NotMapped]
+        public List<string> list_users_id
+        {
+            get
+            {
+                return list_users != null ? list_users.Select(x => x.user_id).ToList() : new List<string>();
+            }
+        }
     }
 }
