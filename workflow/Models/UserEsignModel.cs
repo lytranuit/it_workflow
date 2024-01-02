@@ -17,6 +17,12 @@ namespace Vue.Models
         public string FullName { get; set; }
         public string? image_url { get; set; }
         public string? image_sign { get; set; }
+        public string? signature { get; set; }
+        public string? department_text { get; set; }
+        public string? reportId { get; set; }
+        public string? msnv { get; set; }
+
+        public double? ngaynghi { get; set; }
         public DateTime? last_login { get; set; }
 
         public DateTime? created_at { get; set; }

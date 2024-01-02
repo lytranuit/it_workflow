@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using System.Net.Mail;
 using it.Services;
 using Vue.Data;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using static Vue.Data.ItContext;
+using System.Diagnostics;
 
 namespace it.Controllers
 {
@@ -18,6 +21,8 @@ namespace it.Controllers
             _configuration = configuration;
             _context = context;
             _workflow = workflow;
+            var listener = _context.GetService<DiagnosticSource>();
+            (listener as DiagnosticListener).SubscribeWithAdapter(new CommandInterceptor());
         }
 
         public IActionResult Index()

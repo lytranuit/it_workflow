@@ -16,6 +16,9 @@ using NuGet.Packaging;
 using Vue.Data;
 using Vue.Models;
 using NuGet.LibraryModel;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using static Vue.Data.ItContext;
+using System.Diagnostics;
 
 namespace Syncfusion.EJ2.FileManager.Base.SQLFileProvider
 {
@@ -33,7 +36,10 @@ namespace Syncfusion.EJ2.FileManager.Base.SQLFileProvider
 		{
 			_context = itContext;
 			_configuration = configuration;
-		}
+
+            var listener = _context.GetService<DiagnosticSource>();
+            (listener as DiagnosticListener).SubscribeWithAdapter(new CommandInterceptor());
+        }
 		// Sets the SQLConnection string, table name and table id
 		public void SetSQLConnection(string sqlTableName, string tableID)
 		{

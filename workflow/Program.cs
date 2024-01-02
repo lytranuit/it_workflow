@@ -37,7 +37,7 @@ namespace Vue
               x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
             builder.Services.AddDbContext<IdentityContext>(options =>
-                options.UseSqlServer(connectionString));
+                options.UseSqlServer(EsignConnectionString));
             builder.Services.AddDefaultIdentity<UserModel>(options => options.SignIn.RequireConfirmedAccount = false).AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<IdentityContext>(); ;
 

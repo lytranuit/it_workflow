@@ -380,38 +380,66 @@ namespace workflow.Areas.V1.Controllers
         [HttpPost]
         public async Task<JsonResult> sync()
         {
-            var user_esign = _esignContext.UserEsignModel.ToList();
-
-            foreach (var user in user_esign)
+            var users = _context.UserModel.ToList();
+            foreach (var user in users)
             {
-                var find = _context.UserModel.Where(d => d.Email.ToLower() == user.Email.ToLower()).FirstOrDefault();
-                if (find != null)
+                var esign = _esignContext.UserEsignModel.Where(d => d.Email.ToLower() == user.Email.ToLower()).FirstOrDefault();
+                if (esign != null)
                 {
-                    find.FullName = user.FullName;
-                    find.image_sign = user.image_sign;
-                    find.image_url = user.image_url;
-                    find.signature = $"/private/pfx/{user.Id}.pfx";
-					find.deleted_at = user.deleted_at;
-					find.LockoutEnd = user.LockoutEnd;
-					_context.Update(find);
-                    _context.SaveChanges();
-                }
-                else
-                {
-                    UserModel newuser = new UserModel
-                    {
-                        Email = user.Email,
-                        UserName = user.Email,
-                        EmailConfirmed = true,
-                        FullName = user.FullName,
-                        image_url = user.image_url,
-                        image_sign = user.image_sign,
-                        signature = $"/private/pfx/{user.Id}.pfx",
-						deleted_at = user.deleted_at,
-						LockoutEnd = user.LockoutEnd,
-					};
-                    IdentityResult result = await UserManager.CreateAsync(newuser, "!PMP_it123456");
+                    esign.msnv = user.msnv;
+                    esign.signature = user.signature;
+                    esign.ngaynghi = user.ngaynghi;
+                    esign.reportId = user.reportId;
 
+                    _esignContext.Update(esign);
+                    _esignContext.SaveChanges();
+
+                    var user_department = _context.UserDepartmentModel.Where(d => d.user_id == user.Id).ToList();
+                    foreach (var department in user_department)
+                    {
+                        department.user_id = esign.Id;
+                    }
+                    _context.UpdateRange(user_department);
+
+                    var activity = _context.ActivityModel.Where(d => d.created_by == user.Id).ToList();
+                    foreach (var item in activity)
+                    {
+                        item.created_by = esign.Id;
+                    }
+                    _context.UpdateRange(activity);
+
+
+                    var comments = _context.CommentModel.Where(d => d.user_id == user.Id).ToList();
+                    foreach (var item in comments)
+                    {
+                        item.user_id = esign.Id;
+                    }
+                    _context.UpdateRange(comments);
+
+
+                    var transitions = _context.TransitionModel.Where(d => d.created_by == user.Id).ToList();
+                    foreach (var item in transitions)
+                    {
+                        item.created_by = esign.Id;
+                    }
+                    _context.UpdateRange(transitions);
+
+                    var executions = _context.ExecutionModel.Where(d => d.user_id == user.Id).ToList();
+                    foreach (var item in executions)
+                    {
+                        item.user_id = esign.Id;
+                    }
+                    _context.UpdateRange(executions);
+
+                    var process = _context.ProcessModel.Where(d => d.user_id == user.Id).ToList();
+                    foreach (var item in process)
+                    {
+                        item.user_id = esign.Id;
+                    }
+                    _context.UpdateRange(process);
+
+
+                    _context.SaveChanges();
                 }
             }
             return Json(new { success = true });

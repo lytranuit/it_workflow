@@ -15,12 +15,6 @@
           class="p-button-primary p-button-sm mr-2"
           @click="excel"
         ></Button>
-        <Button
-          label="Đồng bộ"
-          icon="pi pi-sync"
-          class="p-button-warning p-button-sm"
-          @click="sync"
-        ></Button>
       </h5>
       <section class="card card-fluid">
         <div class="card-body" style="overflow: auto; position: relative">

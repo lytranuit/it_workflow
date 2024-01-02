@@ -15,6 +15,8 @@ using iText.Kernel.Pdf;
 using iText.Kernel.Utils;
 using Org.BouncyCastle.Asn1.X509;
 using static iText.Svg.SvgConstants;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using static Vue.Data.ItContext;
 
 namespace it.Services
 {
@@ -29,6 +31,9 @@ namespace it.Services
             _configuration = configuration;
             _context = context;
             actionAccessor = ActionAccessor;
+
+            var listener = _context.GetService<DiagnosticSource>();
+            (listener as DiagnosticListener).SubscribeWithAdapter(new CommandInterceptor());
         }
         public async Task<Boolean> create_next(ActivityModel activity)
         {

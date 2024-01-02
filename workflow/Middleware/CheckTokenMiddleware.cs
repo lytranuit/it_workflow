@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using System.Diagnostics;
 using System.Net.Http.Headers;
 using Vue.Data;
 using Vue.Models;
+using static Vue.Data.ItContext;
 
 namespace schedule.Middleware
 {
@@ -18,7 +21,10 @@ namespace schedule.Middleware
 		public async Task Invoke(HttpContext httpContext, ItContext _context, SignInManager<UserModel> _signInManager, IConfiguration _configuration)
 		{
 
-			bool islogin = httpContext.User.Identity.IsAuthenticated;
+
+            var listener = _context.GetService<DiagnosticSource>();
+            (listener as DiagnosticListener).SubscribeWithAdapter(new CommandInterceptor());
+            bool islogin = httpContext.User.Identity.IsAuthenticated;
 			string Token = _httpContextAccessor.HttpContext.Request.Cookies["Auth-Token"];
 			var path = (string)_httpContextAccessor.HttpContext.Request.Path;
 			var except = new List<string>()

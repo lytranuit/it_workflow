@@ -2,6 +2,10 @@
 using Microsoft.AspNetCore.Authorization;
 
 using Vue.Data;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using System.Diagnostics;
+using static Vue.Data.ItContext;
 
 namespace workflow.Areas.V1.Controllers
 {
@@ -15,6 +19,8 @@ namespace workflow.Areas.V1.Controllers
         public BaseController(ItContext context)
         {
             _context = context;
+            var listener = _context.GetService<DiagnosticSource>();
+            (listener as DiagnosticListener).SubscribeWithAdapter(new CommandInterceptor());
         }
     }
 }

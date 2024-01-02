@@ -7,6 +7,9 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using static Vue.Data.ItContext;
+using System.Diagnostics;
 
 namespace workflow.Areas.V1.Controllers
 {
@@ -29,6 +32,8 @@ namespace workflow.Areas.V1.Controllers
             _signInManager = signInManager;
             _context = context;
             RoleManager = RoleMgr;
+            var listener = _context.GetService<DiagnosticSource>();
+            (listener as DiagnosticListener).SubscribeWithAdapter(new CommandInterceptor());
         }
         public class InputModel
         {
