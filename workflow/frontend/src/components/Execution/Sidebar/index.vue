@@ -2,6 +2,12 @@
   <Sidebar v-model:visible="visible" :position="position" style="width: 50rem">
     <template #header>
       <div class="control ml-auto flex-m">
+        <a class="nav-link cursor-pointer flex-m items-center font-13" href="#" @click="saveDraft(selectedModel.id)" v-if="selectedModel.blocking &&
+          (hasPermission() || model.user_id == current_user.id) && selectedModel.clazz == 'formTask'
+          ">
+          <i class="far fa-clipboard font-16"></i>
+          <div class="ml-2">Lưu nháp</div>
+        </a>
         <a class="nav-link cursor-pointer flex-m items-center font-13" href="#"
           @click="assign_again(selectedModel.block_id)" v-if="selectedModel.blocking &&
             (hasPermission() || model.user_id == current_user.id)
@@ -285,6 +291,10 @@ export default {
     },
     require_sign(activity) {
       this.$emit("require_sign", activity);
+    },
+    saveDraft(from_activity_id) {
+      var that = this;
+      that.$emit("saveDraft", from_activity_id);
     },
     getAll(departments) {
       var that = this;

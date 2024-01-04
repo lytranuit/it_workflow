@@ -23,20 +23,20 @@
         </router-link>
       </li>
 
-      <li v-if="is_admin">
+      <li v-if="is_admin || is_manager">
         <router-link class="nav-link" to="/execution">
           <i class="fas fa-list"></i>
           <span>Tất cả lượt chạy</span>
         </router-link>
       </li>
-      <li v-if="is_admin">
+      <li v-if="is_admin || is_manager">
         <router-link class="nav-link" to="/history">
           <i class="fas fa-history"></i>
           <span>Audittrails</span>
         </router-link>
       </li>
 
-      <li v-if="is_admin">
+      <li v-if="is_admin || is_manager">
         <a href="javascript: void(0);">
           <i class="ti-briefcase"></i>
           <span>{{ $t("system") }}</span>
@@ -44,10 +44,10 @@
         </a>
 
         <ul class="nav-second-level" aria-expanded="false">
-          <li class="nav-item">
+          <li class="nav-item" v-if="is_admin">
             <router-link class="nav-link" to="/user"><i class="ti-control-record"></i>{{ $t("user") }}</router-link>
           </li>
-          <li class="nav-item">
+          <li class="nav-item" v-if="is_admin">
             <router-link class="nav-link" to="/department"><i class="ti-control-record"></i>Bộ phận</router-link>
           </li>
           <li class="nav-item">
@@ -70,7 +70,7 @@ import PopupExecution from "./PopupExecution.vue";
 
 const { initMetisMenu, initActiveMenu } = useLayout();
 const store = useAuth();
-const { is_admin } = storeToRefs(store);
+const { is_admin, is_manager } = storeToRefs(store);
 
 onMounted(() => {
   initMetisMenu();

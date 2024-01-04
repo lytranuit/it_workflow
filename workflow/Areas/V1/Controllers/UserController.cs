@@ -20,6 +20,7 @@ using Spire.Xls;
 using workflow.Areas.V1.Models;
 using workflow.Models;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.Text.Json.Serialization;
 
 namespace workflow.Areas.V1.Controllers
 {
@@ -344,13 +345,19 @@ namespace workflow.Areas.V1.Controllers
                 label = a.Name
             }).ToList();
             //var jsonData = new { data = ProcessModel };
-            return Json(Model);
+            return Json(Model, new System.Text.Json.JsonSerializerOptions()
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            });
         }
         public async Task<JsonResult> Departments()
         {
             var All = GetChild(0);
             //var jsonData = new { data = ProcessModel };
-            return Json(All);
+            return Json(All, new System.Text.Json.JsonSerializerOptions()
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            });
         }
         private List<SelectResponse> GetChild(int parent)
         {

@@ -5,10 +5,12 @@ import { defineStore } from "pinia";
 import { useCookies } from "vue3-cookies";
 import authApi from "../api/authApi";
 import userApi from "../api/userApi";
+import Api from "../api/Api";
 export const useAuth = defineStore("auth", () => {
   const data = ref({});
   const roles = ref([]);
   const departments = ref([]);
+  const userdepartments = ref([]);
   const isAuth = computed(() => {
     const { cookies } = useCookies();
     const Token = cookies.get("Auth-Token");
@@ -22,6 +24,9 @@ export const useAuth = defineStore("auth", () => {
     return in_groups(["Administrator"]);
   });
 
+  const is_manager = computed(() => {
+    return in_groups(["Manager Flow"]);
+  });
   async function getUser() {
     const { cookies } = useCookies();
     const Token = cookies.get("Auth-Token");
@@ -70,6 +75,13 @@ export const useAuth = defineStore("auth", () => {
       return response;
     });
   }
+  async function fetchUserDepartment() {
+    if (userdepartments.value.length) return;
+    return Api.UserDepartments().then((response) => {
+      userdepartments.value = response;
+      return response;
+    });
+  }
   function in_groups(groups) {
     let re = false;
     let user_roles = user.value.roles;
@@ -87,14 +99,17 @@ export const useAuth = defineStore("auth", () => {
     data,
     roles,
     departments,
+    userdepartments,
     isAuth,
     user,
     is_admin,
+    is_manager,
     getUser,
     logout,
     fetchRoles,
     fetchDepartment,
     fetchData,
-    fetchDataAuth
+    fetchDataAuth,
+    fetchUserDepartment
   };
 });

@@ -10,7 +10,7 @@ using static Vue.Data.ItContext;
 namespace workflow.Areas.V1.Controllers
 {
     [Area("V1")]
-    [Authorize(Roles = "Administrator,User")]
+    [Authorize(Roles = "Administrator,User,Manager Flow")]
     //[Authorize]
     public class BaseController : Controller
     {

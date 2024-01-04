@@ -7,17 +7,18 @@
           <Accordion :activeIndex="activeName" multiple>
             <AccordionTab :header="element.block.label" :key="index" v-for="(element, index) in data_custom_block">
               <div class="row bg-white">
-                <div class="col-lg-3 mb-2">
+                <!-- <div class="col-lg-3 mb-2">
                   <select class="form-control" :name="'sel_' + index" v-model="element.data_setting.type_performer"
                     required>
                     <option value="3">Bộ phận</option>
                     <option value="4">Người dùng</option>
                   </select>
-                </div>
-                <div class="col-lg-9 mb-2">
+                </div> -->
+                <div class="col-lg-12 mb-2">
                   <div v-if="element.data_setting.type_performer == 4">
-                    <UserTreeSelect multiple required v-model="element.data_setting.listuser" :name="'user_' + index">
-                    </UserTreeSelect>
+                    <UserDepartmentTreeSelect multiple required v-model="element.data_setting.listuser"
+                      :name="'user_' + index">
+                    </UserDepartmentTreeSelect>
                   </div>
                   <div v-if="element.data_setting.type_performer == 3">
                     <DepartmentTreeSelect multiple required v-model="element.data_setting.listdepartment"
@@ -43,11 +44,11 @@
 import Dialog from "primevue/dialog";
 // import { useProcess } from "../../stores/process";
 import DepartmentTreeSelect from "../TreeSelect/DepartmentTreeSelect.vue";
-import UserTreeSelect from "../TreeSelect/UserTreeSelect.vue";
+import UserDepartmentTreeSelect from "../TreeSelect/UserDepartmentTreeSelect.vue";
 import Button from "primevue/button";
 // var store = useProcess();
 export default {
-  components: { UserTreeSelect, DepartmentTreeSelect, Dialog, Button },
+  components: { UserDepartmentTreeSelect, DepartmentTreeSelect, Dialog, Button },
   props: {
     data_custom_block: {
       type: Array,
@@ -73,7 +74,11 @@ export default {
       });
     },
   },
-  mounted() { },
+  mounted() {
+    for(var item of this.data_custom_block){
+      item.data_setting.type_performer = 4;
+    }
+  },
   methods: {
     save() {
       var vaild = $("#form-assign").valid();

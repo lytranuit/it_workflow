@@ -705,7 +705,7 @@ small {
 	min-width: 270px;
 	max-width: 270px;
 	background-color: #ffffff;
-	min-height: calc(100vh - 70px);
+	min-height: 100vh;
 	-webkit-box-shadow: 0 6px 20px rgba(36, 37, 38, 0.08);
 	box-shadow: 0 6px 20px rgba(36, 37, 38, 0.08);
 	-webkit-transition: .3s;
@@ -870,14 +870,6 @@ small {
 }
 
 @media (max-width: 1024px) {
-	.left-sidenav {
-		position: fixed;
-		top: 70px;
-		overflow-y: auto;
-		z-index: 10;
-		bottom: 0;
-	}
-
 	.page-content {
 		min-height: 100vh;
 	}

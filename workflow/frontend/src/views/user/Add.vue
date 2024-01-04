@@ -49,8 +49,8 @@
                 <div class="form-group row">
                   <b class="col-12 col-lg-2 col-form-label">Bộ phận:</b>
                   <div class="col-lg-10 pt-1">
-                    <DepartmentTreeSelect v-model="data.departments" valueConsistsOf="ALL_WITH_INDETERMINATE"
-                      :flat="false" multiple></DepartmentTreeSelect>
+                    <DepartmentTreeSelect v-model="data.departments" valueConsistsOf="ALL_WITH_INDETERMINATE" :flat="true"
+                      multiple></DepartmentTreeSelect>
                     <select name="departments[]" v-model="data.departments" multiple class="d-none">
                       <option v-for="option in data.departments" :key="option" :value="option"></option>
                     </select>

@@ -52,7 +52,7 @@
       <ToolbarPanel ref="toolbar_ref" :mode="mode" />
       <div ref="canvas" class="canvasPanel" :style="{ height: height + 'px', width: '100%' }"></div>
       <Sidebar v-if="selectedModel != null" @save_data="save_data" @execute_transition="execute_transition"
-        @assign_again="assign_again" @require_sign="require_sign" @close="close">
+        @assign_again="assign_again" @require_sign="require_sign" @close="close" @saveDraft="saveDraft">
       </Sidebar>
       <Assign v-if="custom_block.length > 0" :data_custom_block="custom_block" :required="required" @save_data="save_data"
         @close="close"></Assign>
@@ -194,7 +194,7 @@ const save_data = async () => {
         for (var field of item.fields) {
           field.execution_id = model.value.id;
           field.process_field_id = field.id;
-          field.id = rand();
+          field.id = field.id || rand();
           if (
             (field.type == "file" || field.type == "file_multiple") &&
             field.files &&
@@ -403,43 +403,46 @@ const initShape = () => {
           data_custom_block.value[findCustomBlock].data_setting
         );
       }
-      var fields = block.fields || [];
-      fields = fields.map(function (i) {
-        i.data_setting = i.data_setting || {};
-        i.values = {};
-        switch (i.type) {
-          case "number":
-          case "text":
-          case "email":
-          case "date":
-          case "date_month":
-          case "date_time":
-          case "select":
-          case "department":
-          case "textarea":
-          case "employee":
-          case "currency":
-          case "radio":
-            var value = i.has_default ? i.data_setting.default_value : null;
-            i.values = { value: value };
-            break;
-          case "select_multiple":
-          case "employee_multiple":
-          case "department_multiple":
-          case "checkbox":
-            var value_array =
-              i.has_default && i.data_setting.default_value_array
-                ? i.data_setting.default_value_array
-                : [];
-            i.values = { value_array: value_array };
-            break;
-          case "table":
-            i.values = { list_data: [] };
-            break;
-        }
-        return i;
-      });
-      activity.fields = fields;
+      if (activity.is_new) {
+        var fields = block.fields || [];
+        fields = fields.map(function (i) {
+          i.data_setting = i.data_setting || {};
+          i.values = {};
+          switch (i.type) {
+            case "number":
+            case "text":
+            case "email":
+            case "date":
+            case "date_month":
+            case "date_time":
+            case "select":
+            case "department":
+            case "textarea":
+            case "employee":
+            case "currency":
+            case "radio":
+              var value = i.has_default ? i.data_setting.default_value : null;
+              i.values = { value: value };
+              break;
+            case "select_multiple":
+            case "employee_multiple":
+            case "department_multiple":
+            case "checkbox":
+              var value_array =
+                i.has_default && i.data_setting.default_value_array
+                  ? i.data_setting.default_value_array
+                  : [];
+              i.values = { value_array: value_array };
+              break;
+            case "table":
+              i.values = { list_data: [] };
+              break;
+          }
+          return i;
+        });
+        activity.fields = fields;
+      }
+     
       activity.outEdges = outEdges;
     }
   }
@@ -797,6 +800,48 @@ const execute_transition = (from_activity_id, edge_id) => {
     //
   }, 100);
 };
+const saveDraft = (from_activity_id) => {
+  var findIndexActivity = data_activity.value.findLastIndex(function (item) {
+    return item.id == from_activity_id;
+  });
+  var activity = data_activity.value[findIndexActivity];
+
+  ////VAILD TIEU DE
+  if (!$(".tieu_de").val()) {
+    Swal.fire({
+      title: "Nhập tiêu đề",
+      input: "text",
+      inputAttributes: {
+        autocapitalize: "off",
+      },
+      showCancelButton: false,
+      confirmButtonText: "Lưu lại",
+      showLoaderOnConfirm: true,
+      preConfirm: (data) => {
+        if (data) {
+          model.value.title = data;
+          return true;
+        } else {
+          return false;
+        }
+      },
+      allowOutsideClick: () => !Swal.isLoading(),
+    }).then((result) => {
+      // console.log(result);
+      if (result.value) {
+        saveDraft(from_activity_id);
+      }
+    });
+    //alert("Bạn chưa nhập tiêu đề!");
+    $(".tieu_de").focus();
+    return;
+  }
+  if (!activity.is_new) {
+    activity.is_update = true;
+  }
+  save_data();
+  // console.log(data_activity.value);
+}
 const check_assign = (block_id) => {
   var nodes = data.value.nodes;
   var findNodes = nodes.filter(function (item) {

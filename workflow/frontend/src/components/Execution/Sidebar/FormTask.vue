@@ -45,6 +45,7 @@
                 <div v-if="element.type == 'text'">
                   <input class="form-control form-control-sm text" type="text" v-model="element.values.value"
                     :required="element.is_require" :name="element.id" />
+                    
                 </div>
                 <div v-if="element.type == 'yesno'">
                   <div class="custom-control custom-switch switch-success">
@@ -338,6 +339,7 @@ export default {
       });
     }
     this.fill_field();
+    console.log(this.fields);
   },
   methods: {
     fill_field() {

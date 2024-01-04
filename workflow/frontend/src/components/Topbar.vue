@@ -26,9 +26,8 @@ onBeforeUnmount(() => {
 });
 
 const logoUrl = computed(() => {
-  return `${contextPath}layout/images/${
-    layoutConfig.darkTheme.value ? "logo-white" : "logo-dark"
-  }.svg`;
+  return `${contextPath}layout/images/${layoutConfig.darkTheme.value ? "logo-white" : "logo-dark"
+    }.svg`;
 });
 
 const onTopBarMenuButton = () => {
@@ -108,38 +107,45 @@ const toggle = (event) => {
   <div class="layout-topbar">
     <router-link to="/" class="layout-topbar-logo justify-content-center">
       <span>
-        <img
-          src="../assets/images/clientlogo_astahealthcare.com_f1800.png"
-          alt="logo-large"
-          class="logo-lg logo-light"
-             width="110"
-        />
+        <img src="../assets/images/clientlogo_astahealthcare.com_f1800.png" alt="logo-large" class="logo-lg logo-light"
+          width="110" />
       </span>
     </router-link>
 
-    <button
-      class="p-link layout-menu-button layout-topbar-button"
-      @click="onMenuToggle()"
-    >
+    <button class="p-link layout-menu-button layout-topbar-button" @click="onMenuToggle()">
       <i class="pi pi-bars"></i>
     </button>
+    <div class="d-none d-xl-block">
+      <div class="soft">
+        <a href="https://esign.astahealthcare.com/">
+          <img src="../assets/images/esign.png" width="35" alt="" />
+          <strong class="d-block">Chữ ký điện tử</strong>
+        </a>
+      </div>
 
-    <button
-      class="p-link layout-topbar-menu-button layout-topbar-button"
-      @click="onTopBarMenuButton()"
-    >
+      <div class="soft">
+        <a href="https://task.astahealthcare.com/">
+          <img src="../assets/images/task.png" width="28" alt="" />
+          <strong class="d-block">Công việc</strong>
+        </a>
+
+      </div>
+
+      <div class="soft">
+
+        <a href="https://flow.astahealthcare.com/">
+          <img src="../assets/images/workflow.png" width="28" alt="" />
+          <strong class="d-block">Quy trình</strong>
+        </a>
+      </div>
+    </div>
+    <button class="p-link layout-topbar-menu-button layout-topbar-button" @click="onTopBarMenuButton()">
       <i class="pi pi-ellipsis-v"></i>
     </button>
 
-    <TieredMenu
-      id="overlay_tmenu"
-      ref="menu1"
-      :model="items"
-      :popup="true"
-      style="width: 200px"
-    ></TieredMenu>
+    <TieredMenu id="overlay_tmenu" ref="menu1" :model="items" :popup="true" style="width: 200px"></TieredMenu>
     <div class="layout-topbar-menu" :class="topbarMenuClasses">
-      <div class="dropdown">
+      <!-- <div class="dropdown">
         <a
           class="nav-link dropdown-toggle waves-effect waves-light"
           data-toggle="dropdown"
@@ -210,29 +216,22 @@ const toggle = (event) => {
               height="14"
           /></a>
         </div>
-      </div>
-      <button
-        class="p-link"
-        @click="toggle"
-        aria-haspopup="true"
-        aria-controls="overlay_tmenu"
-      >
-        <img
-          :src="user.image_url"
-          alt="profile-user"
-          class="rounded-circle"
-          width="40"
-        />
+      </div> -->
+      <button class="p-link" @click="toggle" aria-haspopup="true" aria-controls="overlay_tmenu">
+        <img :src="user.image_url" alt="profile-user" class="rounded-circle" width="40" />
         {{ user.fullName }}
       </button>
-      <TieredMenu
-        id="overlay_tmenu"
-        ref="menu"
-        :model="items"
-        :popup="true"
-        style="width: 200px"
-      ></TieredMenu>
+      <TieredMenu id="overlay_tmenu" ref="menu" :model="items" :popup="true" style="width: 200px"></TieredMenu>
     </div>
   </div>
 </template>
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.soft {
+  height: 100%;
+  align-content: center;
+  justify-items: center;
+  display: inline-grid;
+  margin-left: 20px;
+  text-align: center;
+}
+</style>
