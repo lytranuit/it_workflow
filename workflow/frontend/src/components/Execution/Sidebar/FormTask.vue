@@ -339,7 +339,7 @@ export default {
       });
     }
     this.fill_field();
-    console.log(this.fields);
+    // console.log(this.fields);
   },
   methods: {
     fill_field() {

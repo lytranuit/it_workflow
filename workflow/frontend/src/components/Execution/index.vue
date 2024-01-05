@@ -194,7 +194,7 @@ const save_data = async () => {
         for (var field of item.fields) {
           field.execution_id = model.value.id;
           field.process_field_id = field.id;
-          field.id = field.id || rand();
+          field.id = rand();
           if (
             (field.type == "file" || field.type == "file_multiple") &&
             field.files &&
@@ -403,7 +403,8 @@ const initShape = () => {
           data_custom_block.value[findCustomBlock].data_setting
         );
       }
-      if (activity.is_new) {
+      // console.log(activity.fields);
+      if (activity.is_new || !activity.fields.length) {
         var fields = block.fields || [];
         fields = fields.map(function (i) {
           i.data_setting = i.data_setting || {};
@@ -441,8 +442,9 @@ const initShape = () => {
           return i;
         });
         activity.fields = fields;
+        // console.log(fields);
       }
-     
+
       activity.outEdges = outEdges;
     }
   }
