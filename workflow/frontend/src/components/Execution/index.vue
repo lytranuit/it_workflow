@@ -192,6 +192,7 @@ const save_data = async () => {
     if ((item.is_new || item.is_update) && !item.failed) {
       if (item.fields) {
         for (var field of item.fields) {
+          field.activity_id = item.id;
           field.execution_id = model.value.id;
           field.process_field_id = field.id;
           field.id = rand();
@@ -403,7 +404,7 @@ const initShape = () => {
           data_custom_block.value[findCustomBlock].data_setting
         );
       }
-      // console.log(activity.fields);
+      console.log(activity.fields);
       if (activity.is_new || !activity.fields.length) {
         var fields = block.fields || [];
         fields = fields.map(function (i) {
