@@ -393,6 +393,7 @@ namespace workflow.Areas.V1.Controllers
             _context.SaveChanges();
             var files = Request.Form.Files;
 
+            var items_comment = new List<CommentFileModel>();
             if (files != null && files.Count > 0)
             {
                 var pathroot = _configuration["Source:Path_Private"] + "\\executions\\" + CommentModel.execution_id + "\\";
@@ -401,7 +402,6 @@ namespace workflow.Areas.V1.Controllers
                 if (!exists)
                     Directory.CreateDirectory(pathroot);
 
-                var items_comment = new List<CommentFileModel>();
                 foreach (var file in files)
                 {
                     var timeStamp = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
@@ -455,64 +455,68 @@ namespace workflow.Areas.V1.Controllers
             }
 
             ///create unread
+            var ExecutionModel = _context.ExecutionModel.Where(d => d.id == CommentModel.execution_id).FirstOrDefault();
+            var Activities = _context.ActivityModel
+                        .Where(d => d.execution_id == CommentModel.execution_id)
+                        .ToList();
+            var users_related = new List<string>();
+            foreach (var activity in Activities)
+            {
+                if (activity.blocking == true)
+                {
+                    var list_reciever = _workflow.getListReciever(activity).Select(d => d.Id).ToList();
+                    users_related.AddRange(list_reciever);
+                }
+                else
+                {
+                    users_related.Add(activity.created_by);
+                }
+            }
+            users_related = users_related.Distinct().ToList();
+            var itemToRemove = users_related.SingleOrDefault(r => r == user_id);
+            users_related.Remove(itemToRemove);
+            //SEND MAIL
+            if (users_related != null)
+            {
+                var users_related_obj = _context.UserModel.Where(d => users_related.Contains(d.Id)).Select(d => d.Email).ToList();
+                var mail_string = string.Join(",", users_related_obj.ToArray());
+                string Domain = (HttpContext.Request.IsHttps ? "https://" : "http://") + HttpContext.Request.Host.Value;
+                var attach = items_comment.Select(d => d.url).ToList();
+                var text = CommentModel.comment;
+                if (attach.Count() > 0 && CommentModel.comment == null)
+                {
+                    text = $"{user.FullName} gửi đính kèm";
+                }
+                var body = _view.Render("Emails/NewComment",
+                    new
+                    {
+                        link_logo = Domain + "/images/clientlogo_astahealthcare.com_f1800.png",
+                        link = Domain + "/execution/details/" + ExecutionModel.process_version_id + "?execution_id=" + ExecutionModel.id,
+                        text = text,
+                        name = user.FullName
+                    });
 
-            //var DocumentModel = _context.DocumentModel
-            //            .Where(d => d.id == DocumentCommentModel.document_id)
-            //            .Include(d => d.users_follow)
-            //            .Include(d => d.users_signature)
-            //            .Include(d => d.users_receive)
-            //            .FirstOrDefault();
-
-            //var users_follow = DocumentModel.users_follow.Select(a => a.user_id).ToList();
-            //var users_signature = DocumentModel.users_signature.Select(a => a.user_id).ToList();
-            //var users_representative = DocumentModel.users_signature.Where(a => a.representative_id != null).Select(a => a.representative_id).ToList();
-            //var users_receive = DocumentModel.users_receive.Select(a => a.user_id).ToList();
-            //List<string> users_related = new List<string>();
-            //users_related.AddRange(users_follow);
-            //users_related.AddRange(users_signature);
-            //users_related.AddRange(users_representative);
-            //users_related.AddRange(users_receive);
-            //users_related = users_related.Distinct().ToList();
-            //var itemToRemove = users_related.SingleOrDefault(r => r == user_id);
-            //users_related.Remove(itemToRemove);
-            //var items = new List<DocumentUserUnreadModel>();
-            //foreach (string u in users_related)
-            //{
-            //    items.Add(new DocumentUserUnreadModel
-            //    {
-            //        user_id = u,
-            //        document_id = DocumentModel.id,
-            //        time = DateTime.Now,
-            //    });
-            //}
-            //_context.AddRange(items);
-            ////SEND MAIL
-            //if (users_related != null)
-            //{
-            //    var users_related_obj = _context.UserModel.Where(d => users_related.Contains(d.Id)).Select(d => d.Email).ToList();
-            //    var mail_string = string.Join(",", users_related_obj.ToArray());
-            //    string Domain = (HttpContext.Request.IsHttps ? "https://" : "http://") + HttpContext.Request.Host.Value;
-            //    var body = _view.Render("Emails/NewComment", new { link_logo = Domain + "/images/PMP_Stada_Group.png", link = Domain + "/admin/document/details/" + DocumentModel.id });
-            //    var email = new EmailModel
-            //    {
-            //        email_to = mail_string,
-            //        subject = "[Tin nhắn mới] " + DocumentModel.name_vi,
-            //        body = body,
-            //        email_type = "new_comment_document",
-            //        status = 1
-            //    };
-            //    _context.Add(email);
-            //}
+                var email = new EmailModel
+                {
+                    email_to = mail_string,
+                    subject = "[Tin nhắn mới] " + ExecutionModel.title,
+                    body = body,
+                    email_type = "new_comment_document",
+                    status = 1,
+                    data_attachments = attach
+                };
+                _context.Add(email);
+            }
             ////await _context.SaveChangesAsync();
 
-            ///// Audittrail
-            //var audit = new AuditTrailsModel();
-            //audit.UserId = user.Id;
-            //audit.Type = AuditType.Update.ToString();
-            //audit.DateTime = DateTime.Now;
-            //audit.description = $"Tài khoản {user.FullName} đã thêm bình luận.";
-            //_context.Add(audit);
-            //await _context.SaveChangesAsync();
+            /// Audittrail
+            var audit = new AuditTrailsModel();
+            audit.UserId = user.Id;
+            audit.Type = AuditType.Update.ToString();
+            audit.DateTime = DateTime.Now;
+            audit.description = $"Tài khoản {user.FullName} đã thêm bình luận.";
+            _context.Add(audit);
+            await _context.SaveChangesAsync();
 
             CommentModel.user = user;
             CommentModel.is_read = true;

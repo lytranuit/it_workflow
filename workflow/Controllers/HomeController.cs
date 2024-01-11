@@ -139,14 +139,15 @@ namespace it.Controllers
                 message.BodyEncoding = System.Text.Encoding.UTF8;
                 message.SubjectEncoding = System.Text.Encoding.UTF8;
                 message.IsBodyHtml = true;
+                var dir = _configuration["Source:Path_Private"].Replace("\\private", "").Replace("\\", "/");
                 if (attachments != null)
                 {
                     foreach (var attach in attachments)
                     {
-                        if (System.IO.File.Exists("." + attach) == false)
+                        if (System.IO.File.Exists(dir + attach) == false)
                             continue;
                         // Create  the file attachment for this email message.
-                        Attachment data = new Attachment("." + attach);
+                        Attachment data = new Attachment(dir + attach);
                         // Add time stamp information for the file.
                         System.Net.Mime.ContentDisposition disposition = data.ContentDisposition;
                         disposition.CreationDate = System.IO.File.GetCreationTime(attach);
@@ -175,22 +176,22 @@ namespace it.Controllers
 
         public async Task<JsonResult> cronjob()
         {
-            var emails = _context.EmailModel.Where(d => d.status == 1).Take(10).ToList();
-            foreach (var email in emails)
-            {
-                var SuccesMail = SendMail(email.email_to, email.subject, email.body, email.data_attachments);
-                if (SuccesMail.success == 1)
-                {
-                    email.status = 2;
-                }
-                else
-                {
-                    email.status = 3;
-                    email.error = SuccesMail.ex.ToString();
-                }
-                _context.Update(email);
-            }
-            await _context.SaveChangesAsync();
+            //var emails = _context.EmailModel.Where(d => d.status == 1).Take(10).ToList();
+            //foreach (var email in emails)
+            //{
+            //    var SuccesMail = SendMail(email.email_to, email.subject, email.body, email.data_attachments);
+            //    if (SuccesMail.success == 1)
+            //    {
+            //        email.status = 2;
+            //    }
+            //    else
+            //    {
+            //        email.status = 3;
+            //        email.error = SuccesMail.ex.ToString();
+            //    }
+            //    _context.Update(email);
+            //}
+            //await _context.SaveChangesAsync();
 
             await NotificationTask();
             return Json(new { success = true });
