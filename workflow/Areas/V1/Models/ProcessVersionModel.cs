@@ -31,7 +31,7 @@ namespace workflow.Areas.V1.Models
 			}
 			set
 			{
-				json = JsonSerializer.Serialize(value, new JsonSerializerOptions()
+                json = JsonSerializer.Serialize(value, new JsonSerializerOptions()
 				{
 					ReferenceHandler = ReferenceHandler.IgnoreCycles
 				});

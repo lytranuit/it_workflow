@@ -6,6 +6,9 @@ using Vue.Data;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using static Vue.Data.ItContext;
 using System.Diagnostics;
+using Spire.Doc;
+using workflow.Areas.V1.Models;
+using Vue.Models;
 
 namespace it.Controllers
 {
@@ -78,8 +81,6 @@ namespace it.Controllers
 
         public async Task<JsonResult> NotificationTask()
         {
-
-
             var blockings = _context.ActivityModel.Where(d => d.blocking == true && d.deleted_at == null && d.status_notification == null).ToList();
             blockings = blockings.Where(d => d.data_setting.has_notification == true).ToList();
             foreach (var blocking in blockings)
@@ -87,23 +88,24 @@ namespace it.Controllers
                 var data_setting_block = blocking.data_setting;
                 var mail_setting = data_setting_block.mail;
                 mail_setting = _workflow.fillMail(mail_setting, blocking);
-
-                var SuccesMail = SendMail(mail_setting.to, mail_setting.title, mail_setting.content, mail_setting.filecontent != null ? mail_setting.filecontent.Split(',').ToList() : null);
-                if (SuccesMail.success == 1)
+                var email = new EmailModel
                 {
-                    blocking.status_notification = 2;
-                }
-                else
-                {
-                    blocking.status_notification = 3;
-                    blocking.error_notification = SuccesMail.ex.Message;
-                }
+                    email_to = mail_setting.to,
+                    subject = mail_setting.title,
+                    body = mail_setting.content,
+                    email_type = "NotificationTask",
+                    data_attachments = mail_setting.filecontent != null ? mail_setting.filecontent.Split(',').ToList() : null,
+                    status = 1
+                };
+                _context.Add(email);
+                blocking.status_notification = 2;
                 _context.Update(blocking);
                 await _context.SaveChangesAsync();
             }
 
             return Json(new { success = true, blockings = blockings });
         }
+
         public async Task<JsonResult> PrintTask()
         {
 

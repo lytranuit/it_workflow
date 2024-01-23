@@ -56,6 +56,7 @@ namespace Vue.Data
         public DbSet<LibraryModel> LibraryModel { get; set; }
         public DbSet<FilterIdRaw> FilterIdRaw { get; set; }
         public DbSet<SizeRaw> SizeRaw { get; set; }
+        public DbSet<NghiphepModel> NghiphepModel { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<UserRoleModel>().ToTable("AspNetUserRoles").HasKey(table => new
@@ -157,8 +158,7 @@ namespace Vue.Data
             [DiagnosticName("Microsoft.EntityFrameworkCore.Database.Command.CommandExecuting")]
             public void OnCommandExecuting(DbCommand command, DbCommandMethod executeMethod, Guid commandId, Guid connectionId, bool async, DateTimeOffset startTime)
             {
-                var secondaryDatabaseName = "OrgData";
-                var schemaName = "dbo";
+
                 var list_talbe = new List<string>()
             {
                 "AspNetUsers",
@@ -171,10 +171,24 @@ namespace Vue.Data
                 //var tableName = "AspNetUsers";
                 foreach (var tableName in list_talbe)
                 {
+                    var secondaryDatabaseName = "OrgData";
+                    var schemaName = "dbo";
                     command.CommandText = command.CommandText.Replace($" [{tableName}]", $" [{schemaName}].[{tableName}]")
                                                          .Replace($" [{schemaName}].[{tableName}]", $" [{secondaryDatabaseName}].[{schemaName}].[{tableName}]");
                 }
-
+                //////
+                var list_nhansu = new List<string>()
+            {
+              "WF_NGHIPHEP"
+            };
+                //var tableName = "AspNetUsers";
+                foreach (var tableName in list_nhansu)
+                {
+                    var secondaryDatabaseName = "NHANSU";
+                    var schemaName = "dbo";
+                    command.CommandText = command.CommandText.Replace($" [{tableName}]", $" [{schemaName}].[{tableName}]")
+                                                         .Replace($" [{schemaName}].[{tableName}]", $" [{secondaryDatabaseName}].[{schemaName}].[{tableName}]");
+                }
 
             }
         }

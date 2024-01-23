@@ -454,14 +454,14 @@ namespace it.Services
                             text = String.Join(", ", option);
                             replacements.Add(field.variable, text);
                         }
-                        else if (field.type == "select_department")
+                        else if (field.type == "department_multiple")
                         {
                             var options = data_setting.options;
                             var option = _context.DepartmentModel.Where(d => values.value_array.Contains(d.id.ToString())).Select(d => d.name).ToList();
                             text = String.Join(", ", option);
                             replacements.Add(field.variable, text);
                         }
-                        else if (field.type == "select_employee")
+                        else if (field.type == "employee_multiple")
                         {
                             var options = data_setting.options;
                             var option = _context.UserModel.Where(d => values.value_array.Contains(d.Id.ToString())).Select(d => d.FullName).ToList();
@@ -988,14 +988,14 @@ namespace it.Services
                         text = String.Join(", ", option);
                         replacements.Add(field.variable, text);
                     }
-                    else if (field.type == "select_department")
+                    else if (field.type == "department_multiple")
                     {
                         var options = data_setting.options;
                         var option = _context.DepartmentModel.Where(d => values.value_array.Contains(d.id.ToString())).Select(d => d.name).ToList();
                         text = String.Join(", ", option);
                         replacements.Add(field.variable, text);
                     }
-                    else if (field.type == "select_employee")
+                    else if (field.type == "employee_multiple")
                     {
                         var options = data_setting.options;
                         var option = _context.UserModel.Where(d => values.value_array.Contains(d.Id.ToString())).Select(d => d.FullName).ToList();

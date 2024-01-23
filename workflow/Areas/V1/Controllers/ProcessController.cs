@@ -8,13 +8,14 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections;
 using Microsoft.AspNetCore.Identity;
 using workflow.Services;
-using Newtonsoft.Json;
 using Spire.Xls;
 using System.Drawing;
 using workflow.Areas.V1.Models;
 using Vue.Models;
 using Vue.Data;
 using System.Diagnostics;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace workflow.Areas.V1.Controllers
 {
@@ -66,16 +67,30 @@ namespace workflow.Areas.V1.Controllers
             var jsonData = new { success = true, message = "" };
             try
             {
-                var ProcessModel = _context.ProcessModel.Where(d => d.id == id).FirstOrDefault();
+                var ProcessModel = _context.ProcessModel.Where(d => d.id == id)
+                    .Include(d => d.versions).Include(x => x.blocks.OrderBy(x => x.stt))
+                    .ThenInclude(d => d.fields.OrderBy(x => x.stt))
+                    .Include(x => x.links)
+                    .FirstOrDefault();
                 if (ProcessModel != null)
                 {
                     ProcessModel.updated_at = DateTime.Now;
                     ProcessModel.status_id = (int)ProcessStatus.Release;
                     _context.ProcessModel.Update(ProcessModel);
+                    _context.SaveChanges();
                 }
-                _context.SaveChanges();
+                else
+                {
+                    throw new Exception("Không tìm thấy Process");
+                }
+
+
+
+
+
+
                 var version = 1;
-                var ProcessVersionModel_old = _context.ProcessVersionModel.Where(d => d.process_id == ProcessModel.id).OrderByDescending(d => d.version).ToList();
+                var ProcessVersionModel_old = ProcessModel.versions.OrderByDescending(d => d.version).ToList();
                 if (ProcessVersionModel_old.Count > 0)
                 {
                     foreach (var item in ProcessVersionModel_old)
@@ -84,12 +99,8 @@ namespace workflow.Areas.V1.Controllers
                     }
                     version = ProcessVersionModel_old[0].version + 1;
                 }
-                var json = _context.ProcessModel.Where(x => x.id == ProcessModel.id)
-                    .Include(x => x.blocks.OrderBy(x => x.stt))
-                    .ThenInclude(d => d.fields.OrderBy(x => x.stt))
-                    .Include(x => x.links)
-                    .FirstOrDefault();
-                json.versions = null;
+                var versions = ProcessModel.versions;
+                ProcessModel.versions = null;
                 var ProcessVersionModel = new ProcessVersionModel()
                 {
                     id = Guid.NewGuid().ToString(),
@@ -101,9 +112,17 @@ namespace workflow.Areas.V1.Controllers
                 };
 
 
-                ProcessVersionModel.process = json;
-                _context.Add(ProcessVersionModel);
+                ProcessVersionModel.process = ProcessModel;
+                _context.ProcessVersionModel.Add(ProcessVersionModel);
                 _context.SaveChanges();
+                foreach (var item in versions)
+                {
+                    var find = _context.ProcessVersionModel.Where(d => d.id == item.id).FirstOrDefault();
+                    find.process_id = ProcessModel.id;
+
+                    _context.Update(find);
+                    _context.SaveChanges();
+                }
             }
             catch (Exception ex)
             {
@@ -239,7 +258,7 @@ namespace workflow.Areas.V1.Controllers
                                 }
                                 //Console.WriteLine("table: " + columns.Count);
                             }
-                            field.settings = JsonConvert.SerializeObject(data_setting);
+                            field.settings = Newtonsoft.Json.JsonConvert.SerializeObject(data_setting);
                         }
 
                     }
@@ -371,14 +390,14 @@ namespace workflow.Areas.V1.Controllers
                                 text = String.Join(", ", option);
                                 row.Cells[(start_col_field - 1)].Value = text;
                             }
-                            else if (field.type == "select_department")
+                            else if (field.type == "department_multiple")
                             {
                                 var options = data_setting.options;
                                 var option = _context.DepartmentModel.Where(d => values.value_array.Contains(d.id.ToString())).Select(d => d.name).ToList();
                                 text = String.Join(", ", option);
                                 row.Cells[(start_col_field - 1)].Value = text;
                             }
-                            else if (field.type == "select_employee")
+                            else if (field.type == "employee_multiple")
                             {
                                 var options = data_setting.options;
                                 var option = _context.UserModel.Where(d => values.value_array.Contains(d.Id.ToString())).Select(d => d.FullName).ToList();
@@ -568,7 +587,7 @@ namespace workflow.Areas.V1.Controllers
                                     }
                                     //Console.WriteLine("table: " + columns.Count);
                                 }
-                                field.settings = JsonConvert.SerializeObject(data_setting);
+                                field.settings = Newtonsoft.Json.JsonConvert.SerializeObject(data_setting);
                             }
 
                         }
@@ -700,14 +719,14 @@ namespace workflow.Areas.V1.Controllers
                                     text = String.Join(", ", option);
                                     row.Cells[(start_col_field - 1)].Value = text;
                                 }
-                                else if (field.type == "select_department")
+                                else if (field.type == "department_multiple")
                                 {
                                     var options = data_setting.options;
                                     var option = _context.DepartmentModel.Where(d => values.value_array.Contains(d.id.ToString())).Select(d => d.name).ToList();
                                     text = String.Join(", ", option);
                                     row.Cells[(start_col_field - 1)].Value = text;
                                 }
-                                else if (field.type == "select_employee")
+                                else if (field.type == "employee_multiple")
                                 {
                                     var options = data_setting.options;
                                     var option = _context.UserModel.Where(d => values.value_array.Contains(d.Id.ToString())).Select(d => d.FullName).ToList();

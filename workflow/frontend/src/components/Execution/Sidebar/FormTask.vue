@@ -693,7 +693,7 @@ export default {
             return item.name;
           });
         text = list.join(", ");
-      } else if (field.type == "select_department") {
+      } else if (field.type == "department_multiple") {
         var value_array = field.values.value_array || [];
         var list = this.departments
           .filter(function (item) {
@@ -703,7 +703,7 @@ export default {
             return item.label;
           });
         text = list.join(", ");
-      } else if (field.type == "select_employee") {
+      } else if (field.type == "employee_multiple") {
         var value_array = field.values.value_array || [];
         var list = this.users
           .filter(function (item) {

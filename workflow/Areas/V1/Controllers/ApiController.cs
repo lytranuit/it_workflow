@@ -30,6 +30,7 @@ using Vue.Models;
 using System.Collections;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using System.Globalization;
 
 namespace workflow.Areas.V1.Controllers
 {
@@ -1858,6 +1859,102 @@ end:
             //}
 
             return Json(ExecutionModel);
+
+        }
+        public async Task<JsonResult> tinhngaynghi()
+        {
+            var process_id = "2qax2NMI4V9lBCnijIhwkYzblva0Wxlo";
+            //var Process = _context.ProcessModel.Where(d => d.id == process_id).Include(d => d.versions).ThenInclude(d => d.executions).ThenInclude(d => d.user).FirstOrDefault();
+            //if (Process == null)
+            //	return Json("Không tìm thấy Qui trình");
+            var ProcessVersion = _context.ProcessVersionModel.Where(d => d.process_id == process_id).Select(d => d.id).ToList();
+
+            var ExecutionModel = _context.ExecutionModel.Where(d => d.deleted_at == null && ProcessVersion.Contains(d.process_version_id)).ToList();
+            var list_NghiPhep = new List<NghiphepModel>();
+            if (ExecutionModel.Count > 0)
+            {
+
+                foreach (var execution in ExecutionModel)
+                {
+                    var NghiPhepModel = new NghiphepModel()
+                    {
+                        id = execution.id,
+                        title = execution.title,
+                        code = execution.code,
+                        user_id = execution.user_id,
+                        email = execution.user.Email,
+                        status_id = execution.status_id
+                    };
+                    var fields = execution.fields;
+                    var songaynghi = fields.Where(d => d.variable == "thoi_gian").FirstOrDefault();
+                    if (songaynghi != null)
+                    {
+                        double value = double.Parse(songaynghi.values.value != null ? songaynghi.values.value : "0", CultureInfo.InvariantCulture.NumberFormat);
+                        NghiPhepModel.songaynghi = value;
+                    }
+                    var tu_ngay = fields.Where(d => d.variable == "tu_ngay").FirstOrDefault();
+                    if (tu_ngay != null)
+                    {
+                        DateTime value = DateTime.Parse(tu_ngay.values.value);
+                        NghiPhepModel.tu_ngay = value;
+                    }
+                    var den_ngay = fields.Where(d => d.variable == "den_ngay").FirstOrDefault();
+                    if (den_ngay != null)
+                    {
+                        DateTime value = DateTime.Parse(den_ngay.values.value);
+                        NghiPhepModel.den_ngay = value;
+                    }
+                    var ly_do = fields.Where(d => d.variable == "ly_do").FirstOrDefault();
+                    if (ly_do != null)
+                    {
+                        NghiPhepModel.ly_do = ly_do.values.value;
+                    }
+
+                    var loanghiphep = fields.Where(d => d.variable == "loaiphep").FirstOrDefault();
+                    if (loanghiphep != null)
+                    {
+                        var options = loanghiphep.data_setting.options;
+                        var list_value = loanghiphep.values.value_array;
+                        var value = loanghiphep.values.value;
+                        if (value == null)
+                        {
+                            value = list_value[0];
+                        }
+                        var value_option = options.Where(d => d.id == value).FirstOrDefault();
+                        if (value_option != null)
+                        {
+                            var name = value_option.name;
+                            var list_name = name.Split(" – ");
+                            if (list_name.Length > 0)
+                            {
+                                NghiPhepModel.loaiphep = list_name[0];
+                            }
+
+                        }
+
+                    }
+
+                    var NghiPhepModel_old = _context.NghiphepModel.Where(d => d.id == NghiPhepModel.id).FirstOrDefault();
+                    if (NghiPhepModel_old != null)
+                    {
+                        CopyValues(NghiPhepModel_old, NghiPhepModel);
+                    }
+                    else
+                    {
+                        _context.Add(NghiPhepModel);
+                    }
+                    _context.SaveChanges();
+
+                    list_NghiPhep.Add(NghiPhepModel);
+
+
+                }
+
+                //foreach
+
+            }
+
+            return Json(new { success = true });
 
         }
     }
