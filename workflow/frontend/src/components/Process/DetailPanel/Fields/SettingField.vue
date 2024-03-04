@@ -2,122 +2,63 @@
   <div style="width: 100%">
     <draggable class="" v-model="model.fields">
       <transition-group type="transition" name="flip-list">
-        <div
-          class="item-control flex-m"
-          v-for="(element, index) in model.fields"
-          :key="element.id"
-        >
+        <div class="item-control flex-m" v-for="(element, index) in model.fields" :key="element.id">
           <div class="handle icon-move">
             <i class="fas fa-grip-vertical"></i>
           </div>
-          <div
-            class="control-preview-item background-sortable mb-2 ml-2 inline-flex-m"
-          >
+          <div class="control-preview-item background-sortable mb-2 ml-2 inline-flex-m">
             <div class="form-input-data-preview mr-3 w-100">
               <div class="form-input-control flex-m">
                 <div class="mb-2 custom-title-inline pr-2" style="width: 120px">
                   <div class="container-label">
                     <div class="container-left">
-                      <div
-                        id="idControlName"
-                        class="font-weight-bold font-14 pr-2 d-inline-block"
-                      >
+                      <div id="idControlName" class="font-weight-bold font-14 pr-2 d-inline-block">
                         <div style="">
                           {{ element.name }}
-                          <span
-                            class="text-danger"
-                            style="float: inherit"
-                            v-if="element.is_require"
-                          >
+                          <span class="text-danger" style="float: inherit" v-if="element.is_require">
                             *
                           </span>
                         </div>
                       </div>
-                      <div
-                        class="btn-selectTion-guide icon icon-infor-blue cursor-pointer icon-control"
-                        style="color: #0c9cdd; float: right"
-                        v-show="element.guide && element.guide != ''"
-                      >
-                        <div
-                          class="con-ms-tooltip"
-                          data-toggle="tooltip"
-                          data-placement="top"
-                          :data-original-title="element.guide"
-                        >
+                      <div class="btn-selectTion-guide icon icon-infor-blue cursor-pointer icon-control"
+                        style="color: #0c9cdd; float: right" v-show="element.guide && element.guide != ''">
+                        <div class="con-ms-tooltip" data-toggle="tooltip" data-placement="top"
+                          :data-original-title="element.guide">
                           <i class="fas fa-info-circle"></i>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-                <div
-                  class="form-input-control-left w-100"
-                  v-if="element.type != 'table'"
-                >
-                  <div v-if="element.type == 'number'">
-                    <input
-                      class="form-control form-control-sm number"
-                      type="number"
-                      :value="
-                        element.has_default
-                          ? element.data_setting.default_value
-                          : ''
-                      "
-                    />
-                  </div>
+                <div class="form-input-control-left w-100" v-if="element.type != 'table'">
+                  <component :is="Field(element.type)" :value="element.has_default
+                    ? element.data_setting.default_value
+                    : ''"></component>
+
                   <div v-if="element.type == 'formular'">
-                    <input
-                      class="form-control form-control-sm"
-                      type="number"
-                      readonly
-                    />
+                    <input class="form-control form-control-sm" type="number" readonly />
                   </div>
                   <div v-if="element.type == 'currency'">
-                    <input
-                      class="form-control form-control-sm number"
-                      type="number"
-                      :value="
-                        element.has_default
-                          ? element.data_setting.default_value
-                          : ''
-                      "
-                    />
+                    <input class="form-control form-control-sm number" type="number" />
                   </div>
                   <div v-if="element.type == 'text'">
-                    <input
-                      class="form-control form-control-sm text"
-                      type="text"
-                      :value="
-                        element.has_default
-                          ? element.data_setting.default_value
-                          : ''
-                      "
-                    />
+                    <input class="form-control form-control-sm text" type="text" :value="element.has_default
+                      ? element.data_setting.default_value
+                      : ''
+                      " />
                   </div>
                   <div v-if="element.type == 'email'">
-                    <input
-                      class="form-control form-control-sm email"
-                      type="email"
-                      :value="
-                        element.has_default
-                          ? element.data_setting.default_value
-                          : ''
-                      "
-                    />
+                    <input class="form-control form-control-sm email" type="email" :value="element.has_default
+                      ? element.data_setting.default_value
+                      : ''
+                      " />
                   </div>
                   <div v-if="element.type == 'file'">
-                    <input
-                      class="form-control form-control-sm file"
-                      type="file"
-                    />
+                    <input class="form-control form-control-sm file" type="file" />
                   </div>
 
                   <div v-if="element.type == 'file_multiple'">
-                    <input
-                      class="form-control form-control-sm file"
-                      type="file"
-                      multiple
-                    />
+                    <input class="form-control form-control-sm file" type="file" multiple />
                   </div>
                   <div v-if="element.type == 'date'">
                     <Calendar dateFormat="yy/mm/dd" />
@@ -127,48 +68,28 @@
                   </div>
 
                   <div v-if="element.type == 'date_time'">
-                    <Calendar
-                      dateFormat="yy-mm-dd HH:ii:ss"
-                      showTime
-                      hourFormat="24"
-                    />
+                    <Calendar dateFormat="yy-mm-dd HH:ii:ss" showTime hourFormat="24" />
                   </div>
 
                   <div v-if="element.type == 'select'">
-                    <TreeSelect
-                      :options="get_options(element.data_setting.options)"
-                      :value="
-                        element.has_default
-                          ? element.data_setting.default_value
-                          : ''
-                      "
-                    >
+                    <TreeSelect :options="get_options(element.data_setting.options)" :value="element.has_default
+                      ? element.data_setting.default_value
+                      : ''
+                      ">
                     </TreeSelect>
                   </div>
 
                   <div v-if="element.type == 'select_multiple'">
-                    <TreeSelect
-                      :options="get_options(element.data_setting.options)"
-                      :value="
-                        element.has_default
-                          ? element.data_setting.default_value_array
-                          : []
-                      "
-                      multiple
-                    ></TreeSelect>
+                    <TreeSelect :options="get_options(element.data_setting.options)" :value="element.has_default
+                      ? element.data_setting.default_value_array
+                      : []
+                      " multiple></TreeSelect>
                   </div>
 
                   <div v-if="element.type == 'radio'">
-                    <div
-                      class="radio radio-success radio-circle"
-                      v-for="option in element.data_setting.options"
-                      :key="option.id"
-                    >
-                      <input
-                        :id="'radio-' + option.id"
-                        type="radio"
-                        :name="'radio-' + element.id"
-                      />
+                    <div class="radio radio-success radio-circle" v-for="option in element.data_setting.options"
+                      :key="option.id">
+                      <input :id="'radio-' + option.id" type="radio" :name="'radio-' + element.id" />
                       <label :for="'radio-' + option.id">
                         {{ option.name }}
                       </label>
@@ -176,11 +97,8 @@
                   </div>
 
                   <div v-if="element.type == 'checkbox'">
-                    <div
-                      class="checkbox checkbox-success"
-                      v-for="option in element.data_setting.options"
-                      :key="option.id"
-                    >
+                    <div class="checkbox checkbox-success" v-for="option in element.data_setting.options"
+                      :key="option.id">
                       <input :id="'checkbox-' + option.id" type="checkbox" />
                       <label :for="'checkbox-' + option.id">
                         {{ option.name }}
@@ -189,77 +107,48 @@
                   </div>
                   <div v-if="element.type == 'yesno'">
                     <div class="custom-control custom-switch switch-success">
-                      <input
-                        type="checkbox"
-                        class="custom-control-input"
-                        :id="'customSwitch_' + element.id"
-                        checked=""
-                      />
-                      <label
-                        class="custom-control-label"
-                        :for="'customSwitch_' + element.id"
-                      ></label>
+                      <input type="checkbox" class="custom-control-input" :id="'customSwitch_' + element.id" checked="" />
+                      <label class="custom-control-label" :for="'customSwitch_' + element.id"></label>
                     </div>
                   </div>
                   <div v-if="element.type == 'textarea'">
-                    <textarea
-                      class="form-control form-control-sm textarea"
-                      :value="
-                        element.has_default
-                          ? element.data_setting.default_value
-                          : ''
-                      "
-                    ></textarea>
+                    <textarea class="form-control form-control-sm textarea" :value="element.has_default
+                      ? element.data_setting.default_value
+                      : ''
+                      "></textarea>
                   </div>
 
                   <div v-if="element.type == 'employee'">
-                    <UserTreeSelect
-                      :modelValue="
-                        element.has_default
-                          ? element.data_setting.default_value
-                          : ''
-                      "
-                    ></UserTreeSelect>
+                    <UserTreeSelect :modelValue="element.has_default
+                      ? element.data_setting.default_value
+                      : ''
+                      "></UserTreeSelect>
                   </div>
 
                   <div v-if="element.type == 'employee_multiple'">
-                    <UserTreeSelect
-                      :modelValue="
-                        element.has_default
-                          ? element.data_setting.default_value_array
-                          : []
-                      "
-                      multiple
-                    ></UserTreeSelect>
+                    <UserTreeSelect :modelValue="element.has_default
+                      ? element.data_setting.default_value_array
+                      : []
+                      " multiple></UserTreeSelect>
                   </div>
 
                   <div v-if="element.type == 'department'">
-                    <DepartmentTreeSelect
-                      :modelValue="
-                        element.has_default
-                          ? element.data_setting.default_value
-                          : ''
-                      "
-                    ></DepartmentTreeSelect>
+                    <DepartmentTreeSelect :modelValue="element.has_default
+                      ? element.data_setting.default_value
+                      : ''
+                      "></DepartmentTreeSelect>
                   </div>
 
                   <div v-if="element.type == 'department_multiple'">
-                    <DepartmentTreeSelect
-                      :modelValue="
-                        element.has_default
-                          ? element.data_setting.default_value_array
-                          : []
-                      "
-                      multiple
-                    ></DepartmentTreeSelect>
+                    <DepartmentTreeSelect :modelValue="element.has_default
+                      ? element.data_setting.default_value_array
+                      : []
+                      " multiple></DepartmentTreeSelect>
                   </div>
 
                   <div v-if="element.type == 'task'">
-                    <div
-                      class="checkbox checkbox-success checkbox-circle"
-                      v-for="option in element.data_setting.options"
-                      :key="option.id"
-                    >
+                    <div class="checkbox checkbox-success checkbox-circle" v-for="option in element.data_setting.options"
+                      :key="option.id">
                       <input :id="'task-' + option.id" type="checkbox" />
                       <label :for="'task-' + option.id">
                         {{ option.name }}
@@ -269,99 +158,51 @@
                 </div>
               </div>
               <div v-if="element.type == 'table'" style="overflow: auto">
-                <table
-                  class="table table-bordered mb-0 bg-white"
-                  style="outline: 1px solid #dee2e6 !important"
-                >
+                <table class="table table-bordered mb-0 bg-white" style="outline: 1px solid #dee2e6 !important">
                   <thead class="">
                     <tr>
-                      <th
-                        class="border-top-0"
-                        v-for="(column, index1) in element.data_setting.columns"
-                        :key="column.id"
-                      >
+                      <th class="border-top-0" v-for="(column, index1) in element.data_setting.columns" :key="column.id">
                         {{ column.name }}
-                        <span class="text-danger" v-if="column.is_require"
-                          >*</span
-                        >
+                        <span class="text-danger" v-if="column.is_require">*</span>
                       </th>
                     </tr>
                   </thead>
                   <tr>
-                    <td
-                      v-for="(column, index1) in element.data_setting.columns"
-                      :key="column.id"
-                    >
+                    <td v-for="(column, index1) in element.data_setting.columns" :key="column.id">
                       <div v-if="column.type == 'stt'">1</div>
                       <div v-if="column.type == 'number'">
-                        <input
-                          class="form-control form-control-sm number"
-                          type="number"
-                        />
+                        <input class="form-control form-control-sm number" type="number" />
                       </div>
                       <div v-if="column.type == 'currency'">
-                        <input
-                          class="form-control form-control-sm number"
-                          type="number"
-                        />
+                        <input class="form-control form-control-sm number" type="number" />
                       </div>
                       <div v-if="column.type == 'text'">
-                        <input
-                          class="form-control form-control-sm text"
-                          type="text"
-                        />
+                        <input class="form-control form-control-sm text" type="text" />
                       </div>
                       <div v-if="column.type == 'email'">
-                        <input
-                          class="form-control form-control-sm email"
-                          type="email"
-                        />
+                        <input class="form-control form-control-sm email" type="email" />
                       </div>
                       <div v-if="column.type == 'date'">
-                        <input
-                          class="form-control form-control-sm date"
-                          type="text"
-                        />
+                        <input class="form-control form-control-sm date" type="text" />
                       </div>
                       <div v-if="column.type == 'date_month'">
-                        <input
-                          class="form-control form-control-sm date_month"
-                          type="text"
-                        />
+                        <input class="form-control form-control-sm date_month" type="text" />
                       </div>
 
                       <div v-if="column.type == 'date_time'">
-                        <input
-                          class="form-control form-control-sm date_time"
-                          type="text"
-                        />
+                        <input class="form-control form-control-sm date_time" type="text" />
                       </div>
                       <div v-if="column.type == 'formular'">
-                        <input
-                          class="form-control form-control-sm number"
-                          type="number"
-                          readonly
-                        />
+                        <input class="form-control form-control-sm number" type="number" readonly />
                       </div>
                       <div v-if="column.type == 'textarea'">
-                        <textarea
-                          class="form-control form-control-sm textarea"
-                        ></textarea>
+                        <textarea class="form-control form-control-sm textarea"></textarea>
                       </div>
                       <div v-if="column.type == 'yesno'">
-                        <div
-                          class="custom-control custom-switch switch-success"
-                        >
-                          <input
-                            type="checkbox"
-                            class="custom-control-input"
-                            :id="'customSwitch_' + column.id + '_' + index1"
-                            checked=""
-                          />
-                          <label
-                            class="custom-control-label"
-                            :for="'customSwitch_' + column.id + '_' + index1"
-                          ></label>
+                        <div class="custom-control custom-switch switch-success">
+                          <input type="checkbox" class="custom-control-input"
+                            :id="'customSwitch_' + column.id + '_' + index1" checked="" />
+                          <label class="custom-control-label" :for="'customSwitch_' + column.id + '_' + index1"></label>
                         </div>
                       </div>
                     </td>
@@ -376,18 +217,9 @@
                   <i class="fas fa-ellipsis-v"></i>
                 </a>
                 <div class="dropdown-menu">
-                  <a class="dropdown-item" href="#" v-on:click="edit(element)"
-                    >Chỉnh sửa</a
-                  >
-                  <a class="dropdown-item" href="#" v-on:click="copy(element)"
-                    >Nhân bản</a
-                  >
-                  <a
-                    class="dropdown-item text-danger"
-                    href="#"
-                    v-on:click="remove_field(element.id)"
-                    >Xóa</a
-                  >
+                  <a class="dropdown-item" href="#" v-on:click="edit(element)">Chỉnh sửa</a>
+                  <a class="dropdown-item" href="#" v-on:click="copy(element)">Nhân bản</a>
+                  <a class="dropdown-item text-danger" href="#" v-on:click="remove_field(element.id)">Xóa</a>
                 </div>
               </div>
             </div>
@@ -396,119 +228,67 @@
       </transition-group>
     </draggable>
     <div class="dropdown text-center mt-3">
-      <button
-        class="btn btn-success btn-sm dropdown-toggle"
-        type="button"
-        id="dropdownMenuButton"
-        data-toggle="dropdown"
-        aria-haspopup="true"
-        aria-expanded="false"
-      >
+      <button class="btn btn-success btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown"
+        aria-haspopup="true" aria-expanded="false">
         <i class="fas fa-plus mr-1"></i>
         Thêm trường
       </button>
       <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-        <a
-          href="#"
-          class="dropdown-item d-flex"
-          @click="add_field(element.type, element.name)"
-          v-for="element in myArray"
-          :key="element.type"
-          ><span class="mr-2" v-html="element.icon"></span>
-          <div class="name-control">{{ element.name }}</div></a
-        >
+        <a href="#" class="dropdown-item d-flex" @click="add_field(element.type, element.name)" v-for="element in myArray"
+          :key="element.type"><span class="mr-2" v-html="element.icon"></span>
+          <div class="name-control">{{ element.name }}</div>
+        </a>
       </div>
     </div>
-    <Dialog
-      v-model:visible="visible"
-      modal
-      :header="temp_add.description"
-      :style="{ width: '50vw' }"
-    >
+    <Dialog v-model:visible="visible" modal :header="temp_add.description" :style="{ width: '50vw' }">
       <div class="form-group row">
         <div class="col-lg-12 mt-2">
-          <b class="col-form-label"
-            >Tên trường:<span class="text-danger">*</span></b
-          >
+          <b class="col-form-label">Tên trường:<span class="text-danger">*</span></b>
           <div class="pt-1">
-            <input
-              class="form-control form-control-sm"
-              type="text"
-              name="name"
-              required=""
-              v-model="temp_add.name"
-            />
+            <input class="form-control form-control-sm" type="text" name="name" required="" v-model="temp_add.name" />
           </div>
         </div>
         <div class="col-lg-12 mt-2" v-if="temp_add.type == 'currency'">
-          <b class="col-form-label"
-            >Tiền tệ:<span class="text-danger">*</span></b
-          >
+          <b class="col-form-label">Tiền tệ:<span class="text-danger">*</span></b>
           <div class="pt-1">
-            <select
-              class="form-control form-control-sm"
-              v-model="temp_add.data_setting.currency"
-              name="currency"
-              required=""
-            >
+            <select class="form-control form-control-sm" v-model="temp_add.data_setting.currency" name="currency"
+              required="">
               <option value="VND" selected>VND</option>
               <option value="USD">DOLLAR</option>
               <option value="EUR">EURO</option>
             </select>
           </div>
         </div>
-        <div
-          class="col-lg-12 mt-2"
-          v-if="
-            temp_add.type == 'date' ||
-            temp_add.type == 'date_time' ||
-            temp_add.type == 'date_month'
-          "
-        >
+        <div class="col-lg-12 mt-2" v-if="temp_add.type == 'date' ||
+          temp_add.type == 'date_time' ||
+          temp_add.type == 'date_month'
+          ">
           <b class="col-form-label">Kiểu dữ liệu:</b>
           <div class="pt-1">
-            <select
-              class="form-control form-control-sm"
-              v-model="temp_add.type"
-            >
+            <select class="form-control form-control-sm" v-model="temp_add.type">
               <option value="date">Ngày/Tháng/Năm</option>
               <option value="date_month">Tháng/Năm</option>
               <option value="date_time">Ngày/Tháng/Năm Giờ:Phút</option>
             </select>
           </div>
         </div>
-        <div
-          class="col-lg-12 mt-2"
-          v-if="
-            temp_add.type == 'select' ||
-            temp_add.type == 'select_multiple' ||
-            temp_add.type == 'radio' ||
-            temp_add.type == 'checkbox' ||
-            temp_add.type == 'task'
-          "
-        >
+        <div class="col-lg-12 mt-2" v-if="temp_add.type == 'select' ||
+          temp_add.type == 'select_multiple' ||
+          temp_add.type == 'radio' ||
+          temp_add.type == 'checkbox' ||
+          temp_add.type == 'task'
+          ">
           <b class="col-form-label">Danh sách giá trị:</b>
           <div class="list-group-item">
             <draggable class="" v-model="temp_add.data_setting.options">
               <transition-group type="transition" name="flip-list">
-                <div
-                  class="flex-m mb-2"
-                  v-for="(option, index) in temp_add.data_setting.options"
-                  :key="option.id"
-                >
+                <div class="flex-m mb-2" v-for="(option, index) in temp_add.data_setting.options" :key="option.id">
                   <div class="handle icon-move mr-2" style="cursor: move">
                     <i class="fas fa-grip-vertical"></i>
                   </div>
-                  <input
-                    class="form-control form-control-sm"
-                    v-model="option.name"
-                  />
-                  <div
-                    class="ml-2 text-danger"
-                    style="cursor: pointer"
-                    v-on:click="remove_option(index)"
-                    v-if="temp_add.data_setting.options.length > 1"
-                  >
+                  <input class="form-control form-control-sm" v-model="option.name" />
+                  <div class="ml-2 text-danger" style="cursor: pointer" v-on:click="remove_option(index)"
+                    v-if="temp_add.data_setting.options.length > 1">
                     <i class="fas fa-trash-alt"></i>
                   </div>
                 </div>
@@ -516,137 +296,73 @@
             </draggable>
 
             <div class="btn-group" role="group" aria-label="Basic example">
-              <button
-                class="btn btn-secondary btn-sm"
-                v-on:click="add_option($event)"
-              >
+              <button class="btn btn-secondary btn-sm" v-on:click="add_option($event)">
                 <i class="fas fa-plus mr-2"></i> Thêm dòng
               </button>
             </div>
           </div>
         </div>
-        <div
-          class="col-lg-12 mt-2 flex-m"
-          v-if="
-            temp_add.type == 'select' ||
-            temp_add.type == 'select_multiple' ||
-            temp_add.type == 'radio' ||
-            temp_add.type == 'checkbox'
-          "
-        >
+        <div class="col-lg-12 mt-2 flex-m" v-if="temp_add.type == 'select' ||
+          temp_add.type == 'select_multiple' ||
+          temp_add.type == 'radio' ||
+          temp_add.type == 'checkbox'
+          ">
           <b class="col-form-label mr-3">Kiểu chọn giá trị:</b>
           <div>
             <div>
               <div class="radio radio-primary form-check-inline">
-                <input
-                  type="radio"
-                  id="inlineRadio1"
-                  value="select"
-                  name="radioInline"
-                  v-model="temp_add.type"
-                />
+                <input type="radio" id="inlineRadio1" value="select" name="radioInline" v-model="temp_add.type" />
                 <label class="mb-0" for="inlineRadio1"> Sổ chọn một </label>
               </div>
               <div class="radio radio-primary form-check-inline">
-                <input
-                  type="radio"
-                  id="inlineRadio2"
-                  value="select_multiple"
-                  name="radioInline"
-                  v-model="temp_add.type"
-                />
+                <input type="radio" id="inlineRadio2" value="select_multiple" name="radioInline"
+                  v-model="temp_add.type" />
                 <label class="mb-0" for="inlineRadio2"> Sổ chọn nhiều </label>
               </div>
             </div>
             <div>
               <div class="radio radio-primary form-check-inline">
-                <input
-                  type="radio"
-                  id="inlineRadio3"
-                  value="radio"
-                  name="radioInline"
-                  v-model="temp_add.type"
-                />
+                <input type="radio" id="inlineRadio3" value="radio" name="radioInline" v-model="temp_add.type" />
                 <label class="mb-0" for="inlineRadio3"> Tích chọn một </label>
               </div>
               <div class="radio radio-primary form-check-inline">
-                <input
-                  type="radio"
-                  id="inlineRadio4"
-                  value="checkbox"
-                  name="radioInline"
-                  v-model="temp_add.type"
-                />
+                <input type="radio" id="inlineRadio4" value="checkbox" name="radioInline" v-model="temp_add.type" />
                 <label class="mb-0" for="inlineRadio4"> Tích chọn nhiều </label>
               </div>
             </div>
           </div>
         </div>
-        <div
-          class="col-lg-12 mt-2"
-          v-if="
-            temp_add.type == 'employee' || temp_add.type == 'employee_multiple'
-          "
-        >
+        <div class="col-lg-12 mt-2" v-if="temp_add.type == 'employee' || temp_add.type == 'employee_multiple'
+          ">
           <b class="col-form-label mr-3">Kiểu chọn giá trị:</b>
 
           <div class="radio radio-primary form-check-inline">
-            <input
-              type="radio"
-              id="inlineRadio1"
-              value="employee"
-              name="radioInline"
-              v-model="temp_add.type"
-            />
+            <input type="radio" id="inlineRadio1" value="employee" name="radioInline" v-model="temp_add.type" />
             <label class="mb-0" for="inlineRadio1"> Chọn một </label>
           </div>
           <div class="radio radio-primary form-check-inline">
-            <input
-              type="radio"
-              id="inlineRadio2"
-              value="employee_multiple"
-              name="radioInline"
-              v-model="temp_add.type"
-            />
+            <input type="radio" id="inlineRadio2" value="employee_multiple" name="radioInline" v-model="temp_add.type" />
             <label class="mb-0" for="inlineRadio2"> Chọn nhiều </label>
           </div>
         </div>
 
-        <div
-          class="col-lg-12 mt-2"
-          v-if="
-            temp_add.type == 'department' ||
-            temp_add.type == 'department_multiple'
-          "
-        >
+        <div class="col-lg-12 mt-2" v-if="temp_add.type == 'department' ||
+          temp_add.type == 'department_multiple'
+          ">
           <b class="col-form-label mr-3">Kiểu chọn giá trị:</b>
 
           <div class="radio radio-primary form-check-inline">
-            <input
-              type="radio"
-              id="inlineRadio1"
-              value="department"
-              name="radioInline"
-              v-model="temp_add.type"
-            />
+            <input type="radio" id="inlineRadio1" value="department" name="radioInline" v-model="temp_add.type" />
             <label class="mb-0" for="inlineRadio1"> Chọn một </label>
           </div>
           <div class="radio radio-primary form-check-inline">
-            <input
-              type="radio"
-              id="inlineRadio2"
-              value="department_multiple"
-              name="radioInline"
-              v-model="temp_add.type"
-            />
+            <input type="radio" id="inlineRadio2" value="department_multiple" name="radioInline"
+              v-model="temp_add.type" />
             <label class="mb-0" for="inlineRadio2"> Chọn nhiều </label>
           </div>
         </div>
-        <div
-          class="col-lg-12 mt-2"
-          v-if="temp_add.type == 'file' || temp_add.type == 'file_multiple'"
-        >
-        
+        <div class="col-lg-12 mt-2" v-if="temp_add.type == 'file' || temp_add.type == 'file_multiple'">
+
           <b class="col-form-label mr-3">Chấp nhận:</b>
           <select class="form-control" v-model="temp_add.data_setting.accept_file">
             <option value="all">Tất cả</option>
@@ -654,67 +370,36 @@
             <option value="image">Hình ảnh</option>
           </select>
         </div>
-        <div
-          class="col-lg-12 mt-2"
-          v-if="temp_add.type == 'file' || temp_add.type == 'file_multiple'"
-        >
-        
+        <div class="col-lg-12 mt-2" v-if="temp_add.type == 'file' || temp_add.type == 'file_multiple'">
+
           <b class="col-form-label mr-3">Kiểu chọn giá trị:</b>
           <div class="radio radio-primary form-check-inline">
-            <input
-              type="radio"
-              id="inlineRadio1"
-              value="file"
-              name="radioInline"
-              v-model="temp_add.type"
-            />
+            <input type="radio" id="inlineRadio1" value="file" name="radioInline" v-model="temp_add.type" />
             <label class="mb-0" for="inlineRadio1"> Chọn một </label>
           </div>
           <div class="radio radio-primary form-check-inline">
-            <input
-              type="radio"
-              id="inlineRadio2"
-              value="file_multiple"
-              name="radioInline"
-              v-model="temp_add.type"
-            />
+            <input type="radio" id="inlineRadio2" value="file_multiple" name="radioInline" v-model="temp_add.type" />
             <label class="mb-0" for="inlineRadio2"> Chọn nhiều </label>
           </div>
         </div>
         <div class="col-lg-12 mt-2" v-if="temp_add.type == 'formular'">
           <b class="col-form-label mr-3">Lấy thông tin từ:</b>
           <div class="radio radio-primary form-check-inline">
-            <input
-              type="radio"
-              id="inlineRadio1"
-              value="1"
-              name="radioInline"
-              v-model="temp_add.data_setting.formular.type"
-            />
+            <input type="radio" id="inlineRadio1" value="1" name="radioInline"
+              v-model="temp_add.data_setting.formular.type" />
             <label class="mb-0" for="inlineRadio1"> Trường dữ liệu </label>
           </div>
           <div class="radio radio-primary form-check-inline">
-            <input
-              type="radio"
-              id="inlineRadio2"
-              value="2"
-              name="radioInline"
-              v-model="temp_add.data_setting.formular.type"
-            />
+            <input type="radio" id="inlineRadio2" value="2" name="radioInline"
+              v-model="temp_add.data_setting.formular.type" />
             <label class="mb-0" for="inlineRadio2"> Bảng </label>
           </div>
           <div class="mt-2" v-if="temp_add.data_setting.formular.type == 1">
-            <DxHtmlEditor
-              @value-changed="change_formular($event, temp_add.data_setting)"
-              :value="temp_add.data_setting.formular.temp2"
-              :mentions="mentions(model.fields)"
-              style="min-height: 100px"
-            >
+            <DxHtmlEditor @value-changed="change_formular($event, temp_add.data_setting)"
+              :value="temp_add.data_setting.formular.temp2" :mentions="mentions(model.fields)" style="min-height: 100px">
               <DxValidator>
-                <DxCustomRule
-                  message="Công thức không hợp lệ, vui lòng kiểm tra lại!"
-                  :validation-callback="validateFormular"
-                />
+                <DxCustomRule message="Công thức không hợp lệ, vui lòng kiểm tra lại!"
+                  :validation-callback="validateFormular" />
               </DxValidator>
             </DxHtmlEditor>
             <div class="description-formular">
@@ -729,13 +414,8 @@
           </div>
           <div class="row mt-2" v-if="temp_add.data_setting.formular.type == 2">
             <div class="col-6">
-              <b class="col-form-label"
-                >Toán tử<span class="text-danger">*</span></b
-              >
-              <select
-                class="form-control form-control-sm"
-                v-model="temp_add.data_setting.formular.operator_type"
-              >
+              <b class="col-form-label">Toán tử<span class="text-danger">*</span></b>
+              <select class="form-control form-control-sm" v-model="temp_add.data_setting.formular.operator_type">
                 <option value="sum">Tính tổng</option>
                 <option value="avg">Tính trung bình</option>
                 <option value="min">Tính Min</option>
@@ -743,17 +423,9 @@
               </select>
             </div>
             <div class="col-6">
-              <b class="col-form-label"
-                >Cột dữ liệu:<span class="text-danger">*</span></b
-              >
-              <select
-                class="form-control form-control-sm"
-                v-model="temp_add.data_setting.formular.operator_column"
-              >
-                <option
-                  v-for="(column, index) in table_column(model.fields)"
-                  :value="column.id"
-                >
+              <b class="col-form-label">Cột dữ liệu:<span class="text-danger">*</span></b>
+              <select class="form-control form-control-sm" v-model="temp_add.data_setting.formular.operator_column">
+                <option v-for="(column, index) in table_column(model.fields)" :value="column.id">
                   {{ column.text }}
                 </option>
               </select>
@@ -761,27 +433,17 @@
           </div>
           <div class="row">
             <div class="col-6">
-              <b class="col-form-label"
-                >Kiểu dữ liệu trả về:<span class="text-danger">*</span></b
-              >
-              <select
-                class="form-control form-control-sm"
-                v-model="temp_add.data_setting.formular.type_return"
-              >
+              <b class="col-form-label">Kiểu dữ liệu trả về:<span class="text-danger">*</span></b>
+              <select class="form-control form-control-sm" v-model="temp_add.data_setting.formular.type_return">
                 <option value="decimal">Số thập phân</option>
                 <option value="percent">Số phần trăm</option>
                 <option value="currency">Tiền tệ</option>
               </select>
             </div>
             <div class="col-6">
-              <b class="col-form-label"
-                >Số chữ số phần thập phân:<span class="text-danger">*</span></b
-              >
-              <input
-                class="form-control form-control-sm"
-                type="number"
-                v-model="temp_add.data_setting.formular.decimal_number"
-              />
+              <b class="col-form-label">Số chữ số phần thập phân:<span class="text-danger">*</span></b>
+              <input class="form-control form-control-sm" type="number"
+                v-model="temp_add.data_setting.formular.decimal_number" />
             </div>
           </div>
         </div>
@@ -795,25 +457,15 @@
             </div>
             <draggable class="" v-model="temp_add.data_setting.columns">
               <transition-group type="transition" name="flip-list">
-                <div
-                  class="flex-m mb-2"
-                  v-for="(column, index) in temp_add.data_setting.columns"
-                  :key="column.id"
-                >
+                <div class="flex-m mb-2" v-for="(column, index) in temp_add.data_setting.columns" :key="column.id">
                   <div class="handle icon-move mr-2" style="cursor: move">
                     <i class="fas fa-grip-vertical"></i>
                   </div>
 
-                  <input
-                    class="form-control form-control-sm mr-2"
-                    v-model="column.name"
-                  />
+                  <input class="form-control form-control-sm mr-2" v-model="column.name" />
                   <div class="mr-5 flex-m" style="width: 700px">
-                    <select
-                      class="form-control form-control-sm mr-1"
-                      v-model="column.type"
-                      @change="change_column_type(column)"
-                    >
+                    <select class="form-control form-control-sm mr-1" v-model="column.type"
+                      @change="change_column_type(column)">
                       <option value="stt">STT tăng dần</option>
                       <option value="text">Một dòng</option>
                       <option value="textarea">Nhiều dòng</option>
@@ -823,43 +475,24 @@
                       <option value="yesno">Yes/no</option>
                       <option value="formular">Công thức</option>
                     </select>
-                    <select
-                      class="form-control form-control-sm"
-                      v-if="column.type == 'currency'"
-                      v-model="column.currency"
-                      required
-                    >
+                    <select class="form-control form-control-sm" v-if="column.type == 'currency'"
+                      v-model="column.currency" required>
                       <option value="VND" selected>VND</option>
                       <option value="USD">DOLLAR</option>
                       <option value="EUR">EURO</option>
                     </select>
                     <div>
-                      <a
-                        class="btn btn-sm btn-setting"
-                        @click="toggle($event, column)"
-                      >
+                      <a class="btn btn-sm btn-setting" @click="toggle($event, column)">
                         <i class="fas fa-cog"></i>
                       </a>
                     </div>
                   </div>
                   <div class="custom-control custom-switch switch-primary mr-2">
-                    <input
-                      type="checkbox"
-                      class="custom-control-input"
-                      :id="column.id"
-                      v-model="column.is_require"
-                    />
-                    <label
-                      class="custom-control-label"
-                      :for="column.id"
-                    ></label>
+                    <input type="checkbox" class="custom-control-input" :id="column.id" v-model="column.is_require" />
+                    <label class="custom-control-label" :for="column.id"></label>
                   </div>
-                  <div
-                    class="text-danger"
-                    style="cursor: pointer"
-                    v-on:click="remove_column(index)"
-                    v-if="temp_add.data_setting.columns.length > 1"
-                  >
+                  <div class="text-danger" style="cursor: pointer" v-on:click="remove_column(index)"
+                    v-if="temp_add.data_setting.columns.length > 1">
                     <i class="fas fa-trash-alt"></i>
                   </div>
                 </div>
@@ -867,10 +500,7 @@
             </draggable>
 
             <div class="btn-group" role="group">
-              <button
-                class="btn btn-secondary btn-sm"
-                v-on:click="add_column($event)"
-              >
+              <button class="btn btn-secondary btn-sm" v-on:click="add_column($event)">
                 <i class="fas fa-plus mr-2"></i> Thêm cột
               </button>
             </div>
@@ -879,223 +509,108 @@
         <div class="col-lg-12 mt-2">
           <b class="col-form-label">Hướng dẫn nhập:</b>
           <div class="pt-1">
-            <textarea
-              class="form-control form-control-sm"
-              type="text"
-              name="guide"
-              v-model="temp_add.guide"
-              placeholder="Nhập nội dung hướng dẫn"
-            ></textarea>
+            <textarea class="form-control form-control-sm" type="text" name="guide" v-model="temp_add.guide"
+              placeholder="Nhập nội dung hướng dẫn"></textarea>
           </div>
         </div>
-        <template
-          v-if="
-            temp_add.type != 'table' &&
-            temp_add.type != 'task' &&
-            temp_add.type != 'yesno' &&
-            temp_add.type != 'formular'
-          "
-        >
+        <template v-if="temp_add.type != 'table' &&
+          temp_add.type != 'task' &&
+          temp_add.type != 'yesno' &&
+          temp_add.type != 'formular'
+          ">
           <div class="col-lg-12 mt-2">
             <div class="checkbox checkbox-primary">
-              <input
-                id="checkbox2"
-                type="checkbox"
-                v-model="temp_add.is_require"
-              />
+              <input id="checkbox2" type="checkbox" v-model="temp_add.is_require" />
               <label for="checkbox2"> Trường bắt buộc </label>
             </div>
           </div>
-          <div
-            class="col-lg-12 mt-2"
-            v-if="
-              temp_add.type != 'date' &&
-              temp_add.type != 'date_time' &&
-              temp_add.type != 'date_month' &&
-              temp_add.type != 'file' &&
-              temp_add.type != 'file_multiple'
-            "
-          >
+          <div class="col-lg-12 mt-2" v-if="temp_add.type != 'date' &&
+            temp_add.type != 'date_time' &&
+            temp_add.type != 'date_month' &&
+            temp_add.type != 'file' &&
+            temp_add.type != 'file_multiple'
+            ">
             <div class="checkbox checkbox-primary">
-              <input
-                id="checkbox3"
-                type="checkbox"
-                v-model="temp_add.has_default"
-              />
+              <input id="checkbox3" type="checkbox" v-model="temp_add.has_default" />
               <label for="checkbox3"> Giá trị mặc định </label>
             </div>
           </div>
         </template>
         <div class="col-lg-12 mt-2" v-if="temp_add.type == 'task'">
           <div class="checkbox checkbox-primary">
-            <input
-              id="checkbox3"
-              type="checkbox"
-              v-model="temp_add.is_require"
-            />
+            <input id="checkbox3" type="checkbox" v-model="temp_add.is_require" />
             <label for="checkbox3">
               Bắc buộc hoàn thành toàn bộ công việc
             </label>
           </div>
         </div>
-        <div
-          class="col-lg-12 mt-2"
-          v-if="temp_add.type == 'text' && temp_add.has_default"
-        >
-          <input
-            class="form-control form-control-sm"
-            type="text"
-            v-model="temp_add.data_setting.default_value"
-            placeholder="Mặc định"
-          />
+        <div class="col-lg-12 mt-2" v-if="temp_add.type == 'text' && temp_add.has_default">
+          <input class="form-control form-control-sm" type="text" v-model="temp_add.data_setting.default_value"
+            placeholder="Mặc định" />
         </div>
-        <div
-          class="col-lg-12 mt-2"
-          v-if="temp_add.type == 'number' && temp_add.has_default"
-        >
-          <input
-            class="form-control form-control-sm"
-            type="number"
-            v-model="temp_add.data_setting.default_value"
-            placeholder="Mặc định"
-          />
+        <div class="col-lg-12 mt-2" v-if="temp_add.type == 'number' && temp_add.has_default">
+          <input class="form-control form-control-sm" type="number" v-model="temp_add.data_setting.default_value"
+            placeholder="Mặc định" />
         </div>
 
-        <div
-          class="col-lg-12 mt-2"
-          v-if="temp_add.type == 'currency' && temp_add.has_default"
-        >
-          <input
-            class="form-control form-control-sm"
-            type="number"
-            v-model="temp_add.data_setting.default_value"
-            placeholder="Mặc định"
-          />
+        <div class="col-lg-12 mt-2" v-if="temp_add.type == 'currency' && temp_add.has_default">
+          <input class="form-control form-control-sm" type="number" v-model="temp_add.data_setting.default_value"
+            placeholder="Mặc định" />
         </div>
-        <div
-          class="col-lg-12 mt-2"
-          v-if="temp_add.type == 'email' && temp_add.has_default"
-        >
-          <input
-            class="form-control form-control-sm"
-            type="email"
-            v-model="temp_add.data_setting.default_value"
-            placeholder="Mặc định"
-          />
+        <div class="col-lg-12 mt-2" v-if="temp_add.type == 'email' && temp_add.has_default">
+          <input class="form-control form-control-sm" type="email" v-model="temp_add.data_setting.default_value"
+            placeholder="Mặc định" />
         </div>
-        <div
-          class="col-lg-12 mt-2"
-          v-if="temp_add.type == 'textarea' && temp_add.has_default"
-        >
-          <textarea
-            class="form-control form-control-sm"
-            type="text"
-            v-model="temp_add.data_setting.default_value"
-            placeholder="Mặc định"
-          ></textarea>
+        <div class="col-lg-12 mt-2" v-if="temp_add.type == 'textarea' && temp_add.has_default">
+          <textarea class="form-control form-control-sm" type="text" v-model="temp_add.data_setting.default_value"
+            placeholder="Mặc định"></textarea>
         </div>
-        <div
-          class="col-lg-12 mt-2"
-          v-if="temp_add.type == 'select' && temp_add.has_default"
-        >
-          <TreeSelect
-            v-model="temp_add.data_setting.default_value"
-            :options="get_options(temp_add.data_setting.options)"
-          >
+        <div class="col-lg-12 mt-2" v-if="temp_add.type == 'select' && temp_add.has_default">
+          <TreeSelect v-model="temp_add.data_setting.default_value" :options="get_options(temp_add.data_setting.options)">
           </TreeSelect>
         </div>
-        <div
-          class="col-lg-12 mt-2"
-          v-if="temp_add.type == 'select_multiple' && temp_add.has_default"
-        >
-          <TreeSelect
-            v-model="temp_add.data_setting.default_value_array"
-            :options="get_options(temp_add.data_setting.options)"
-            multiple
-          >
+        <div class="col-lg-12 mt-2" v-if="temp_add.type == 'select_multiple' && temp_add.has_default">
+          <TreeSelect v-model="temp_add.data_setting.default_value_array"
+            :options="get_options(temp_add.data_setting.options)" multiple>
           </TreeSelect>
         </div>
-        <div
-          class="col-lg-12 mt-2"
-          v-if="temp_add.type == 'employee' && temp_add.has_default"
-        >
-          <UserTreeSelect
-            v-model="temp_add.data_setting.default_value"
-          ></UserTreeSelect>
+        <div class="col-lg-12 mt-2" v-if="temp_add.type == 'employee' && temp_add.has_default">
+          <UserTreeSelect v-model="temp_add.data_setting.default_value"></UserTreeSelect>
         </div>
 
-        <div
-          class="col-lg-12 mt-2"
-          v-if="temp_add.type == 'employee_multiple' && temp_add.has_default"
-        >
-          <UserTreeSelect
-            v-model="temp_add.data_setting.default_value_array"
-            multiple
-          ></UserTreeSelect>
+        <div class="col-lg-12 mt-2" v-if="temp_add.type == 'employee_multiple' && temp_add.has_default">
+          <UserTreeSelect v-model="temp_add.data_setting.default_value_array" multiple></UserTreeSelect>
         </div>
 
-        <div
-          class="col-lg-12 mt-2"
-          v-if="temp_add.type == 'department' && temp_add.has_default"
-        >
-          <DepartmentTreeSelect
-            v-model="temp_add.data_setting.default_value"
-          ></DepartmentTreeSelect>
+        <div class="col-lg-12 mt-2" v-if="temp_add.type == 'department' && temp_add.has_default">
+          <DepartmentTreeSelect v-model="temp_add.data_setting.default_value"></DepartmentTreeSelect>
         </div>
-        <div
-          class="col-lg-12 mt-2"
-          v-if="temp_add.type == 'department_multiple' && temp_add.has_default"
-        >
-          <DepartmentTreeSelect
-            v-model="temp_add.data_setting.default_value_array"
-            multiple
-          ></DepartmentTreeSelect>
+        <div class="col-lg-12 mt-2" v-if="temp_add.type == 'department_multiple' && temp_add.has_default">
+          <DepartmentTreeSelect v-model="temp_add.data_setting.default_value_array" multiple></DepartmentTreeSelect>
         </div>
       </div>
       <template #footer>
-        <button
-          type="button"
-          class="btn btn-primary"
-          @click="save_field($event)"
-        >
+        <button type="button" class="btn btn-primary" @click="save_field($event)">
           Lưu lại
         </button>
-        <button
-          type="button"
-          class="btn btn-secondary"
-          @click="visible = false"
-        >
+        <button type="button" class="btn btn-secondary" @click="visible = false">
           Hủy bỏ
         </button>
       </template>
     </Dialog>
     <OverlayPanel ref="op" :dismissable="false" showCloseIcon>
       <div class="p-3">
-        <b class="col-form-label"
-          >Tên biến:<span class="text-danger">*</span></b
-        >
+        <b class="col-form-label">Tên biến:<span class="text-danger">*</span></b>
         <div class="pt-1">
-          <input
-            class="form-control form-control-sm"
-            type="text"
-            v-model="column_temp.variable"
-          />
+          <input class="form-control form-control-sm" type="text" v-model="column_temp.variable" />
         </div>
         <div v-if="column_temp.type == 'formular'">
-          <b class="col-form-label"
-            >Thiết lập công thức:<span class="text-danger">*</span></b
-          >
-          <DxHtmlEditor
-            @value-changed="change_formular($event, column_temp)"
-            :value="column_temp.formular.temp2"
-            :mentions="mentions_table(temp_add.data_setting.columns)"
-            style="min-height: 100px"
-          >
+          <b class="col-form-label">Thiết lập công thức:<span class="text-danger">*</span></b>
+          <DxHtmlEditor @value-changed="change_formular($event, column_temp)" :value="column_temp.formular.temp2"
+            :mentions="mentions_table(temp_add.data_setting.columns)" style="min-height: 100px">
             <DxValidator>
-              <DxCustomRule
-                message="Công thức không hợp lệ, vui lòng kiểm tra lại!"
-                :validation-callback="validateFormular"
-              />
+              <DxCustomRule message="Công thức không hợp lệ, vui lòng kiểm tra lại!"
+                :validation-callback="validateFormular" />
               <DxMention></DxMention>
             </DxValidator>
           </DxHtmlEditor>
@@ -1110,27 +625,16 @@
           </div>
           <div class="row">
             <div class="col-6">
-              <b class="col-form-label"
-                >Kiểu dữ liệu trả về:<span class="text-danger">*</span></b
-              >
-              <select
-                class="form-control form-control-sm"
-                v-model="column_temp.formular.type_return"
-              >
+              <b class="col-form-label">Kiểu dữ liệu trả về:<span class="text-danger">*</span></b>
+              <select class="form-control form-control-sm" v-model="column_temp.formular.type_return">
                 <option value="decimal">Số thập phân</option>
                 <option value="percent">Số phần trăm</option>
                 <option value="currency">Tiền tệ</option>
               </select>
             </div>
             <div class="col-6">
-              <b class="col-form-label"
-                >Số chữ số phần thập phân:<span class="text-danger">*</span></b
-              >
-              <input
-                class="form-control form-control-sm"
-                type="number"
-                v-model="column_temp.formular.decimal_number"
-              />
+              <b class="col-form-label">Số chữ số phần thập phân:<span class="text-danger">*</span></b>
+              <input class="form-control form-control-sm" type="number" v-model="column_temp.formular.decimal_number" />
             </div>
           </div>
         </div>
@@ -1140,7 +644,7 @@
 </template>
 <script>
 import stringMath from "string-math";
-
+import numberField from '../Fields/Field/NumberField.vue';
 import {
   DxHtmlEditor,
   DxToolbar,
@@ -1159,6 +663,7 @@ import DepartmentTreeSelect from "../../../TreeSelect/DepartmentTreeSelect.vue";
 // const store = useProcess();
 export default {
   components: {
+    numberField,
     DxHtmlEditor,
     DxToolbar,
     DxItem,
@@ -1249,6 +754,11 @@ export default {
           type: "department",
         },
         {
+          name: "Nguyên vật liệu",
+          icon: '<i class="fab fa-mdb"></i>',
+          type: "nvl",
+        },
+        {
           name: "Công việc con",
           icon: '<i class="fas fa-tasks"></i>',
           type: "task",
@@ -1263,7 +773,7 @@ export default {
       visible: false,
     };
   },
-  mounted() {},
+  mounted() { },
   methods: {
     toggle(e, column) {
       this.column_temp = column;
@@ -1598,6 +1108,9 @@ export default {
       }
       this.temp_add = {};
     },
+    Field(type) {
+      return type + "Field";
+    }
   },
 };
 </script>
