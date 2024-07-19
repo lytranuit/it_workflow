@@ -16,6 +16,7 @@ using Vue.Data;
 using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.CodeAnalysis.VisualBasic;
 
 namespace workflow.Areas.V1.Controllers
 {
@@ -385,24 +386,34 @@ namespace workflow.Areas.V1.Controllers
                             }
                             else if (field.type == "select_multiple" || field.type == "checkbox")
                             {
-                                var options = data_setting.options;
-                                var option = options.Where(d => values.value_array.Contains(d.id)).Select(d => d.name).ToList();
-                                text = String.Join(", ", option);
-                                row.Cells[(start_col_field - 1)].Value = text;
+                                if (values.value_array != null)
+                                {
+                                    var options = data_setting.options;
+                                    var option = options.Where(d => values.value_array.Contains(d.id)).Select(d => d.name).ToList();
+                                    text = option != null ? String.Join(", ", option) : "";
+                                    row.Cells[(start_col_field - 1)].Value = text;
+                                }
                             }
                             else if (field.type == "department_multiple")
                             {
-                                var options = data_setting.options;
-                                var option = _context.DepartmentModel.Where(d => values.value_array.Contains(d.id.ToString())).Select(d => d.name).ToList();
-                                text = String.Join(", ", option);
-                                row.Cells[(start_col_field - 1)].Value = text;
+                                //var options = data_setting.options;
+                                if (values.value_array != null)
+                                {
+                                    var option = _context.DepartmentModel.Where(d => values.value_array.Contains(d.id.ToString())).Select(d => d.name).ToList();
+                                    text = option != null ? String.Join(", ", option) : "";
+                                    row.Cells[(start_col_field - 1)].Value = text;
+                                }
                             }
                             else if (field.type == "employee_multiple")
                             {
-                                var options = data_setting.options;
-                                var option = _context.UserModel.Where(d => values.value_array.Contains(d.Id.ToString())).Select(d => d.FullName).ToList();
-                                text = String.Join(", ", option);
-                                row.Cells[(start_col_field - 1)].Value = text;
+                                if (values.value_array != null)
+                                {
+                                    //var options = data_setting.options;
+                                    var option = _context.UserModel.Where(d => values.value_array.Contains(d.Id.ToString())).Select(d => d.FullName).ToList();
+                                    text = option != null ? String.Join(", ", option) : "";
+                                    row.Cells[(start_col_field - 1)].Value = text;
+                                }
+
                             }
                             else if (field.type == "table")
                             {
@@ -511,7 +522,11 @@ namespace workflow.Areas.V1.Controllers
             sheet.Activate();
             workbook.SaveToFile("./wwwroot" + documentPath, ExcelVersion.Version2013);
 
-            return Json(new { success = true, link = documentPath });
+            return Json(new
+            {
+                success = true,
+                link = documentPath
+            });
         }
 
         [HttpPost]
@@ -714,24 +729,33 @@ namespace workflow.Areas.V1.Controllers
                                 }
                                 else if (field.type == "select_multiple" || field.type == "checkbox")
                                 {
-                                    var options = data_setting.options;
-                                    var option = options.Where(d => values.value_array.Contains(d.id)).Select(d => d.name).ToList();
-                                    text = String.Join(", ", option);
-                                    row.Cells[(start_col_field - 1)].Value = text;
+                                    if (values.value_array != null)
+                                    {
+                                        var options = data_setting.options;
+                                        var option = options.Where(d => values.value_array.Contains(d.id)).Select(d => d.name).ToList();
+                                        text = option != null ? String.Join(", ", option) : "";
+                                        row.Cells[(start_col_field - 1)].Value = text;
+                                    }
                                 }
                                 else if (field.type == "department_multiple")
                                 {
-                                    var options = data_setting.options;
-                                    var option = _context.DepartmentModel.Where(d => values.value_array.Contains(d.id.ToString())).Select(d => d.name).ToList();
-                                    text = String.Join(", ", option);
-                                    row.Cells[(start_col_field - 1)].Value = text;
+                                    if (values.value_array != null)
+                                    {
+                                        //var options = data_setting.options;
+                                        var option = _context.DepartmentModel.Where(d => values.value_array.Contains(d.id.ToString())).Select(d => d.name).ToList();
+                                        text = option != null ? String.Join(", ", option) : "";
+                                        row.Cells[(start_col_field - 1)].Value = text;
+                                    }
                                 }
                                 else if (field.type == "employee_multiple")
                                 {
-                                    var options = data_setting.options;
-                                    var option = _context.UserModel.Where(d => values.value_array.Contains(d.Id.ToString())).Select(d => d.FullName).ToList();
-                                    text = String.Join(", ", option);
-                                    row.Cells[(start_col_field - 1)].Value = text;
+                                    if (values.value_array != null)
+                                    {
+                                        //var options = data_setting.options;
+                                        var option = _context.UserModel.Where(d => values.value_array.Contains(d.Id.ToString())).Select(d => d.FullName).ToList();
+                                        text = option != null ? String.Join(", ", option) : "";
+                                        row.Cells[(start_col_field - 1)].Value = text;
+                                    }
                                 }
                                 else if (field.type == "table")
                                 {
