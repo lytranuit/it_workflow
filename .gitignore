@@ -364,6 +364,3 @@ FodyWeavers.xsd
 workflow/private/
 workflow/wwwroot/temp/
 workflow/Scripts/false/
-workflow/appsettings.Development.json
-workflow/appsettings.Production.json
-workflow/appsettings.Staging.json
