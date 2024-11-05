@@ -5,11 +5,20 @@
         <div class="flex-m">
           <span class="title">
             <span v-show="!editTitle" ref="spanTitle">{{ model.title }}</span>
-            <input v-show="editTitle" class="form-control form-control-sm tieu_de" v-model="model.title" ref="inputTitle"
-              placeholder="Tiêu đề" />
+            <input
+              v-show="editTitle"
+              class="form-control form-control-sm tieu_de"
+              v-model="model.title"
+              ref="inputTitle"
+              placeholder="Tiêu đề"
+            />
           </span>
 
-          <span class="edit-title ml-2" @click="toggle_edit()" :class="{ 'btn-success btn btn-sm': editTitle }">
+          <span
+            class="edit-title ml-2"
+            @click="toggle_edit()"
+            :class="{ 'btn-success btn btn-sm': editTitle }"
+          >
             <i class="fas fa-pen" v-if="!edit"></i>
             <i class="fas fa-check" v-else></i>
           </span>
@@ -31,7 +40,8 @@
           </div>
           <span class="mx-2">|</span>
           <div class="">
-            <span class=""> Ngày tạo: </span><span class="font-weight-bold"> {{ model.created_at }} </span>
+            <span class=""> Ngày tạo: </span
+            ><span class="font-weight-bold"> {{ model.created_at }} </span>
           </div>
         </div>
       </div>
@@ -50,13 +60,34 @@
     </div>
     <div class="root">
       <ToolbarPanel ref="toolbar_ref" :mode="mode" />
-      <div ref="canvas" class="canvasPanel" :style="{ height: height + 'px', width: '100%' }"></div>
-      <Sidebar v-if="selectedModel != null" @save_data="save_data" @execute_transition="execute_transition"
-        @assign_again="assign_again" @require_sign="require_sign" @close="close" @saveDraft="saveDraft">
+      <div
+        ref="canvas"
+        class="canvasPanel"
+        :style="{ height: height + 'px', width: '100%' }"
+      ></div>
+      <Sidebar
+        v-if="selectedModel != null"
+        @save_data="save_data"
+        @execute_transition="execute_transition"
+        @assign_again="assign_again"
+        @require_sign="require_sign"
+        @close="close"
+        @saveDraft="saveDraft"
+      >
       </Sidebar>
-      <Assign v-if="custom_block.length > 0" :data_custom_block="custom_block" :required="required" @save_data="save_data"
-        @close="close"></Assign>
-      <RequireSign v-if="is_require_sign" :activity="activity_require" @save_data="save_data" @close="close">
+      <Assign
+        v-if="custom_block.length > 0"
+        :data_custom_block="custom_block"
+        :required="required"
+        @save_data="save_data"
+        @close="close"
+      ></Assign>
+      <RequireSign
+        v-if="is_require_sign"
+        :activity="activity_require"
+        @save_data="save_data"
+        @close="close"
+      >
       </RequireSign>
     </div>
     <div class="row mt-2" v-if="model.id > 0">
@@ -250,11 +281,11 @@ const save_data = async () => {
   }
   router.push(
     "/execution/details/" +
-    props.process_version_id +
-    "?execution_id=" +
-    model.value.id +
-    "&time=" +
-    moment().valueOf()
+      props.process_version_id +
+      "?execution_id=" +
+      model.value.id +
+      "&time=" +
+      moment().valueOf()
   );
 };
 const init = () => {
@@ -297,7 +328,6 @@ const init = () => {
   initEvents();
 };
 const initEvents = () => {
-
   graph.value.on("node:touchend", (e) => {
     var item = e.item;
     var id = item.get("model").id;
@@ -520,7 +550,7 @@ const execute_transition = (from_activity_id, edge_id) => {
       field.files = $(this)[0].files;
     });
     //////
-    if ($("#approve").length) {
+    if ($("#approve-sign").length) {
       $("#approve-sign").addClass("active");
       let sign = $(".signature");
       var sign_x = sign[0].offsetLeft;
@@ -727,7 +757,10 @@ const execute_transition = (from_activity_id, edge_id) => {
       var data_setting_block = target.get("model").data_setting || {};
       var type_performer = target.get("model").type_performer;
       var data_setting = {};
-      if (type_performer == null || (type_performer == 1 && data_setting_block.block_id == null)) {
+      if (
+        type_performer == null ||
+        (type_performer == 1 && data_setting_block.block_id == null)
+      ) {
         data_setting.type_performer = 4;
         data_setting.listuser = [user.value.id];
       } else if (type_performer == 1 && data_setting_block.block_id != null) {
@@ -758,23 +791,27 @@ const execute_transition = (from_activity_id, edge_id) => {
   }
   //// Check previous
   // graph.get
-  var neighbors = graph.value.getNeighbors(source, 'source');
+  var neighbors = graph.value.getNeighbors(source, "source");
   // console.log(source);
   // console.log(neighbors);
   if (neighbors.length) {
     for (var node_source of neighbors) {
       var clazz = node_source.get("model").clazz;
       if (clazz == "exclusiveGateway") {
-        var targets = graph.value.getNeighbors(node_source, 'target');
+        var targets = graph.value.getNeighbors(node_source, "target");
         for (var t of targets) {
-          var find_activity_target = data_activity.value.findLastIndex(function (item) {
-            return item.block_id == t.get("model").id;
-          });
+          var find_activity_target = data_activity.value.findLastIndex(
+            function (item) {
+              return item.block_id == t.get("model").id;
+            }
+          );
           if (find_activity_target == -1) continue;
           var activity_target = data_activity.value[find_activity_target];
           if (activity_target.blocking) {
             data_activity.value.splice(find_activity_target, 1); /// XÓA activity
-            var find_transition = data_transition.value.findLastIndex(function (item) {
+            var find_transition = data_transition.value.findLastIndex(function (
+              item
+            ) {
               return item.to_activity_id == activity_target.id;
             });
             if (find_transition == -1) continue;
@@ -844,7 +881,7 @@ const saveDraft = (from_activity_id) => {
   }
   save_data();
   // console.log(data_activity.value);
-}
+};
 const check_assign = (block_id) => {
   var nodes = data.value.nodes;
   var findNodes = nodes.filter(function (item) {
