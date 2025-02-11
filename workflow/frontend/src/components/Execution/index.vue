@@ -982,7 +982,7 @@ const get_execution = async (execution_id) => {
   graph.value.fitView();
   graph.value.executeCommand("currentFlow");
   //// active block lên
-  store.active_activity();
+  // store.active_activity();
   /////Bỏ loadding
   waiting.value = false;
   // }, 100);
@@ -1071,7 +1071,7 @@ onMounted(async () => {
     graph.value.fitView();
     graph.value.executeCommand("currentFlow");
     //// active block lên
-    store.active_activity();
+    // store.active_activity();
 
     /////Bỏ loadding
     waiting.value = false;

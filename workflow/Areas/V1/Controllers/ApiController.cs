@@ -154,6 +154,28 @@ namespace workflow.Areas.V1.Controllers
 
             return Json(new { execution_success = done_count, execution_fail = cancle_count, execution_amount = count, execution_wait = wait_count });
         }
+
+        public async Task<JsonResult> CountWait(string? process_id = null)
+        {
+            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+
+            var user_id = UserManager.GetUserId(currentUser); // Get user id:
+            var user_current = await UserManager.GetUserAsync(currentUser); // Get user id:
+
+            var customerData = _context.ExecutionModel.Where(m => m.deleted_at == null);
+            var user_departments = _context.UserDepartmentModel.Where(d => d.user_id == user_id).Select(d => d.department_id).ToList();
+            var list_exe = _context.CustomBlockModel.ToList();
+            var list = list_exe.Where(d => (d.data_setting.type_performer == 4 && d.data_setting.listuser != null && d.data_setting.listuser.Contains(user_id))
+            || (d.data_setting.type_performer == 3 && check_department(d.data_setting.listdepartment, user_departments))).Select(d => d.block_id + d.execution_id).ToList();
+
+
+            var execution = _context.ActivityModel.Where(d => d.blocking == true && d.deleted_at == null && list.Contains(d.block_id + d.execution_id)).Select(d => d.execution_id).ToList();
+            var count_wait = customerData.Where(d => execution.Contains(d.id)).Count();
+
+
+            return Json(new { count_wait });
+        }
+
         [HttpPost]
         public async Task<JsonResult> tableUser()
         {
@@ -971,7 +993,7 @@ namespace workflow.Areas.V1.Controllers
 
                 }
 
-end:
+            end:
                 Console.WriteLine("End");
             }
             catch (DbUpdateConcurrencyException)
@@ -1051,7 +1073,7 @@ end:
                     await _context.SaveChangesAsync();
                 }
             }
-end:
+        end:
             Console.WriteLine("End");
             return Json(new { success = 1 });
 
@@ -1304,36 +1326,36 @@ end:
                 }
 
 
-/////GỬI MAIL THEO MẪU
-//if (ActivityModel.blocking == true)
-//{
-//    var data_setting = ActivityModel.data_setting;
-//    var mail = data_setting.mail;
-//    if (mail == null)
-//    {
-//        goto end;
-//    }
-//    mail = _workflow.fillMail(mail, ActivityModel);
-//    //data_setting.mail = mail;
-//    //ActivityModel.data_setting = data_setting;
-//    //_context.Update(ActivityModel);
+            /////GỬI MAIL THEO MẪU
+            //if (ActivityModel.blocking == true)
+            //{
+            //    var data_setting = ActivityModel.data_setting;
+            //    var mail = data_setting.mail;
+            //    if (mail == null)
+            //    {
+            //        goto end;
+            //    }
+            //    mail = _workflow.fillMail(mail, ActivityModel);
+            //    //data_setting.mail = mail;
+            //    //ActivityModel.data_setting = data_setting;
+            //    //_context.Update(ActivityModel);
 
-//    var email = new EmailModel
-//    {
-//        email_to = mail.to,
-//        subject = mail.title,
-//        body = mail.content,
-//        data_attachments = mail.filecontent.Split(",").ToList(),
-//        email_type = "forward_step",
-//        status = 1
-//    };
-//    _context.Add(email);
-//    await _context.SaveChangesAsync();
-//}
+            //    var email = new EmailModel
+            //    {
+            //        email_to = mail.to,
+            //        subject = mail.title,
+            //        body = mail.content,
+            //        data_attachments = mail.filecontent.Split(",").ToList(),
+            //        email_type = "forward_step",
+            //        status = 1
+            //    };
+            //    _context.Add(email);
+            //    await _context.SaveChangesAsync();
+            //}
 
-/////
+            /////
 
-end:
+            end:
                 Console.WriteLine("End");
             }
             catch (DbUpdateConcurrencyException)
@@ -1491,7 +1513,7 @@ end:
 
                 await _context.SaveChangesAsync();
             }
-end:
+        end:
             Console.WriteLine("End");
             return Json(new { success = 1 });
 
@@ -1861,7 +1883,19 @@ end:
             return Json(ExecutionModel);
 
         }
-      
+        public bool check_department(List<int> departments, List<int> in_departments)
+        {
+            if (departments == null)
+                return false;
+            foreach (var department in departments)
+            {
+                if (in_departments.Contains(department))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
     public class SelectResponse
     {

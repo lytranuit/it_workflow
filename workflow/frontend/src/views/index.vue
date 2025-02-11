@@ -127,7 +127,9 @@
                   <td v-html="tr.version"></td>
                   <td v-html="tr.count"></td>
                   <td>
-                    <a href="#" @click="exportVersion(tr.id)"><i class="fas fa-download"></i></a>
+                    <a href="#" @click="exportVersion(tr.id)"
+                      ><i class="fas fa-download"></i
+                    ></a>
                   </td>
                 </tr>
               </tbody>
@@ -187,11 +189,7 @@ const exportVersion = (id) => {
   });
 };
 onMounted(() => {
-  var is_first = localStorage.getItem("is_first") || 0;
-  if (!is_first) {
-    // localStorage.setItem("is_first", 1);
-    router.push("/member");
-  } else if (!store.is_admin) {
+  if (!store.is_admin) {
     router.push("/execution/wait");
   } else {
     Api.HomeBadge().then((res) => {
