@@ -1,15 +1,16 @@
 ﻿
-using Microsoft.AspNetCore.Mvc;
-using Vue.Models;
-using Vue.Data;
-using Microsoft.AspNetCore.Identity;
-using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using static Vue.Data.ItContext;
+using Newtonsoft.Json;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
+using System.Runtime.Intrinsics.X86;
+using Vue.Data;
+using Vue.Models;
+using static Vue.Data.ItContext;
 
 namespace workflow.Areas.V1.Controllers
 {
@@ -173,6 +174,22 @@ namespace workflow.Areas.V1.Controllers
                     {
                         is_sign = false;
                     }
+                    string? truongbophan_UserId = null;
+                    var person = _context.PersonnelModel.Where(d => d.EMAIL.ToLower() == user.Email.ToLower()).FirstOrDefault();
+                    if (person != null)
+                    {
+                        var bophan = _context.PhongModel.SingleOrDefault(d => d.MAPHONG == person.MAPHONG);
+                        if (bophan != null)
+                        {
+                            var truongbophan_id = bophan.truongbophan_id;
+                            var truongbophan = _context.PersonnelModel.SingleOrDefault(d => d.id == truongbophan_id);
+                            var truongbophan_user = _context.UserModel.SingleOrDefault(d => d.Email.ToLower() == truongbophan.EMAIL.ToLower());
+                            if (truongbophan_user != null)
+                            {
+                                truongbophan_UserId = truongbophan_user.Id;
+                            }
+                        }
+                    }
                     return Json(new
                     {
                         success = true,
@@ -183,9 +200,9 @@ namespace workflow.Areas.V1.Controllers
                         is_sign = is_sign,
                         image_sign = user.image_sign,
                         departments = user.departments,
+                        truongbophan_id = truongbophan_UserId,
                         id = user.Id,
                         token = token,
-                        ngaynghi = user.ngaynghi,
                         vaild_to = find.vaild_to.Value.ToString("yyyy-MM-dd HH:mm:ss")
                     }); ;
                 }

@@ -31,6 +31,7 @@ namespace workflow.Areas.V1.Models
 
         public string? created_by { get; set; }
         public string? settings { get; set; }
+        public int? esign_id { get; set; }
         [NotMapped]
         public virtual BlockSettings? data_setting
         {

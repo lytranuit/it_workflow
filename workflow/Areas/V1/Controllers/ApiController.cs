@@ -42,10 +42,12 @@ namespace workflow.Areas.V1.Controllers
         private readonly IConfiguration _configuration;
         private readonly Workflow _workflow;
         private readonly ViewRender _view;
+        protected readonly EsignContext _esignContext;
 
 
-        public ApiController(ItContext context, IConfiguration configuration, UserManager<UserModel> UserMgr, RoleManager<IdentityRole> RoleMgr, Workflow workflow, ViewRender view) : base(context)
+        public ApiController(ItContext context, EsignContext esignContext, IConfiguration configuration, UserManager<UserModel> UserMgr, RoleManager<IdentityRole> RoleMgr, Workflow workflow, ViewRender view) : base(context)
         {
+            _esignContext = esignContext;
             _configuration = configuration;
             UserManager = UserMgr;
             RoleManager = RoleMgr;
@@ -94,7 +96,7 @@ namespace workflow.Areas.V1.Controllers
         }
         public async Task<JsonResult> ProcessGroupWithProcess()
         {
-            var ProcessGroupModel = _context.ProcessGroupModel.Where(x => x.deleted_at == null).Include(x => x.list_process_version.Where(d => d.active == true)).ToList();
+            var ProcessGroupModel = _context.ProcessGroupModel.Where(x => x.deleted_at == null).Include(x => x.list_process_version.Where(d => d.active == true && d.deleted_at == null)).ToList();
             //var jsonData = new { data = ProcessModel };
             return Json(ProcessGroupModel);
         }
@@ -632,6 +634,25 @@ namespace workflow.Areas.V1.Controllers
             //var jsonData = new { data = ProcessModel };
             return Json(list);
         }
+        public async Task<JsonResult> ProcessRun()
+        {
+            var list_process_id = _context.ExecutionModel.Where(x => x.deleted_at == null).Include(d => d.process_version).Select(d => d.process_version.process_id).ToList();
+            list_process_id = list_process_id.Distinct().ToList();
+            var list_process = _context.ProcessModel.Where(d => list_process_id.Contains(d.id)).ToList();
+            return Json(list_process, new System.Text.Json.JsonSerializerOptions()
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            });
+        }
+        public async Task<JsonResult> EsignType()
+        {
+            var list = _context.DocumentTypeModel.Where(x => x.deleted_at == null).ToList();
+
+            return Json(list, new System.Text.Json.JsonSerializerOptions()
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            });
+        }
         private List<SelectResponse> GetChild(int parent)
         {
             var DepartmentModel = _context.DepartmentModel.Where(d => d.deleted_at == null && d.parent == parent).OrderBy(d => d.stt).ToList();
@@ -679,7 +700,7 @@ namespace workflow.Areas.V1.Controllers
                     //if (count_child > 0)
                     //{
                     var child = GetChildUserDepartments(department.id);
-                    var users = _context.UserDepartmentModel.Where(d => d.department_id == department.id).Include(d => d.user).ToList();
+                    var users = _context.UserDepartmentModel.Include(d => d.user).Where(d => d.department_id == department.id && d.user != null && d.user.deleted_at == null).ToList();
                     if (users.Count() == 0 && child.Count() == 0)
                         continue;
                     foreach (var item in users)

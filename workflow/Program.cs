@@ -35,7 +35,11 @@ namespace Vue
             builder.Services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             builder.Services.AddControllersWithViews().AddJsonOptions(x =>
               x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
-
+            builder.Services.AddControllers()
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+            });
             builder.Services.AddDbContext<IdentityContext>(options =>
                 options.UseSqlServer(EsignConnectionString));
             builder.Services.AddDefaultIdentity<UserModel>(options => options.SignIn.RequireConfirmedAccount = false).AddRoles<IdentityRole>()

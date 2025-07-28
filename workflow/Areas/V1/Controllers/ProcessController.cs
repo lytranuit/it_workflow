@@ -68,11 +68,7 @@ namespace workflow.Areas.V1.Controllers
             var jsonData = new { success = true, message = "" };
             try
             {
-                var ProcessModel = _context.ProcessModel.Where(d => d.id == id)
-                    .Include(d => d.versions).Include(x => x.blocks.OrderBy(x => x.stt))
-                    .ThenInclude(d => d.fields.OrderBy(x => x.stt))
-                    .Include(x => x.links)
-                    .FirstOrDefault();
+                var ProcessModel = _context.ProcessModel.Where(d => d.id == id).FirstOrDefault();
                 if (ProcessModel != null)
                 {
                     ProcessModel.updated_at = DateTime.Now;
@@ -89,19 +85,18 @@ namespace workflow.Areas.V1.Controllers
 
 
 
-
+                var versions = _context.ProcessVersionModel.Where(d => d.process_id == id && d.deleted_at == null).OrderByDescending(d => d.version).ToList();
                 var version = 1;
-                var ProcessVersionModel_old = ProcessModel.versions.OrderByDescending(d => d.version).ToList();
-                if (ProcessVersionModel_old.Count > 0)
+                if (versions.Count() > 0)
                 {
-                    foreach (var item in ProcessVersionModel_old)
+                    var versions_active = versions.Where(d => d.active == true).ToList();
+                    foreach (var item in versions_active)
                     {
                         item.active = false;
+                        _context.Update(item);
                     }
-                    version = ProcessVersionModel_old[0].version + 1;
+                    version = versions.FirstOrDefault().version + 1;
                 }
-                var versions = ProcessModel.versions;
-                ProcessModel.versions = null;
                 var ProcessVersionModel = new ProcessVersionModel()
                 {
                     id = Guid.NewGuid().ToString(),
@@ -111,19 +106,61 @@ namespace workflow.Areas.V1.Controllers
                     created_at = DateTime.Now,
                     group_id = ProcessModel.group_id
                 };
-
-
-                ProcessVersionModel.process = ProcessModel;
+                var process = _context.ProcessModel.Where(d => d.id == id).Include(x => x.blocks.OrderBy(x => x.stt))
+                        .ThenInclude(d => d.fields.OrderBy(x => x.stt))
+                        .Include(x => x.links)
+                        .AsNoTracking()
+                        .FirstOrDefault();
+                foreach(var block in process.blocks)
+                {
+                    block.process =null; // Clear navigation property to avoid circular reference
+                }
+                foreach (var link in process.links)
+                {
+                    link.process = null; // Clear navigation property to avoid circular reference
+                }
+                ProcessVersionModel.process = process;
                 _context.ProcessVersionModel.Add(ProcessVersionModel);
                 _context.SaveChanges();
-                foreach (var item in versions)
-                {
-                    var find = _context.ProcessVersionModel.Where(d => d.id == item.id).FirstOrDefault();
-                    find.process_id = ProcessModel.id;
+            }
+            catch (Exception ex)
+            {
+                jsonData = new { success = false, message = ex.Message };
+            }
 
-                    _context.Update(find);
+
+            return Json(jsonData);
+        }
+        [HttpPost]
+        public async Task<JsonResult> UnRelease(string id)
+        {
+
+            var jsonData = new { success = true, message = "" };
+            try
+            {
+                var ProcessModel = _context.ProcessModel.Where(d => d.id == id)
+                    .FirstOrDefault();
+                if (ProcessModel != null)
+                {
+                    ProcessModel.updated_at = DateTime.Now;
+                    ProcessModel.status_id = (int)ProcessStatus.Draft;
+                    _context.ProcessModel.Update(ProcessModel);
                     _context.SaveChanges();
                 }
+                else
+                {
+                    throw new Exception("Không tìm thấy Process");
+                }
+
+
+                var ProcessVersionModel_old = _context.ProcessVersionModel.Where(d => d.process_id == id && d.active == true).FirstOrDefault();
+                if (ProcessVersionModel_old != null)
+                {
+                    ProcessVersionModel_old.active = false;
+                    _context.Update(ProcessVersionModel_old);
+                    _context.SaveChanges();
+                }
+
             }
             catch (Exception ex)
             {

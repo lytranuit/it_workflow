@@ -1,10 +1,13 @@
 ﻿<template>
   <div class="text-center h-100">
-    <embed
-      :src="url"
-      style="width: 100%; height: 100%"
-      type="application/pdf"
-    />
+
+    <embed :src="url" style="width: 100%; height: 100%" type="application/pdf" v-if="type_output == 'pdf'" />
+    <div class="flex-m mb-1" v-else>
+      <div>File: </div>
+      <a :href="url" :download="file.name" style="margin-left: 5px;">
+        {{ file.name }}
+      </a>
+    </div>
   </div>
 </template>
 <script>
@@ -23,10 +26,24 @@ export default {
     url() {
       var esign = this.model.data_setting.esign || {};
       var files = esign.files || [];
+      if (files.length == 0) {
+        return "";
+      }
       return files[0].url;
     },
+    file() {
+      var esign = this.model.data_setting.esign || {};
+      var files = esign.files || [];
+      if (files.length == 0) {
+        return {};
+      }
+      return files[0];
+    },
+    type_output() {
+      return this.model.data_setting.type_output || "pdf";
+    },
   },
-  mounted() {},
+  mounted() { },
   methods: {
     //signatures() {
     //    var esign = this.model.data_setting.esign || {};

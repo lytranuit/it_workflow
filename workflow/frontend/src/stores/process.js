@@ -11,10 +11,12 @@ export const useProcess = defineStore("process", () => {
   const data_activity = ref([]);
   const data = ref({});
   const data_custom_block = ref([]);
+  const esignType = ref([]);
   const groups = ref([]);
   const roles = ref([]);
   const departments = ref([]);
   const users = ref([]);
+  const processRun = ref([]);
   const model = ref({});
   const selectedModel = ref({});
   const editTitle = ref(false);
@@ -122,12 +124,15 @@ export const useProcess = defineStore("process", () => {
     // var data_custom_block = this.data_custom_block;
     // var data_activity = this.data_activity;
     // var data_transition = this.data_transition;
-
+    var failed = activity.failed || false;
     var outs = node.getOutEdges();
     if (outs.length) {
       for (var out of outs) {
         var source = out.getSource();
         var target = out.getTarget();
+        ////Nếu như không phải là 
+        if (out.get("model").reverse != failed) continue;
+
 
         var transition = {
           is_new: true,
@@ -181,7 +186,7 @@ export const useProcess = defineStore("process", () => {
             clazz: target.get("model").clazz,
             is_new: true,
             executed: !blocking,
-            failed: false,
+            failed: failed,
             blocking: blocking,
             data_setting: data_setting,
             in_transition_id: transition.id,
@@ -225,6 +230,9 @@ export const useProcess = defineStore("process", () => {
             } else if (type_performer == 5) {
               data_setting.type_performer = 4;
               data_setting.listuser = [model.value.user_id];
+            } else if (type_performer == 6) {
+              data_setting.type_performer = 4;
+              data_setting.listuser = [user.value.truongbophan_id];
             }
             var custom_block = {
               data_setting: data_setting,
@@ -300,6 +308,20 @@ export const useProcess = defineStore("process", () => {
     });
   };
 
+  const fetchProcessRun = () => {
+    if (processRun.value.length) return;
+    Api.ProcessRun().then((res) => {
+      processRun.value = res;
+    });
+  };
+
+  const fetchEsignType = () => {
+    if (esignType.value.length) return;
+    Api.EsignType().then((res) => {
+      esignType.value = res;
+    });
+  };
+
   const fetchDepartments = () => {
     if (departments.value.length) return;
     Api.department().then((res) => {
@@ -320,7 +342,9 @@ export const useProcess = defineStore("process", () => {
     data_custom_block,
     roles,
     departments,
+    esignType,
     users,
+    processRun,
     groups,
     model,
     editTitle,
@@ -343,5 +367,7 @@ export const useProcess = defineStore("process", () => {
     fetchUsers,
     fetchGroups,
     fetchDepartments,
+    fetchProcessRun,
+    fetchEsignType,
   };
 });

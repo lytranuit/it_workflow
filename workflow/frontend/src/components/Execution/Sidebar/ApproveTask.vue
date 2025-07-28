@@ -1,93 +1,39 @@
 ﻿<template>
   <div class="" id="approve">
     <ul class="nav nav-pills nav-justified mb-3" role="tablist">
-      <li
-        class="nav-item waves-effect waves-light"
-        v-if="url != null && readonly == false"
-      >
-        <a
-          class="nav-link"
-          data-toggle="tab"
-          href="#approve-sign"
-          role="tab"
-          aria-selected="false"
-          >Ký tên</a
-        >
+      <!-- <li class="nav-item waves-effect waves-light" v-if="url != null && readonly == false">
+        <a class="nav-link" data-toggle="tab" href="#approve-sign" role="tab" aria-selected="false">Ký tên</a>
+      </li> -->
+      <li class="nav-item waves-effect waves-light" v-if="url != null">
+        <a class="nav-link" data-toggle="tab" href="#viewer" role="tab" aria-selected="false">Xem file</a>
       </li>
-      <li
-        class="nav-item waves-effect waves-light"
-        v-if="url != null && readonly == true"
-      >
-        <a
-          class="nav-link"
-          data-toggle="tab"
-          href="#viewer"
-          role="tab"
-          aria-selected="false"
-          >Xem file</a
-        >
-      </li>
-      <li
-        class="nav-item waves-effect waves-light"
-        v-for="(element, index) in blocks_approve"
-        :key="element"
-      >
-        <a
-          class="nav-link"
-          data-toggle="tab"
-          :href="'#tab-' + index"
-          role="tab"
-          aria-selected="false"
-          >{{ element.label }}</a
-        >
+      <li class="nav-item waves-effect waves-light" v-for="(element, index) in blocks_approve" :key="element">
+        <a class="nav-link" data-toggle="tab" :href="'#tab-' + index" role="tab" aria-selected="false">{{ element.label
+        }}</a>
       </li>
     </ul>
     <div class="tab-content" style="height: calc(100% - 58px)">
-      <div
-        class="tab-pane h-100"
-        id="approve-sign"
-        role="tabpanel"
-        v-if="url != null && readonly == false"
-      >
+      <!-- <div class="tab-pane h-100" id="approve-sign" role="tabpanel" v-if="url != null && readonly == false">
         <div class="card no-shadow border">
           <div class="card-body">
             <div class="row g-0">
-              <div
-                class="col-9"
-                style="border: 5px solid #d7d7d7; border-left: 0"
-              >
-                <div
-                  id="pdf-viewer"
-                  style="height: 620px"
-                  :data-url="file"
-                ></div>
-                <!--<PDFViewer :source="url"
-                        style="height: 620px;/>-->
+              <div class="col-9" style="border: 5px solid #d7d7d7; border-left: 0">
+                <div id="pdf-viewer" style="height: 620px" :data-url="file"></div>
               </div>
-              <div
-                class="col-3 order-first"
-                style="
+              <div class="col-3 order-first" style="
                   border: 5px solid #d7d7d7;
                   height: 640px;
                   display: inline-block;
                   padding: 10px;
-                "
-              >
+                ">
                 <div class="base-title">Chữ ký</div>
                 <span class="base-subtitle">Kéo chữ ký vào văn bản để ký</span>
                 <div id="sign">
-                  <div
-                    class="signature ui-draggable ui-draggable-handle"
-                    :data-id="current_user.id"
-                    v-if="current_user != null"
-                  >
+                  <div class="signature ui-draggable ui-draggable-handle" :data-id="current_user.id"
+                    v-if="current_user != null">
                     <div class="d-inline-block">
-                      <img
-                        class="sign_image"
-                        :src="current_user.image_sign"
-                        style="width: 120px; height: auto"
-                        alt="..."
-                      />
+                      <img class="sign_image" :src="current_user.image_sign" style="width: 120px; height: auto"
+                        alt="..." />
                       <div class="sign_info" style="align-self: center">
                         <div>{{ current_user.fullName }}</div>
                         <div>Current Time</div>
@@ -102,15 +48,9 @@
                   <template v-for="(user, index) in listusersign">
                     <div class="flex-m mt-2" v-if="user.status == 1">
                       <i class="icon-warning">
-                        <span
-                          class="fas fa-spinner fa-spin"
-                          style="transform: rotate(-45deg)"
-                        ></span>
+                        <span class="fas fa-spinner fa-spin" style="transform: rotate(-45deg)"></span>
                       </i>
-                      <div
-                        class="user_signature time-item"
-                        data-id="5a375cd2-1908-4784-9b7b-d470e2d63376"
-                      >
+                      <div class="user_signature time-item" data-id="5a375cd2-1908-4784-9b7b-d470e2d63376">
                         <div class="item-info" style="min-height: 50px">
                           <div class="mt-0">
                             <b>{{ user.user.name }}</b> đã được yêu cầu phê
@@ -121,15 +61,9 @@
                     </div>
                     <div class="flex-m mt-2" v-if="user.status == 2">
                       <i class="icon-success">
-                        <span
-                          class="fas fa-check-circle"
-                          style="transform: rotate(-45deg)"
-                        ></span>
+                        <span class="fas fa-check-circle" style="transform: rotate(-45deg)"></span>
                       </i>
-                      <div
-                        class="user_signature time-item"
-                        data-id="5a375cd2-1908-4784-9b7b-d470e2d63376"
-                      >
+                      <div class="user_signature time-item" data-id="5a375cd2-1908-4784-9b7b-d470e2d63376">
                         <div class="item-info" style="min-height: 50px">
                           <div class="mt-0">
                             <b>{{ user.user.name }}</b> đã
@@ -141,15 +75,9 @@
                     </div>
                     <div class="flex-m mt-2" v-if="user.status == 3">
                       <i class="text-white bg-danger">
-                        <span
-                          class="fas fa-ban"
-                          style="transform: rotate(-45deg)"
-                        ></span>
+                        <span class="fas fa-ban" style="transform: rotate(-45deg)"></span>
                       </i>
-                      <div
-                        class="user_signature time-item"
-                        data-id="5a375cd2-1908-4784-9b7b-d470e2d63376"
-                      >
+                      <div class="user_signature time-item" data-id="5a375cd2-1908-4784-9b7b-d470e2d63376">
                         <div class="item-info" style="min-height: 50px">
                           <div class="mt-0">
                             <b>{{ user.user.name }}</b> đã
@@ -160,49 +88,25 @@
                       </div>
                     </div>
                   </template>
-                </div>
-                <div class="text-center mt-2">
-                  <a
-                    class="btn btn-success btn-sm"
-                    type="button"
-                    href="#"
-                    @click="require_sign(model)"
-                  >
-                    <i class="fas fa-plus mr-1"></i>
-                    Yêu cầu ký tên
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+</div>
+<div class="text-center mt-2">
+  <a class="btn btn-success btn-sm" type="button" href="#" @click="require_sign(model)">
+    <i class="fas fa-plus mr-1"></i>
+    Yêu cầu ký tên
+  </a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div> -->
+      <div class="tab-pane h-100" id="viewer" role="tabpanel" v-if="url != null">
+        <embed :src="url" style="width: 100%; height: 100%" type="application/pdf" />
       </div>
-      <div
-        class="tab-pane h-100"
-        id="viewer"
-        role="tabpanel"
-        v-if="url != null && readonly == true"
-      >
-        <embed
-          :src="url"
-          style="width: 100%; height: 100%"
-          type="application/pdf"
-        />
-      </div>
-      <div
-        class="tab-pane h-100"
-        :id="'tab-' + index"
-        role="tabpanel"
-        v-for="(element, index) in blocks_approve"
-        :key="element"
-      >
+      <div class="tab-pane h-100" :id="'tab-' + index" role="tabpanel" v-for="(element, index) in blocks_approve"
+        :key="element">
         <div class="bg-white py-3">
-          <FormTask
-            :departments="departments"
-            :users="users"
-            :fields="element.fields"
-            readonly
-          ></FormTask>
+          <FormTask :departments="departments" :users="users" :fields="element.fields" readonly></FormTask>
         </div>
       </div>
     </div>
@@ -272,18 +176,10 @@ export default {
       return listusersign;
     },
   },
-  activated() {},
+  activated() { },
   mounted() {
-    $(document).on("click", "#sign .signature.disabled", function (e) {
-      var user_id = $(this).data("id");
-      var sign = $("#pdf-viewer .signature[data-id='" + user_id + "']");
-      $("#pdf-viewer").animate(
-        {
-          scrollTop: sign.parent()[0].offsetTop + sign[0].offsetTop - 20,
-        },
-        "slow"
-      );
-    });
+
+
     var model = this.model;
     var that = this;
     var indexBlock = this.nodes.findIndex(function (item) {
@@ -307,6 +203,7 @@ export default {
     var indexActivity = this.data_activity.findLastIndex(function (item) {
       return item.block_id == blocks_esign_id;
     });
+
     if (indexActivity != -1) {
       var activity_esign = this.data_activity[indexActivity];
       var esign = activity_esign.data_setting.esign || {};
@@ -316,7 +213,18 @@ export default {
       this.file = files[files.length - 1].url;
       this.url = url;
 
-      if (!that.readonly) {
+      if ($("#approve-sign").length && !that.readonly) {
+        $(document).on("click", "#sign .signature.disabled", function (e) {
+          var user_id = $(this).data("id");
+          var sign = $("#pdf-viewer .signature[data-id='" + user_id + "']");
+          $("#pdf-viewer").animate(
+            {
+              scrollTop: sign.parent()[0].offsetTop + sign[0].offsetTop - 20,
+            },
+            "slow"
+          );
+        });
+
         var pdfjsLib = window["pdfjs-dist/build/pdf"];
         // The workerSrc property shall be specified.
         pdfjsLib.GlobalWorkerOptions.workerSrc = "/lib/pdfview/pdf.worker.js";
@@ -347,41 +255,44 @@ export default {
                 item.clazz == "suggestTask"
               );
             });
-            var activity_suggest = that.data_activity[indexActivity];
-            var suggest =
-              activity_suggest.data_setting.suggests[model.block_id];
-            //console.log(suggest);
-            if (suggest) {
-              let parent = $(".box-canvas:eq(" + (suggest.page - 1) + ")");
-              var sign = $("#sign .signature").clone();
-              parent.append(sign);
-              var height_page = $(".pdf-page-canvas", parent).height();
-              $("#pdf-viewer .signature")
-                .css({
-                  left: suggest.position_x + "px",
-                  top:
-                    height_page -
-                    (suggest.position_y + suggest.image_size_height + 40) +
-                    "px",
-                })
-                .draggable({
-                  stop: function (event, ui) {
-                    if (ui.position.left < 0) {
-                      var user_id = $(ui.helper).data("id");
-                      $(
-                        "#sign .disabled.signature[data-id='" + user_id + "']"
-                      ).remove();
-                      $(ui.helper)
-                        .css({
-                          top: 0 + "px",
-                          left: 0 + "px",
-                        })
-                        .appendTo($("#sign"));
-                    }
-                  },
-                });
-              $("#pdf-viewer .signature .sign_image").resizable();
-              $("#sign .signature").addClass("disabled");
+            if (indexActivity != -1) {
+
+              var activity_suggest = that.data_activity[indexActivity];
+              var suggest =
+                activity_suggest.data_setting.suggests[model.block_id];
+              //console.log(suggest);
+              if (suggest) {
+                let parent = $(".box-canvas:eq(" + (suggest.page - 1) + ")");
+                var sign = $("#sign .signature").clone();
+                parent.append(sign);
+                var height_page = $(".pdf-page-canvas", parent).height();
+                $("#pdf-viewer .signature")
+                  .css({
+                    left: suggest.position_x + "px",
+                    top:
+                      height_page -
+                      (suggest.position_y + suggest.image_size_height + 40) +
+                      "px",
+                  })
+                  .draggable({
+                    stop: function (event, ui) {
+                      if (ui.position.left < 0) {
+                        var user_id = $(ui.helper).data("id");
+                        $(
+                          "#sign .disabled.signature[data-id='" + user_id + "']"
+                        ).remove();
+                        $(ui.helper)
+                          .css({
+                            top: 0 + "px",
+                            left: 0 + "px",
+                          })
+                          .appendTo($("#sign"));
+                      }
+                    },
+                  });
+                $("#pdf-viewer .signature .sign_image").resizable();
+                $("#sign .signature").addClass("disabled");
+              }
             }
             ////
             // Fetch the first page
@@ -452,22 +363,25 @@ export default {
             console.error(reason);
           }
         );
-      }
-      setTimeout(function () {
-        if (that.readonly) {
-          $("#viewer").addClass("active");
-          $("[href='#viewer']").addClass("active");
-        } else {
+        setTimeout(function () {
           $("#approve-sign").addClass("active");
           $("[href='#approve-sign']").addClass("active");
-        }
-      }, 100);
+        }, 100);
+      } else {
+        setTimeout(function () {
+          $("#viewer").addClass("active");
+          $("[href='#viewer']").addClass("active");
+        }, 100);
+      }
+
     } else {
       setTimeout(function () {
         $("#tab-0").addClass("active");
         $("[href='#tab-0']").addClass("active");
       }, 100);
     }
+
+
   },
   methods: {
     require_sign(activity) {

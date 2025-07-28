@@ -38,6 +38,15 @@
                 </a>
               </div>
             </div>
+            <div class="col-12 mt-2">
+              <b class="col-form-label">Ouput</b>
+              <div class="pt-1 flex-m">
+                <select class="form-control form-control-sm" v-model="model.data_setting.type_output">
+                  <option value="pdf">PDF</option>
+                  <option value="word">Word</option>
+                </select>
+              </div>
+            </div>
             <div class="text-center mt-3">
               <button class="btn btn-success btn-sm" @click="open_select_file()">
                 <i class="fas fa-plus mr-1"></i>

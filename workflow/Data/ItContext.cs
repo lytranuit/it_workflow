@@ -1,16 +1,17 @@
 ﻿
-using Microsoft.EntityFrameworkCore;
+using Info.Models;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Newtonsoft.Json;
-using workflow.Areas.V1.Models;
-using Vue.Models;
-using workflow.Models;
-using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DiagnosticAdapter;
+using Newtonsoft.Json;
+using System.ComponentModel.DataAnnotations;
 using System.Data.Common;
+using Vue.Models;
+using workflow.Areas.V1.Models;
+using workflow.Models;
 
 namespace Vue.Data
 {
@@ -57,6 +58,29 @@ namespace Vue.Data
         public DbSet<FilterIdRaw> FilterIdRaw { get; set; }
         public DbSet<SizeRaw> SizeRaw { get; set; }
         public DbSet<NghiphepModel> NghiphepModel { get; set; }
+
+
+        /// <summary>
+        /// Esign
+        /// </summary>
+        public DbSet<DocumentModel> DocumentModel { get; set; }
+        public DbSet<DocumentFileModel> DocumentFileModel { get; set; }
+
+        public DbSet<DocumentAttachmentModel> DocumentAttachmentModel { get; set; }
+        public DbSet<DocumentSignatureModel> DocumentSignatureModel { get; set; }
+        public DbSet<DocumentUserReceiveModel> DocumentUserReceiveModel { get; set; }
+        public DbSet<DocumentEventModel> DocumentEventModel { get; set; }
+        public DbSet<DocumentTypeModel> DocumentTypeModel { get; set; }
+        public DbSet<DocumentTypeReceiveModel> DocumentTypeReceiveModel { get; set; }
+
+        /// <summary>
+        /// NHANSU
+        /// </summary>
+        /// <param name="modelBuilder"></param>
+
+        public DbSet<PersonnelModel> PersonnelModel { get; set; }
+        public DbSet<PhongModel> PhongModel { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<UserRoleModel>().ToTable("AspNetUserRoles").HasKey(table => new
@@ -166,7 +190,15 @@ namespace Vue.Data
                     "emails",
                     "Token",
                     "department",
-                    "user_department"
+                    "user_department",
+                    "document",
+                    "document_type",
+                    "document_file",
+                    "document_attachment",
+                    "document_signature",
+                    "document_user_receive",
+                    "document_event",
+                    "document_type_receive"
             };
                 //var tableName = "AspNetUsers";
                 foreach (var tableName in list_talbe)
@@ -176,20 +208,19 @@ namespace Vue.Data
                     command.CommandText = command.CommandText.Replace($" [{tableName}]", $" [{schemaName}].[{tableName}]")
                                                          .Replace($" [{schemaName}].[{tableName}]", $" [{secondaryDatabaseName}].[{schemaName}].[{tableName}]");
                 }
-                //////
-                var list_nhansu = new List<string>()
-            {
-              "WF_NGHIPHEP"
-            };
+                var list_talbe_NS = new List<string>()
+                {
+                    "nsMAPHONG",
+                    "nsHOSONHANVIEN",
+                };
                 //var tableName = "AspNetUsers";
-                foreach (var tableName in list_nhansu)
+                foreach (var tableName in list_talbe_NS)
                 {
                     var secondaryDatabaseName = "NHANSU";
                     var schemaName = "dbo";
                     command.CommandText = command.CommandText.Replace($" [{tableName}]", $" [{schemaName}].[{tableName}]")
                                                          .Replace($" [{schemaName}].[{tableName}]", $" [{secondaryDatabaseName}].[{schemaName}].[{tableName}]");
                 }
-
             }
         }
     }

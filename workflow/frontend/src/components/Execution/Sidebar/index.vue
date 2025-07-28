@@ -2,8 +2,9 @@
   <Sidebar v-model:visible="visible" :position="position" style="width: 50rem">
     <template #header>
       <div class="control ml-auto flex-m">
-        <a class="nav-link cursor-pointer flex-m items-center font-13" href="#" @click="saveDraft(selectedModel.id)" v-if="selectedModel.blocking &&
-          (hasPermission() || model.user_id == current_user.id) && selectedModel.clazz == 'formTask'
+        <a class="nav-link cursor-pointer flex-m items-center font-13" href="#" @click="saveDraft(selectedModel.id)"
+          v-if="selectedModel.blocking &&
+            (hasPermission() || model.user_id == current_user.id) && selectedModel.clazz == 'formTask'
           ">
           <i class="far fa-clipboard font-16"></i>
           <div class="ml-2">Lưu nháp</div>
@@ -11,17 +12,18 @@
         <a class="nav-link cursor-pointer flex-m items-center font-13" href="#"
           @click="assign_again(selectedModel.block_id)" v-if="selectedModel.blocking &&
             (hasPermission() || model.user_id == current_user.id)
-            ">
+          ">
           <i class="fas fa-share font-16"></i>
           <div class="ml-2">Phân công lại</div>
         </a>
-        <a class="nav-link cursor-pointer flex-m items-center font-13" href="#" @click="require_sign(selectedModel)" v-if="selectedModel.blocking &&
-          hasPermission() &&
-          selectedModel.clazz == 'approveTask'
+        <!-- <a class="nav-link cursor-pointer flex-m items-center font-13" href="#" @click="require_sign(selectedModel)"
+          v-if="selectedModel.blocking &&
+            hasPermission() &&
+            selectedModel.clazz == 'approveTask'
           ">
           <i class="fas fa-signature"></i>
           <div class="ml-2">Yêu cầu phê duyệt</div>
-        </a>
+        </a> -->
         <a class="nav-link cursor-pointer flex-m items-center font-13" href="#" v-if="isPopup == true"
           @click="setIsPopup(false)">
           <i class="fas fa-expand font-16"></i>
@@ -46,37 +48,43 @@
             </div>
           </div>
         </div>
-        <div class="box_transition" v-if="selectedModel.blocking && hasPermission()">
+        <div class="box_transition" v-if="selectedModel.blocking && hasPermission() && blocks_esign_id">
+
+          <button class="mr-2 btn btn-sm btn-primary" tabindex="1" type="button" @click="suggets()"
+            v-if="hasPermissionSuggest()">
+            <i class="fas fa-sun"></i> Gợi ý vị trí ký
+          </button>
+          <button class="mr-2 btn btn-sm btn-success" tabindex="1" type="button" @click="chitiet()">
+            <i class="fas fa-info"></i> Chi tiết
+          </button>
+          <button class="mr-2 btn-next" tabindex="1" type="button" @click="kyten()">
+            <i class="fas fa-pen-fancy"></i> Ký tên
+          </button>
+        </div>
+        <div class="box_transition" v-else-if="selectedModel.blocking && hasPermission()">
           <button class="mr-2" :class="{
             'btn-reverse': item.reverse,
             'btn-next': !item.reverse,
-          }" tabindex="1" type="button" name="button" v-for="item in selectedModel.outEdges" :key="item.id"
+          }" tabindex="1" type="button" v-for="item in selectedModel.outEdges" :key="item.id"
             @click="execute_transition(selectedModel.id, item.id)">
             {{ item.label }}
           </button>
         </div>
-        <div class="box_transition" v-if="selectedModel.blocking && !hasPermission() && !hasRequireSign()">
+
+        <div class="box_transition" v-else-if="selectedModel.blocking && !hasPermission()">
           <span class="text-danger">Bạn không có quyền thực hiện bước này.</span>
-        </div>
-        <div class="box_transition" v-if="selectedModel.blocking && !hasPermission() && hasRequireSign()">
-          <button class="mr-2 btn-reverse" type="button" name="button" @click="disagree()">
-            Không đồng ý
-          </button>
-          <button class="mr-2 btn-next" type="button" name="button" @click="agree()">
-            Đồng ý
-          </button>
         </div>
       </div>
       <div class="body" v-if="(selectedModel.blocking && hasPermission()) ||
-        selectedModel.executed ||
-        hasRequireSign()
-        ">
+        selectedModel.executed
+      ">
         <FormTask :departments="departments" :users="users" :fields="fields" :readonly="readonly"
           v-if="selectedModel.clazz == 'formTask'"></FormTask>
         <ApproveTask :departments="departments" :users="users" :nodes="nodes" :readonly="readonly"
           v-if="selectedModel.clazz == 'approveTask'" :model="selectedModel" @require_sign="require_sign"></ApproveTask>
         <SuggestTask :nodes="nodes" :readonly="readonly" v-if="selectedModel.clazz == 'suggestTask'"
-          :model="selectedModel"></SuggestTask>
+          :model="selectedModel">
+        </SuggestTask>
         <PrintSystem v-if="selectedModel.clazz == 'printSystem'" :nodes="nodes" :model="selectedModel"></PrintSystem>
         <OutputSystem v-if="selectedModel.clazz == 'outputSystem'" :nodes="nodes" :model="selectedModel"></OutputSystem>
       </div>
@@ -114,6 +122,7 @@ export default {
     };
   },
   watch: {
+
     selectedModel: {
       handler(newData, oldData) {
         this.visible = this.selectedModel != null;
@@ -151,6 +160,9 @@ export default {
     selectedModel() {
       return store.selectedModel;
     },
+    data_activity() {
+      return store.data_activity;
+    },
     users() {
       return store.users;
     },
@@ -160,8 +172,14 @@ export default {
     departments() {
       return store.departments;
     },
+
     fields() {
       return this.selectedModel.fields;
+    },
+    blocks_esign_id() {
+      var data_setting = this.selectedModel.data_setting || {};
+      // console.log(data_setting);
+      return data_setting.blocks_esign_id;
     },
     current_user() {
       return store_auth.user;
@@ -169,6 +187,7 @@ export default {
     data_transition() {
       return store.data_transition;
     },
+
   },
   mounted() {
     this.isPopup = JSON.parse(localStorage.getItem("isPopup")) || false;
@@ -189,6 +208,27 @@ export default {
     execute_transition(from_activity_id, edge_id) {
       var that = this;
       that.$emit("execute_transition", from_activity_id, edge_id);
+    },
+    kyten() {
+      var esign_id = this.selectedModel.esign_id || 0;
+      if (esign_id > 0) {
+        window.open(`https://esign.astahealthcare.com/admin/document/sign/${esign_id}`, "_blank");
+      }
+    },
+    chitiet() {
+      var esign_id = this.selectedModel.esign_id || 0;
+      if (esign_id > 0) {
+        window.open(`https://esign.astahealthcare.com/admin/document/details/${esign_id}`, "_blank");
+      }
+
+
+    },
+    suggets() {
+      var esign_id = this.selectedModel.esign_id || 0;
+      if (esign_id > 0) {
+        window.open(`https://esign.astahealthcare.com/admin/document/suggestsign/${esign_id}`, "_blank");
+      }
+
     },
     async agree() {
       var that = this;
@@ -308,11 +348,12 @@ export default {
       return list;
     },
     initHtml() {
+
       var that = this;
       var html = "";
       var model = this.selectedModel;
       if (model.blocking) {
-        var data_setting = model.data_setting;
+        var data_setting = model.data_setting || {};
         var type_performer = data_setting.type_performer;
         if (type_performer == 4) {
           var listuser = data_setting.listuser;
@@ -388,6 +429,22 @@ export default {
       }
 
       this.html = html;
+    },
+    hasPermissionSuggest() {
+      var blocks_esign_id = this.blocks_esign_id;
+      var activity_esign = this.data_activity.find(function (item) {
+        return item.block_id == blocks_esign_id;
+      });
+      if (activity_esign) {
+        var created_by = activity_esign.created_by || 0;
+        var current_user = this.current_user;
+        var user_id = current_user.id;
+        if (created_by == user_id) {
+          return true;
+        }
+      }
+
+      return false;
     },
     hasPermission() {
       var data_setting = this.selectedModel.data_setting || {};

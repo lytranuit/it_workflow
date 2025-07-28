@@ -76,6 +76,7 @@ namespace workflow.Areas.V1.Controllers
             var status_id_text = Request.Form["filters[status_id]"].FirstOrDefault();
             var id_text = Request.Form["filters[id]"].FirstOrDefault();
             var title = Request.Form["filters[title]"].FirstOrDefault();
+            var process = Request.Form["filters[process]"].FirstOrDefault();
 
             int status_id = status_id_text != null ? Convert.ToInt32(status_id_text) : 0;
             int id = id_text != null ? Convert.ToInt32(id_text) : 0;
@@ -85,7 +86,7 @@ namespace workflow.Areas.V1.Controllers
             if (user_id == null || user_id == "")
                 user_id = UserManager.GetUserId(currentUser); // Get user id:
             var user_current = await UserManager.GetUserAsync(currentUser); // Get user id:
-            var customerData = _context.ExecutionModel.Where(m => m.deleted_at == null);
+            var customerData = _context.ExecutionModel.Include(d => d.process_version).Where(m => m.deleted_at == null);
             //
             if (type == "wait")
             {
@@ -94,7 +95,7 @@ namespace workflow.Areas.V1.Controllers
                 var list = list_exe.Where(d => (d.data_setting.type_performer == 4 && d.data_setting.listuser != null && d.data_setting.listuser.Contains(user_id))
                 || (d.data_setting.type_performer == 3 && check_department(d.data_setting.listdepartment, user_departments))).Select(d => d.block_id + d.execution_id).ToList();
                 var execution = _context.ActivityModel.Where(d => d.blocking == true && d.deleted_at == null && list.Contains(d.block_id + d.execution_id)).Select(d => d.execution_id).ToList();
-                customerData = customerData.Where(d => execution.Contains(d.id));
+                customerData = customerData.Where(d => d.status_id != (int)ExecutionStatus.Cancel && execution.Contains(d.id));
             }
             if (type == "user_done")
             {
@@ -115,6 +116,10 @@ namespace workflow.Areas.V1.Controllers
             {
                 customerData = customerData.Where(d => d.title.Contains(title));
             }
+            if (process != null && process != "")
+            {
+                customerData = customerData.Where(d => d.process_version.process_id.Contains(process));
+            }
 
             if (status_id > 0)
             {
@@ -122,7 +127,7 @@ namespace workflow.Areas.V1.Controllers
             }
             int recordsFiltered = customerData.Count();
             //customerData = customerData.Include(m => m.group);
-            var datapost = customerData.Include(d => d.process_version).Include(d => d.activities).Include(d => d.user).OrderByDescending(d => d.id).Skip(skip).Take(pageSize).ToList();
+            var datapost = customerData.Include(d => d.activities).Include(d => d.user).OrderByDescending(d => d.id).Skip(skip).Take(pageSize).ToList();
             var data = new ArrayList();
 
             foreach (var record in datapost)

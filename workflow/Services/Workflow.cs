@@ -1,21 +1,21 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Spire.Doc.Documents;
+﻿using iText.Kernel.Pdf;
+using iText.Kernel.Utils;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Org.BouncyCastle.Asn1.X509;
 using Spire.Doc;
+using Spire.Doc.Documents;
+using Spire.Doc.Fields;
+using System.Collections;
+using System.Data;
 using System.Diagnostics;
 using System.Globalization;
-using Spire.Doc.Fields;
-using System.Data;
-using System.Collections;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 using System.Linq;
-using workflow.Areas.V1.Models;
-using Vue.Models;
 using Vue.Data;
-using iText.Kernel.Pdf;
-using iText.Kernel.Utils;
-using Org.BouncyCastle.Asn1.X509;
-using static iText.Svg.SvgConstants;
-using Microsoft.EntityFrameworkCore.Infrastructure;
+using Vue.Models;
+using workflow.Areas.V1.Models;
 using static Vue.Data.ItContext;
 
 namespace it.Services
@@ -23,13 +23,18 @@ namespace it.Services
     public class Workflow
     {
         protected readonly ItContext _context;
+        protected readonly EsignContext _esignContext;
         private IActionContextAccessor actionAccessor;
 
         private readonly IConfiguration _configuration;
-        public Workflow(IConfiguration configuration, ItContext context, IActionContextAccessor ActionAccessor)
+        private static readonly string[] ChuSo = { "không", "một", "hai", "ba", "bốn", "năm", "sáu", "bảy", "tám", "chín" };
+        private static readonly string[] DonVi = { "", "nghìn", "triệu", "tỷ" };
+
+        public Workflow(IConfiguration configuration, ItContext context, EsignContext esignContext, IActionContextAccessor ActionAccessor)
         {
             _configuration = configuration;
             _context = context;
+            _esignContext = esignContext;
             actionAccessor = ActionAccessor;
 
             var listener = _context.GetService<DiagnosticSource>();
@@ -44,6 +49,7 @@ namespace it.Services
             var process = process_version.process;
             var blocks = process.blocks;
             var links = process.links;
+            var failed = activity.failed ?? false;
 
             var node = blocks.Where(d => d.id == activity.block_id).FirstOrDefault();
             if (activity.clazz == "inclusiveGateway")
@@ -67,7 +73,7 @@ namespace it.Services
                 return false;
 
             var outs = getOutEdges(process, node);
-            outs.Where(d => d.reverse == activity.failed).ToList();
+            outs = outs.Where(d => d.reverse == failed).ToList();
             if (outs.Count > 0)
             {
                 foreach (var outEdge in outs)
@@ -106,7 +112,7 @@ namespace it.Services
                     if (create_new == true)
                     {
                         var blocking = false;
-                        if (target.clazz == "formTask" || target.clazz == "approveTask" || target.clazz == "suggestTask" || target.clazz == "mailSystem" || target.clazz == "printSystem" || target.clazz == "outputSystem")
+                        if (target.clazz == "formTask" || target.clazz == "approveTask" || target.clazz == "suggestTask")
                         {
                             blocking = true;
                         }
@@ -120,7 +126,7 @@ namespace it.Services
                             stt = activites[activites.Count - 1].stt + 1,
                             clazz = target.clazz,
                             executed = !blocking,
-                            failed = false,
+                            failed = failed,
                             blocking = blocking,
                             id = Guid.NewGuid().ToString(),
                             //fields= fields,
@@ -133,6 +139,11 @@ namespace it.Services
                             activity_new.created_by = activity.created_by;
                             activity_new.created_at = DateTime.Now;
                         }
+                        if (target.clazz == "approveTask")
+                        {
+                            activity_new.esign_id = activity.esign_id;
+                        }
+
                         _context.Add(activity_new);
                         activites.Add(activity_new);
                     }
@@ -175,6 +186,31 @@ namespace it.Services
                                 data_setting.type_performer = 4;
                                 data_setting.listuser = new List<string>() { execution.user_id };
                             }
+                            else if (type_performer == 6)
+                            {
+                                data_setting.type_performer = 4;
+                                string? truongbophan_UserId = activity.created_by;
+                                var user1 = _context.UserModel.Where(d => d.deleted_at == null && d.Id == activity.created_by).FirstOrDefault();
+                                if (user1 != null)
+                                {
+                                    var person = _context.PersonnelModel.Where(d => d.EMAIL.ToLower() == user1.Email.ToLower()).FirstOrDefault();
+                                    if (person != null)
+                                    {
+                                        var bophan = _context.PhongModel.SingleOrDefault(d => d.MAPHONG == person.MAPHONG);
+                                        if (bophan != null)
+                                        {
+                                            var truongbophan_id = bophan.truongbophan_id;
+                                            var truongbophan = _context.PersonnelModel.SingleOrDefault(d => d.id == truongbophan_id);
+                                            var truongbophan_user = _context.UserModel.SingleOrDefault(d => d.Email.ToLower() == truongbophan.EMAIL.ToLower());
+                                            if (truongbophan_user != null)
+                                            {
+                                                truongbophan_UserId = truongbophan_user.Id;
+                                            }
+                                        }
+                                    }
+                                }
+                                data_setting.listuser = new List<string>() { truongbophan_UserId };
+                            }
                             custom_block = new CustomBlockModel()
                             {
                                 data_setting = data_setting,
@@ -186,7 +222,44 @@ namespace it.Services
                     }
                     _context.SaveChanges();
                     //// Thực hiện
-                    if (activity_new.clazz == "printSystem")
+                    if (activity_new.clazz == "fail")
+                    {
+
+                        execution.status_id = (int)ExecutionStatus.Fail;
+                        _context.Update(execution);
+                        _context.SaveChanges();
+                        /////create event
+                        //var user = _context.UserModel.Find(user_id);
+                        EventModel EventModel = new EventModel
+                        {
+                            execution_id = activity_new.execution_id,
+                            event_content = "Đã thất bại",
+                            type = 2,
+                            created_at = DateTime.Now,
+                        };
+                        _context.Add(EventModel);
+
+                        await _context.SaveChangesAsync();
+                    }
+                    else if (activity_new.clazz == "success")
+                    {
+                        execution.status_id = (int)ExecutionStatus.Success;
+                        _context.Update(execution);
+                        _context.SaveChanges();
+                        /////create event
+                        //var user = _context.UserModel.Find(user_id);
+                        EventModel EventModel = new EventModel
+                        {
+                            execution_id = activity_new.execution_id,
+                            event_content = "Đã hoàn thành",
+                            created_at = DateTime.Now,
+                        };
+                        _context.Add(EventModel);
+
+                        await _context.SaveChangesAsync();
+
+                    }
+                    else if (activity_new.clazz == "printSystem")
                     {
                         await PrintTask(activity_new);
                     }
@@ -194,11 +267,26 @@ namespace it.Services
                     {
                         await OutputTask(activity_new);
                     }
+                    else if (activity_new.blocking == false)
+                    {
+                        /////create event
+                        var user = _context.UserModel.Find(activity_new.created_by);
+                        EventModel EventModel = new EventModel
+                        {
+                            execution_id = activity_new.execution_id,
+                            event_content = "<b>" + user.FullName + "</b> đã thực hiện <b>" + activity_new.label + "</b>",
+                            created_at = DateTime.Now,
+                        };
+                        _context.Add(EventModel);
+                        await _context.SaveChangesAsync();
+                    }
+
                     await create_next(activity_new);
                 }
             }
             return true;
         }
+
         public List<ProcessLinkModel>? getInEdges(ProcessModel process, ProcessBlockModel node)
         {
             //var blocks = process.blocks;
@@ -241,15 +329,14 @@ namespace it.Services
             var ExecutionModel = _context.ExecutionModel.Where(d => d.id == ActivityModel.execution_id && d.deleted_at == null)
                .Include(d => d.process_version)
                .Include(d => d.user)
-               .Include(d => d.activities)
+               .Include(d => d.activities).ThenInclude(d => d.user_created_by)
                .Include(d => d.transitions)
                .Include(d => d.fields)
                .FirstOrDefault();
             if (ExecutionModel == null)
                 return false;
-
             var data_setting_block = ActivityModel.data_setting;
-
+            var user = ActivityModel.user_created_by;
             var type_output = data_setting_block.type_output;
             if (type_output == "esign")
             {
@@ -272,20 +359,205 @@ namespace it.Services
                     ///Tim activity trước
                     ///
                     var prev_transitions = ExecutionModel.transitions.Where(d => d.to_activity_id == ActivityModel.id).ToList();
+
                     foreach (var transition in prev_transitions)
                     {
                         var activity = ExecutionModel.activities.Where(d => d.id == transition.from_activity_id).FirstOrDefault();
+
                         if (activity != null && activity.clazz == "printSystem")
                         {
                             data_setting_block.esign = activity.data_setting.esign;
+
+
+
+
+                            ///UPLOAD ESIGN
+                            //System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+                            //var user_id = UserManager.GetUserId(currentUser);
+                            //var user = await UserManager.GetUserAsync(currentUser);
+
+                            ///Document
+                            var type_id = ActivityModel.data_setting.esign_type_id; /// Type ký điện tử
+                            if (type_id == null || type_id == 0)
+                            {
+                                continue;
+                            }
+                            var DocumentModel = new DocumentModel()
+                            {
+                                name_vi = ExecutionModel.title,
+                                priority = 2,
+                                status_id = (int)DocumentStatus.Release,
+                                type_id = type_id,
+                                user_id = user.Id,
+                                user_next_signature_id = user.Id,
+                                is_sign_parellel = false,
+                                created_at = DateTime.Now,
+                            };
+                            var date_now = DateTime.Now;
+                            var count_type_in_day = _context.DocumentModel.Where(d => d.type_id == DocumentModel.type_id && d.created_at.Value.DayOfYear == date_now.DayOfYear).Count();
+                            var type = _context.DocumentTypeModel.Where(d => d.id == DocumentModel.type_id).Include(d => d.users_receive).FirstOrDefault();
+                            DocumentModel.code = type.symbol + date_now.ToString("ddMMyy") + (count_type_in_day < 9 ? "0" : "") + (count_type_in_day + 1);
+                            //DocumentModel.code = ExecutionModel.code;
+                            _context.Add(DocumentModel);
+                            _context.SaveChanges();
+                            var esign = data_setting_block.esign;
+                            var file = esign.files.FirstOrDefault();
+                            ///DocumentFile
+                            DocumentFileModel DocumentFileModel = new DocumentFileModel
+                            {
+                                document_id = DocumentModel.id,
+                                ext = ".pdf",
+                                url = file.url,
+                                name = file.name,
+                                mimeType = "application/pdf",
+                                created_at = DateTime.Now
+                            };
+                            _context.Add(DocumentFileModel);
+                            //Đính kèm
+                            var fields = ExecutionModel.fields.Where(d => d.type == "file_multiple" || d.type == "file").ToList();
+                            var list_attachment = new List<DocumentAttachmentModel>();
+                            foreach (var f in fields)
+                            {
+                                if (f.values.files != null && f.values.files.Count > 0)
+                                {
+                                    foreach (var file_up in f.values.files)
+                                    {
+                                        list_attachment.Add(new DocumentAttachmentModel()
+                                        {
+                                            document_id = DocumentModel.id,
+                                            name = file_up.name,
+                                            ext = file_up.ext,
+                                            mimeType = file_up.mimeType,
+                                            url = file_up.url,
+                                            created_at = DateTime.Now
+                                        });
+                                    }
+                                }
+                            }
+                            _context.AddRange(list_attachment);
+
+                            ////Signature
+                            //var signatures = esign.signatures;
+                            var process_version = ExecutionModel.process_version;
+                            var process = process_version.process;
+                            var nodes = process.blocks.Where(d => d.data_setting.blocks_esign_id == ActivityModel.block_id && d.clazz == "approveTask").OrderBy(d => d.stt).ToList();
+                            var stt = 0;
+                            foreach (var node in nodes)
+                            {
+                                var customBlock = _context.CustomBlockModel.Where(d => d.execution_id == ActivityModel.execution_id && d.block_id == node.id).FirstOrDefault();
+                                var node_data_setting = node.data_setting;
+                                var type_performer = node.type_performer;
+                                var listuser = node_data_setting.listuser;
+                                if (customBlock != null)
+                                {
+                                    var custom_data_setting = customBlock.data_setting;
+                                    type_performer = custom_data_setting.type_performer;
+                                    listuser = custom_data_setting.listuser;
+                                }
+                                if (type_performer == 1 && node_data_setting.block_id != null)
+                                {
+                                    var findActivity = ExecutionModel.activities.Where(d => d.block_id == node_data_setting.block_id).FirstOrDefault();
+                                    if (findActivity != null)
+                                    {
+                                        DocumentSignatureModel DocumentSignatureModel = new DocumentSignatureModel() { document_id = DocumentModel.id, user_id = findActivity.created_by, stt = stt++, block_id = node.id };
+                                        _context.Add(DocumentSignatureModel);
+                                    }
+                                }
+                                else if (type_performer == 5)
+                                {
+                                    DocumentSignatureModel DocumentSignatureModel = new DocumentSignatureModel() { document_id = DocumentModel.id, user_id = ExecutionModel.user_id, stt = stt++, block_id = node.id };
+                                    _context.Add(DocumentSignatureModel);
+                                }
+                                else if (type_performer == 4)
+                                {
+                                    var user_id = listuser.FirstOrDefault();
+
+                                    DocumentSignatureModel DocumentSignatureModel = new DocumentSignatureModel() { document_id = DocumentModel.id, user_id = user_id, stt = stt++, block_id = node.id };
+                                    _context.Add(DocumentSignatureModel);
+
+                                }
+                                else if (type_performer == 6)
+                                {
+                                    string? truongbophan_UserId = activity.created_by;
+                                    var user1 = _context.UserModel.Where(d => d.deleted_at == null && d.Id == activity.created_by).FirstOrDefault();
+                                    if (user1 != null)
+                                    {
+                                        var person = _context.PersonnelModel.Where(d => d.EMAIL.ToLower() == user1.Email.ToLower()).FirstOrDefault();
+                                        if (person != null)
+                                        {
+                                            var bophan = _context.PhongModel.SingleOrDefault(d => d.MAPHONG == person.MAPHONG);
+                                            if (bophan != null)
+                                            {
+                                                var truongbophan_id = bophan.truongbophan_id;
+                                                var truongbophan = _context.PersonnelModel.SingleOrDefault(d => d.id == truongbophan_id);
+                                                var truongbophan_user = _context.UserModel.SingleOrDefault(d => d.Email.ToLower() == truongbophan.EMAIL.ToLower());
+                                                if (truongbophan_user != null)
+                                                {
+                                                    truongbophan_UserId = truongbophan_user.Id;
+                                                    DocumentSignatureModel DocumentSignatureModel = new DocumentSignatureModel() { document_id = DocumentModel.id, user_id = truongbophan_UserId, stt = stt++, block_id = node.id };
+                                                    _context.Add(DocumentSignatureModel);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+
+                            ////Receive
+                            if (type.users_receive.Count() > 0)
+                            {
+                                foreach (var receive in type.users_receive)
+                                {
+                                    DocumentUserReceiveModel DocumentUserReceiveModel = new DocumentUserReceiveModel() { document_id = DocumentModel.id, user_id = receive.user_id };
+                                    _context.Add(DocumentUserReceiveModel);
+                                }
+                            }
+                            /////create event
+                            DocumentEventModel DocumentEventModel = new DocumentEventModel
+                            {
+                                document_id = DocumentModel.id,
+                                event_content = "<b>" + user.FullName + "</b> tạo hồ sơ mới",
+                                created_at = DateTime.Now,
+                            };
+                            _context.Add(DocumentEventModel);
+                            /////create Related 
+                            //RelatedEsignModel RelatedEsignModel = new RelatedEsignModel()
+                            //{
+                            //    esign_id = DocumentModel.id,
+                            //    related_id = data.id,
+                            //    type = "dutru",
+                            //    created_at = DateTime.Now
+                            //};
+                            //_context.Add(RelatedEsignModel);
+
+                            ////_context.SaveChanges();
+                            //data.status_id = (int)Status.Esign;
+                            //data.activeStep = 1;
+                            //data.esign_id = DocumentModel.id;
+                            //data.code = DocumentModel.code;
+                            //_context.Update(data);
+                            ActivityModel.esign_id = DocumentModel.id;
                             ActivityModel.data_setting = data_setting_block;
 
                             _context.Update(ActivityModel);
+                            ExecutionModel.esign_id = DocumentModel.id;
+                            _context.Update(ExecutionModel);
                             await _context.SaveChangesAsync();
+                            //_context.SaveChanges();
                         }
                     }
                 }
             }
+            /////Event
+            EventModel EventModel = new EventModel
+            {
+                execution_id = ActivityModel.execution_id,
+                event_content = "<b>" + user.FullName + "</b> đã thực hiện <b>" + ActivityModel.label + "</b>",
+                created_at = DateTime.Now,
+            };
+            _context.Add(EventModel);
+            await _context.SaveChangesAsync();
             return true;
         }
         public async Task<Boolean> PrintTask(ActivityModel ActivityModel)
@@ -303,6 +575,7 @@ namespace it.Services
             var data_setting_block = ActivityModel.data_setting;
             var file_template = data_setting_block.file_template;
             var type_template = data_setting_block.type_template;
+            var type_output = data_setting_block.type_output;
             if (type_template == "html")
             {
                 var type_template_html = data_setting_block.type_template_html;
@@ -386,7 +659,7 @@ namespace it.Services
 
                     foreach (var field in activity.fields)
                     {
-                        if (!MergeFieldNames.Contains(field.variable) && field.type != "table")
+                        if (!MergeFieldNames.Contains(field.variable) && field.type != "table" && field.type != "yesno")
                             continue;
                         var data_setting = field.data_setting;
                         var values = field.values;
@@ -477,25 +750,40 @@ namespace it.Services
                         {
                             if (text == null)
                                 continue;
-                            CultureInfo cul = CultureInfo.GetCultureInfo("vi-VN");   // try with "en-US"
-                            text = double.Parse(text).ToString("#,###.##", cul.NumberFormat);
-                            replacements.Add(field.variable, text);
 
+                            CultureInfo cul = CultureInfo.GetCultureInfo("vi-VN");   // try with "en-US"
+                            var text_string = DocTienBangChu(decimal.Parse(text));
+                            var text_number = double.Parse(text).ToString("#,###.##", cul.NumberFormat);
+
+                            replacements.Add(field.variable, text_number);
+                            replacements.Add(field.variable + "_vn", text_string);
                         }
                         else if (field.type == "formular")
                         {
                             if (text == null)
                                 continue;
                             CultureInfo cul = CultureInfo.GetCultureInfo("vi-VN");   // try with "en-US"
-                            text = double.Parse(text).ToString("#,###.##", cul.NumberFormat);
-                            replacements.Add(field.variable, text);
+                            var text_string = DocTienBangChu(decimal.Parse(text));
+                            var text_number = double.Parse(text).ToString("#,###.##", cul.NumberFormat);
+
+                            replacements.Add(field.variable, text_number);
+                            replacements.Add(field.variable + "_vn", text_string);
                         }
                         else if (field.type == "yesno")
                         {
+                            var text_yes = "☐";
+                            var text_no = "☐";
                             if (text == "true")
                             {
                                 text = "√";
+                                text_yes = "☒";
                             }
+                            else
+                            {
+                                text_no = "☒";
+                            }
+                            replacements.Add(field.variable + "_yes", text_yes);
+                            replacements.Add(field.variable + "_no", text_no);
                         }
 
                         else if (field.type == "table")
@@ -709,64 +997,86 @@ namespace it.Services
                 string url = "/private/executions/" + ExecutionModel.id + "/" + newName;
                 //var countpage = document.GetPageCount();
                 var status_process = true;
-                //if (countpage > 3)
-                //{
+
 
                 document.SaveToFile(dir + url, Spire.Doc.FileFormat.Docx);
 
-                ///Convert PDF
-                var file = dir + url;
-                file = file.Replace("/", "\\");
-                var output = dir + "/private/executions/" + ExecutionModel.id;
-                output = output.Replace("/", "\\");
-                status_process = ConvertWordFile(file, output);
-                //}
-                //else
-                //{
-                //    string url_temp_pdf = "/private/executions/" + ExecutionModel.id + "/1_" + timeStamp + ".pdf";
-                //    string url_pdf = "/private/executions/" + ExecutionModel.id + "/" + timeStamp + ".pdf";
-                //    document.SaveToFile(dir + url_temp_pdf, Spire.Doc.FileFormat.PDF);
-                //    ////Loại bỏ trang cuối
-                //    var reader = new PdfReader(dir + url_temp_pdf);
-                //    var dest = new PdfWriter(dir + url_pdf);
-                //    var mergedDocument = new PdfDocument(dest);
-                //    var copyFromDocument = new PdfDocument(reader);
-                //    var merger = new PdfMerger(mergedDocument);
-                //    var c_page = copyFromDocument.GetNumberOfPages();
-                //    merger.Merge(copyFromDocument, 1, copyFromDocument.GetNumberOfPages() - 1);
-                //}
+
+                if (type_output == "word")
+                {
+
+
+                    var files = new List<FileUp>();
+
+                    files.Add(new FileUp()
+                    {
+                        name = file_template.name,
+                        url = url,
+                        ext = ".docx",
+                        mimeType = "application/word"
+                    });
+
+                    //var process1 = ExecutionModel.process_version.process;
+                    //var blocks = process1.blocks;
+                    //var blocks_approve = blocks.Where(d => d.data_setting.blocks_esign_id == blocking.block_id).ToList();
+
+                    //var signatures = new List<Signature>();
+                    //foreach (var block in blocks_approve)
+                    //{
+                    //	var Signature = new Signature()
+                    //	{
+                    //		block_id = block.id,
+                    //		status = 1,
+                    //	};
+                    //	signatures.Add(Signature);
+                    //}
+                    data_setting_block.esign = new Esign();
+                    //data_setting_block.esign.signatures = signatures;
+                    data_setting_block.esign.files = files;
+                }
+                else
+                {
+                    ///Convert PDF
+                    var file = dir + url;
+                    file = file.Replace("/", "\\");
+                    var output = dir + "/private/executions/" + ExecutionModel.id;
+                    output = output.Replace("/", "\\");
+                    status_process = ConvertWordFile(file, output);
+
+
+
+                    //data_setting_block.file_template.url = "/private/executions/" + ExecutionModel.id + "/" + timeStamp + ".pdf";
+                    ////Tạo Esign
+                    var files = new List<FileUp>();
+
+                    files.Add(new FileUp()
+                    {
+                        name = file_template.name,
+                        url = "/private/executions/" + ExecutionModel.id + "/" + timeStamp + ".pdf",
+                        ext = ".pdf",
+                        mimeType = "application/pdf"
+                    });
+
+                    //var process1 = ExecutionModel.process_version.process;
+                    //var blocks = process1.blocks;
+                    //var blocks_approve = blocks.Where(d => d.data_setting.blocks_esign_id == blocking.block_id).ToList();
+
+                    //var signatures = new List<Signature>();
+                    //foreach (var block in blocks_approve)
+                    //{
+                    //	var Signature = new Signature()
+                    //	{
+                    //		block_id = block.id,
+                    //		status = 1,
+                    //	};
+                    //	signatures.Add(Signature);
+                    //}
+                    data_setting_block.esign = new Esign();
+                    //data_setting_block.esign.signatures = signatures;
+                    data_setting_block.esign.files = files;
+                }
 
                 ActivityModel.failed = !status_process;
-
-                //data_setting_block.file_template.url = "/private/executions/" + ExecutionModel.id + "/" + timeStamp + ".pdf";
-                ////Tạo Esign
-                var files = new List<FileUp>();
-
-                files.Add(new FileUp()
-                {
-                    name = file_template.name,
-                    url = "/private/executions/" + ExecutionModel.id + "/" + timeStamp + ".pdf",
-                    ext = ".pdf",
-                    mimeType = "application/pdf"
-                });
-
-                //var process1 = ExecutionModel.process_version.process;
-                //var blocks = process1.blocks;
-                //var blocks_approve = blocks.Where(d => d.data_setting.blocks_esign_id == blocking.block_id).ToList();
-
-                //var signatures = new List<Signature>();
-                //foreach (var block in blocks_approve)
-                //{
-                //	var Signature = new Signature()
-                //	{
-                //		block_id = block.id,
-                //		status = 1,
-                //	};
-                //	signatures.Add(Signature);
-                //}
-                data_setting_block.esign = new Esign();
-                //data_setting_block.esign.signatures = signatures;
-                data_setting_block.esign.files = files;
             }
 
 
@@ -796,11 +1106,19 @@ namespace it.Services
             //ActivityModel.created_by = activity.created_by;
             ActivityModel.created_at = DateTime.Now;
 
-
             _context.Update(ActivityModel);
+            /////Event
+            var user = _context.UserModel.Find(ActivityModel.created_by);
+            EventModel EventModel = new EventModel
+            {
+                execution_id = ActivityModel.execution_id,
+                event_content = "<b>" + user.FullName + "</b> đã thực hiện <b>" + ActivityModel.label + "</b>",
+                created_at = DateTime.Now,
+            };
+            _context.Add(EventModel);
             await _context.SaveChangesAsync();
 
-            create_next(ActivityModel);
+            await create_next(ActivityModel);
             return true;
 
         }
@@ -1012,8 +1330,11 @@ namespace it.Services
                         if (text == null)
                             continue;
                         CultureInfo cul = CultureInfo.GetCultureInfo("vi-VN");   // try with "en-US"
-                        text = double.Parse(text).ToString("#,###.##", cul.NumberFormat);
-                        replacements.Add(field.variable, text);
+                        var text_string = DocTienBangChu(decimal.Parse(text));
+                        var text_number = double.Parse(text).ToString("#,###.##", cul.NumberFormat);
+
+                        replacements.Add(field.variable, text_number);
+                        replacements.Add(field.variable + "_vn", text_string);
 
                     }
                     else if (field.type == "table")
@@ -1074,6 +1395,73 @@ namespace it.Services
             mail.filecontent = filecontent;
             return mail;
         }
-    }
 
+        public static string DocTienBangChu(decimal number)
+        {
+            if (number == 0) return "Không đồng";
+
+            string s = "";
+            string strSo = ((long)number).ToString();
+            int i = 0;
+
+            while (strSo.Length > 0)
+            {
+                string donvi = DonVi[i];
+                string so3 = strSo.Length >= 3 ? strSo.Substring(strSo.Length - 3, 3) : strSo;
+                strSo = strSo.Length >= 3 ? strSo.Substring(0, strSo.Length - 3) : "";
+
+                string chu = Doc3So(so3);
+                if (!string.IsNullOrEmpty(chu))
+                    s = chu + " " + donvi + " " + s;
+
+                i++;
+            }
+
+            s = s.Trim();
+            s = char.ToUpper(s[0]) + s.Substring(1) + " đồng chẵn.";
+            return s;
+        }
+
+        private static string Doc3So(string so)
+        {
+            while (so.Length < 3)
+                so = "0" + so;
+
+            int tram = int.Parse(so[0].ToString());
+            int chuc = int.Parse(so[1].ToString());
+            int donvi = int.Parse(so[2].ToString());
+
+            string s = "";
+
+            if (tram != 0)
+                s += ChuSo[tram] + " trăm";
+            else if (chuc != 0 || donvi != 0)
+                s += "không trăm";
+
+            if (chuc != 0)
+            {
+                if (chuc == 1)
+                    s += " mười";
+                else
+                    s += " " + ChuSo[chuc] + " mươi";
+            }
+            else if (donvi != 0)
+            {
+                s += " linh";
+            }
+
+            if (donvi != 0)
+            {
+                if (chuc != 0 && donvi == 1)
+                    s += " mốt";
+                else if (chuc != 0 && donvi == 5)
+                    s += " lăm";
+                else
+                    s += " " + ChuSo[donvi];
+            }
+
+            return s.Trim();
+        }
+
+    }
 }

@@ -23,6 +23,10 @@ namespace Vue.Data
         public DbSet<UserEsignModel> UserEsignModel { get; set; }
 
 
+
+
+        
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
 

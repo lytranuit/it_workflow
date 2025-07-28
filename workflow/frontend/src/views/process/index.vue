@@ -3,58 +3,27 @@
     <div class="col-12">
       <h5 class="card-header drag-handle">
         <RouterLink to="/process/add">
-          <Button
-            label="Tạo mới"
-            icon="pi pi-plus"
-            class="p-button-success p-button-sm mr-2"
-          ></Button>
+          <Button label="Tạo mới" icon="pi pi-plus" class="p-button-success p-button-sm mr-2"></Button>
         </RouterLink>
       </h5>
       <section class="card card-fluid">
         <div class="card-body" style="overflow: auto; position: relative">
-          <DataTable
-            class="p-datatable-customers"
-            showGridlines
-            :value="datatable"
-            :lazy="true"
-            ref="dt"
-            scrollHeight="70vh"
-            v-model:selection="selectedProducts"
-            :paginator="true"
-            :rowsPerPageOptions="[10, 50, 100]"
-            :rows="rows"
-            :totalRecords="totalRecords"
-            @page="onPage($event)"
-            :rowHover="true"
-            :loading="loading"
-            responsiveLayout="scroll"
-            :resizableColumns="true"
-            columnResizeMode="expand"
-            v-model:filters="filters"
-            filterDisplay="menu"
-          >
+          <DataTable class="p-datatable-customers" showGridlines :value="datatable" :lazy="true" ref="dt"
+            scrollHeight="70vh" v-model:selection="selectedProducts" :paginator="true"
+            :rowsPerPageOptions="[10, 50, 100]" :rows="rows" :totalRecords="totalRecords" @page="onPage($event)"
+            :rowHover="true" :loading="loading" responsiveLayout="scroll" :resizableColumns="true"
+            columnResizeMode="expand" v-model:filters="filters" filterDisplay="menu">
             <template #header>
               <div style="width: 200px">
-                <TreeSelect
-                  :options="columns"
-                  v-model="showing"
-                  multiple
-                  :limit="0"
-                  :limitText="(count) => 'Hiển thị: ' + count + ' cột'"
-                >
+                <TreeSelect :options="columns" v-model="showing" multiple :limit="0"
+                  :limitText="(count) => 'Hiển thị: ' + count + ' cột'">
                 </TreeSelect>
               </div>
             </template>
 
             <template #empty> Không có dữ liệu. </template>
-            <Column
-              v-for="col of selectedColumns"
-              :field="col.data"
-              :header="col.label"
-              :key="col.data"
-              :showFilterMatchModes="false"
-              :class="col.className"
-            >
+            <Column v-for="col of selectedColumns" :field="col.data" :header="col.label" :key="col.data"
+              :showFilterMatchModes="false" :class="col.className">
               <template #body="slotProps">
                 <template v-if="col.data == 'id'">
                   <RouterLink :to="'/process/edit/' + slotProps.data[col.data]">
@@ -63,69 +32,40 @@
                   </RouterLink>
                 </template>
                 <template v-else-if="col.data == 'group'">
-                  <Button
-                    :label="slotProps.data[col.data].name"
-                    class="p-button-sm mr-2"
-                    :style="
-                      'background-color: ' +
-                      slotProps.data[col.data].color +
-                      ';border-color: ' +
-                      slotProps.data[col.data].color +
-                      ';'
-                    "
-                  ></Button>
+                  <Button :label="slotProps.data[col.data].name" class="p-button-sm mr-2" :style="'background-color: ' +
+                    slotProps.data[col.data].color +
+                    ';border-color: ' +
+                    slotProps.data[col.data].color +
+                    ';'
+                    "></Button>
                 </template>
                 <template v-else-if="col.data == 'status_id'">
-                  <Button
-                    label="Draft"
-                    class="p-button-secondary p-button-sm mr-2"
-                    v-if="slotProps.data[col.data] == 1"
-                  ></Button>
-                  <Button
-                    label="Release"
-                    class="p-button-primary p-button-sm mr-2"
-                    v-else-if="slotProps.data[col.data] == 2"
-                  ></Button>
+                  <Button label="Draft" class="p-button-secondary p-button-sm mr-2"
+                    v-if="slotProps.data[col.data] == 1"></Button>
+                  <Button label="Release" class="p-button-primary p-button-sm mr-2"
+                    v-else-if="slotProps.data[col.data] == 2"></Button>
                 </template>
                 <div v-else v-html="slotProps.data[col.data]"></div>
               </template>
-              <template
-                #filter="{ filterModel, filterCallback }"
-                v-if="col.filter == true"
-              >
-                <InputText
-                  type="text"
-                  v-model="filterModel.value"
-                  @keydown.enter="filterCallback()"
-                  class="p-column-filter"
-                />
+              <template #filter="{ filterModel, filterCallback }" v-if="col.filter == true">
+
+                <InputText type="text" v-model="filterModel.value" @keydown.enter="filterCallback()"
+                  class="p-column-filter" />
               </template>
             </Column>
             <Column style="width: 1rem">
               <template #body="slotProps">
                 <span class="p-buttonset">
-                  <Button
-                    icon="fas fa-chart-pie"
-                    class="p-button-success p-button-sm"
-                    title="Tổng quan"
-                    @click="routertoDashboard(slotProps.data['id'])"
-                  ></Button>
-                  <Button
-                    v-if="slotProps.data['status_id'] == 1"
-                    icon="fas fa-arrow-up"
-                    class="p-button-success p-button-sm"
-                    @click="confirmRelease(slotProps.data['id'])"
-                  ></Button>
-                  <Button
-                    icon="pi pi-download"
-                    class="p-button-primary p-button-sm"
-                    @click="excel(slotProps.data['id'])"
-                  ></Button>
-                  <Button
-                    icon="pi pi-trash"
-                    class="p-button-danger p-button-sm"
-                    @click="confirmDelete(slotProps.data['id'])"
-                  ></Button>
+                  <Button icon="fas fa-chart-pie" class="p-button-success p-button-sm" title="Tổng quan"
+                    @click="routertoDashboard(slotProps.data['id'])"></Button>
+                  <Button icon="pi pi-download" class="p-button-primary p-button-sm"
+                    @click="excel(slotProps.data['id'])"></Button>
+                  <Button v-if="slotProps.data['status_id'] == 1" icon="fas fa-arrow-up"
+                    class="p-button-success p-button-sm" @click="confirmRelease(slotProps.data['id'])"></Button>
+                  <Button v-if="slotProps.data['status_id'] != 1" icon="fas fa-arrow-down"
+                    class="p-button-secondary p-button-sm" @click="confirmUnrelease(slotProps.data['id'])"></Button>
+                  <Button icon="pi pi-trash" class="p-button-danger p-button-sm"
+                    @click="confirmDelete(slotProps.data['id'])"></Button>
                 </span>
               </template>
             </Column>
@@ -236,20 +176,38 @@ const confirmDelete = (id) => {
     header: "Xác nhận",
     icon: "pi pi-exclamation-triangle",
     accept: () => {
+      waiting.value = true;
       processApi.remove({ item: [id] }).then((res) => {
         loadLazyData();
       });
     },
   });
 };
-const dashboard = (id) => {};
+const dashboard = (id) => { };
 const confirmRelease = (id) => {
   confirm.require({
     message: "Bạn có muốn phát hành process này?",
     header: "Xác nhận",
     icon: "pi pi-exclamation-triangle",
     accept: () => {
+      waiting.value = true;
       processApi.release(id).then((res) => {
+
+        loadLazyData();
+      });
+    },
+  });
+};
+
+const confirmUnrelease = (id) => {
+  confirm.require({
+    message: "Bạn có muốn hủy phát hành process này?",
+    header: "Xác nhận",
+    icon: "pi pi-exclamation-triangle",
+    accept: () => {
+
+      waiting.value = true;
+      processApi.unrelease(id).then((res) => {
         loadLazyData();
       });
     },

@@ -22,6 +22,7 @@ namespace workflow.Areas.V1.Models
         public int? stt { get; set; }
 
         [ForeignKey("process_id")]
+        [JsonIgnore]
         public virtual ProcessModel process { get; set; }
         [ForeignKey("process_block_id")]
         public virtual ProcessBlockModel block { get; set; }

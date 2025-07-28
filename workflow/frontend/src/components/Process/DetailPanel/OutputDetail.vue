@@ -12,8 +12,14 @@
               <b class="col-form-label">Loại</b>
               <div class="pt-1 flex-m">
                 <select class="form-control form-control-sm" v-model="model.data_setting.type_output">
-                  <option value="esign">File ký</option>
+                  <option value="esign">File trình ký</option>
                 </select>
+              </div>
+            </div>
+            <div class="col-12 mt-2" v-if="model.data_setting.type_output == 'esign'">
+              <b class="col-form-label">Loại trình ký</b>
+              <div class="pt-1 flex-m">
+                <EsignTypeTreeSelect v-model="model.data_setting.esign_type_id"></EsignTypeTreeSelect>
               </div>
             </div>
             <div class="col-12 mt-2">
@@ -38,6 +44,7 @@ import {
   DxVariables,
 } from "devextreme-vue/html-editor";
 import { useProcess } from "../../../stores/process";
+import EsignTypeTreeSelect from "../../TreeSelect/EsignTypeTreeSelect.vue";
 const store = useProcess();
 export default {
   components: {
@@ -46,7 +53,8 @@ export default {
     DxItem,
     DxToolbar,
     DxVariables,
-    FieldFileTreeSelect
+    FieldFileTreeSelect,
+    EsignTypeTreeSelect
   },
   data() {
     return {

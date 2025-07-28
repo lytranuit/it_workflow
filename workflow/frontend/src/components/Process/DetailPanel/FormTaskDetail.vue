@@ -16,6 +16,7 @@
                 <option value="3">Bộ phận</option>
                 <option value="4">Người dùng</option>
                 <option value="5">Người khởi tạo</option>
+                <option value="6">Trưởng bộ phận</option>
               </select>
             </div>
             <div class="my-2" v-if="model.type_performer == 1 || model.type_performer == 2">

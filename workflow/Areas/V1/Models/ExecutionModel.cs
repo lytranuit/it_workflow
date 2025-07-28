@@ -19,6 +19,7 @@ namespace workflow.Areas.V1.Models
         public string user_id { get; set; }
         public string? code { get; set; }
         public int? status_id { get; set; }
+        public int? esign_id { get; set; }
         public string? status
         {
             get
@@ -63,5 +64,7 @@ namespace workflow.Areas.V1.Models
         Success = 3,
         [Display(Name = "Thất bại")]
         Fail = 4,
+        [Display(Name = "Hủy")]
+        Cancel = 5,
     }
 }

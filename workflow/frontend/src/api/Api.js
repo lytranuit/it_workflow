@@ -29,6 +29,24 @@ export default {
     });
   },
 
+  ProcessRun() {
+    return repository.get(`/v1/${resoure}/ProcessRun`).then((res) => {
+      var url = "/Identity/Account/Login";
+      if (res.request.responseURL.indexOf(url) != -1)
+        location.reload();
+      return res.data
+    });
+  },
+
+  EsignType() {
+    return repository.get(`/v1/${resoure}/EsignType`).then((res) => {
+      var url = "/Identity/Account/Login";
+      if (res.request.responseURL.indexOf(url) != -1)
+        location.reload();
+      return res.data
+    });
+  },
+
   employee() {
     return repository.get(`/v1/${resoure}/employee`).then((res) => {
       var url = "/Identity/Account/Login";

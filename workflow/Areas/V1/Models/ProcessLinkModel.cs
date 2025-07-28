@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Newtonsoft.Json;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace workflow.Areas.V1.Models
@@ -20,6 +21,7 @@ namespace workflow.Areas.V1.Models
         public string clazz { get; set; }
 
         [ForeignKey("process_id")]
+        [JsonIgnore]
         public virtual ProcessModel process { get; set; }
     }
 

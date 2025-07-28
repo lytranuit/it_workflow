@@ -1,9 +1,5 @@
 <template>
-  <Execution
-    :process_version_id="route.params.id"
-    ref="execution_ref"
-    :key="route.query.time"
-  ></Execution>
+  <Execution :process_version_id="route.params.id" ref="execution_ref" :key="route.query.time"></Execution>
 </template>
 
 <script setup>
@@ -13,8 +9,6 @@ import { useRoute } from "vue-router";
 import { storeToRefs } from "pinia";
 import { useProcess } from "../../../stores/process";
 import { useAuth } from "../../../stores/auth";
-import moment from "moment";
-import { rand } from "../../../utilities/rand";
 import Api from "../../../api/Api";
 const route = useRoute();
 const store_auth = useAuth();

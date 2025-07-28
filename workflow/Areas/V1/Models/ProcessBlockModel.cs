@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Newtonsoft.Json;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Vue.Models;
 
@@ -19,6 +20,7 @@ namespace workflow.Areas.V1.Models
         public string? variable { get; set; }
 
         [ForeignKey("process_id")]
+        [JsonIgnore]
         public ProcessModel process { get; set; }
 
         public virtual List<ProcessFieldModel>? fields { get; set; }
@@ -61,6 +63,10 @@ namespace workflow.Areas.V1.Models
 
         public string type_output { get; set; }
         public string field_output { get; set; }
+        /// <summary>
+        /// (type_output == eisgn)
+        /// </summary>
+        public int esign_type_id { get; set; }
         /// <summary>
         /// (printTask)
         /// </summary>

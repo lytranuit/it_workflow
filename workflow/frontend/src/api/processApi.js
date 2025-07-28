@@ -93,6 +93,25 @@ export default {
       if (res.request.responseURL.indexOf(url) != -1)
         location.reload();
       return res.data
-    });;
+    });
+  },
+  
+  unrelease(id) {
+    return repository
+      .post(
+        `/v1/${resoure}/unrelease`,
+        { id: id },
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      )
+      .then((res) => {
+      var url = "/Identity/Account/Login";
+      if (res.request.responseURL.indexOf(url) != -1)
+        location.reload();
+      return res.data
+    });
   },
 };

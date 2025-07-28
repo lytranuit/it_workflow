@@ -216,7 +216,65 @@ namespace it.Controllers
 
             return Json(new { success = true, blockings = blockings });
         }
+        public async Task<JsonResult> SyncEsign()
+        {
+            //var blockings = _context.ActivityModel.Where(d => d.blocking == true && d.deleted_at == null && d.status_notification == null).ToList();
+            //blockings = blockings.Where(d => d.data_setting.has_notification == true).ToList();
+            //foreach (var blocking in blockings)
+            //{
 
+            //}
+            var esigns = _context.DocumentSignatureModel.Where(d => d.date_workflow == null && d.block_id != null && d.status != 1).OrderByDescending(d => d.date).ToList();
+            foreach (var esign in esigns)
+            {
+                ///Tim activity
+                var ActivityModel = _context.ActivityModel.Where(d => d.blocking == true && d.deleted_at == null && d.esign_id == esign.document_id && d.block_id == esign.block_id).FirstOrDefault();
+                if (ActivityModel != null)
+                {
+                    if (esign.status == 2) /// Ký hoàn tất
+                    {
+                        ActivityModel.blocking = false;
+                        ActivityModel.executed = true;
+                        ActivityModel.failed = false;
+                        ActivityModel.started_at = DateTime.Now;
+                        ActivityModel.created_at = DateTime.Now;
+                        ActivityModel.created_by = esign.user_sign;
+                        _context.Update(ActivityModel);
+                    }
+                    else if (esign.status == 3)  /// Không ký
+                    {
+                        ActivityModel.blocking = false;
+                        ActivityModel.executed = true;
+                        ActivityModel.failed = true;
+
+                        ActivityModel.note = esign.reason;
+                        ActivityModel.created_at = DateTime.Now;
+                        ActivityModel.created_by = esign.user_id;
+                        ActivityModel.started_at = DateTime.Now;
+                        _context.Update(ActivityModel);
+                    }
+
+                    /////Event
+                    var user = _context.UserModel.Find(ActivityModel.created_by);
+                    EventModel EventModel = new EventModel
+                    {
+                        execution_id = ActivityModel.execution_id,
+                        event_content = "<b>" + user.FullName + "</b> đã thực hiện <b>" + ActivityModel.label + "</b>",
+                        created_at = DateTime.Now,
+                    };
+                    _context.Add(EventModel);
+                    await _context.SaveChangesAsync();
+
+                    await _workflow.create_next(ActivityModel);
+                }
+                esign.date_workflow = DateTime.Now;
+                _context.Update(esign);
+                await _context.SaveChangesAsync();
+
+
+            }
+            return Json(new { success = true });
+        }
         public async Task<JsonResult> PrintTask()
         {
 
@@ -305,7 +363,7 @@ namespace it.Controllers
             //    _context.Update(email);
             //}
             //await _context.SaveChangesAsync();
-
+            await SyncEsign();
             await NotificationTask();
             return Json(new { success = true });
         }

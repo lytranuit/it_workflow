@@ -4,11 +4,7 @@
     <div class="panelBody">
       <Accordion :activeIndex="0">
         <AccordionTab :header="$t('detail.general')">
-          <DefaultDetail
-            :model="model"
-            :onChange="onChange"
-            :readOnly="readOnly"
-          />
+          <DefaultDetail :model="model" :onChange="onChange" :readOnly="readOnly" />
         </AccordionTab>
         <AccordionTab :header="$t('detail.user_performer')">
           <div class="p-3">
@@ -20,30 +16,20 @@
                 <option value="3">Bộ phận</option>
                 <option value="4">Người dùng</option>
                 <option value="5">Người khởi tạo</option>
+                <option value="6">Trưởng bộ phận</option>
               </select>
             </div>
-            <div
-              class="my-2"
-              v-if="model.type_performer == 1 || model.type_performer == 2"
-            >
+            <div class="my-2" v-if="model.type_performer == 1 || model.type_performer == 2">
               <b>Bước:</b>
-              <NodePreviousTreeSelect
-                v-model="model.data_setting.block_id"
-              ></NodePreviousTreeSelect>
+              <NodePreviousTreeSelect v-model="model.data_setting.block_id"></NodePreviousTreeSelect>
             </div>
             <div class="my-2" v-if="model.type_performer == 4">
               <b>Người dùng:</b>
-              <UserTreeSelect
-                multiple
-                v-model="model.data_setting.listuser"
-              ></UserTreeSelect>
+              <UserTreeSelect multiple v-model="model.data_setting.listuser"></UserTreeSelect>
             </div>
             <div class="my-2" v-if="model.type_performer == 3">
               <b>Bộ phận:</b>
-              <DepartmentTreeSelect
-                multiple
-                v-model="model.data_setting.listdepartment"
-              ></DepartmentTreeSelect>
+              <DepartmentTreeSelect multiple v-model="model.data_setting.listdepartment"></DepartmentTreeSelect>
             </div>
           </div>
         </AccordionTab>
@@ -53,12 +39,7 @@
               <div class="">Thời hạn xử lý</div>
               <div class="ml-auto">
                 <div class="custom-control custom-switch switch-primary">
-                  <input
-                    type="checkbox"
-                    class="custom-control-input"
-                    id="check"
-                    v-model="model.has_deadline"
-                  />
+                  <input type="checkbox" class="custom-control-input" id="check" v-model="model.has_deadline" />
                   <label class="custom-control-label" for="check"></label>
                 </div>
               </div>
@@ -69,27 +50,15 @@
             <div class="flex-m">
               <div class="mx-2">
                 <b>Ngày</b>
-                <input
-                  class="form-control"
-                  v-model="model.data_setting.days"
-                  :disabled="!model.has_deadline"
-                />
+                <input class="form-control" v-model="model.data_setting.days" :disabled="!model.has_deadline" />
               </div>
               <div class="mx-2">
                 <b>Giờ</b>
-                <input
-                  class="form-control"
-                  v-model="model.data_setting.hours"
-                  :disabled="!model.has_deadline"
-                />
+                <input class="form-control" v-model="model.data_setting.hours" :disabled="!model.has_deadline" />
               </div>
               <div class="mx-2">
                 <b>Phút</b>
-                <input
-                  class="form-control"
-                  v-model="model.data_setting.minutes"
-                  :disabled="!model.has_deadline"
-                />
+                <input class="form-control" v-model="model.data_setting.minutes" :disabled="!model.has_deadline" />
               </div>
             </div>
           </div>
@@ -98,9 +67,7 @@
           <div class="cont-empty my-3 text-center">Chọn mẫu gợi ý</div>
           <div class="row justify-content-center">
             <div class="col-10">
-              <NodePreviousPrintTreeSelect
-                v-model="model.data_setting.blocks_esign_id"
-              ></NodePreviousPrintTreeSelect>
+              <NodePreviousPrintTreeSelect v-model="model.data_setting.blocks_esign_id"></NodePreviousPrintTreeSelect>
             </div>
           </div>
         </AccordionTab>
@@ -131,7 +98,7 @@ export default {
     },
     onChange: {
       type: Function,
-      default: () => {},
+      default: () => { },
     },
     readOnly: {
       type: Boolean,

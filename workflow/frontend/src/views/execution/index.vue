@@ -4,10 +4,10 @@
       <section class="card card-fluid">
         <div class="card-body" style="overflow: auto; position: relative">
           <DataTable class="p-datatable-customers" showGridlines :value="datatable" :lazy="true" ref="dt"
-            scrollHeight="70vh" v-model:selection="selectedProducts" :paginator="true" :rowsPerPageOptions="[10, 50, 100]"
-            :rows="rows" :totalRecords="totalRecords" @page="onPage($event)" :rowHover="true" :loading="loading"
-            responsiveLayout="scroll" :resizableColumns="true" columnResizeMode="expand" v-model:filters="filters"
-            filterDisplay="menu">
+            scrollHeight="70vh" v-model:selection="selectedProducts" :paginator="true"
+            :rowsPerPageOptions="[10, 50, 100]" :rows="rows" :totalRecords="totalRecords" @page="onPage($event)"
+            :rowHover="true" :loading="loading" responsiveLayout="scroll" :resizableColumns="true"
+            columnResizeMode="expand" v-model:filters="filters" filterDisplay="menu">
             <template #header>
               <div style="width: 200px">
                 <TreeSelect :options="columns" v-model="showing" multiple :limit="0"
@@ -48,11 +48,19 @@
                 <div v-else v-html="slotProps.data[col.data]"></div>
               </template>
               <template #filter="{ filterModel, filterCallback }" v-if="col.filter == true">
-                <select v-if="col.data == 'status_id'" class="form-control" v-model="filterModel.value">
-                  <option value="2">Đang thực hiện</option>
-                  <option value="3">Hoàn thành</option>
-                  <option value="4">Thất bại</option>
-                </select>
+                <template v-if="col.data == 'status_id'">
+                  <select class="form-control" v-model="filterModel.value" @change="filterCallback()">
+                    <option value="2">Đang thực hiện</option>
+                    <option value="3">Hoàn thành</option>
+                    <option value="4">Thất bại</option>
+                    <option value="5">Hủy</option>
+                  </select>
+                </template>
+                <template v-else-if="col.data == 'process'">
+                  <ProcessRunTreeSelect v-model="filterModel.value" @update:modelValue="filterCallback()"
+                    style="width: 300px;">
+                  </ProcessRunTreeSelect>
+                </template>
                 <InputText type="text" v-else v-model="filterModel.value" class="p-column-filter" />
               </template>
             </Column>
@@ -82,6 +90,7 @@ import InputText from "primevue/inputtext";
 import ConfirmDialog from "primevue/confirmdialog";
 import { useConfirm } from "primevue/useconfirm";
 import Loading from "../../components/Loading.vue";
+import ProcessRunTreeSelect from "../../components/TreeSelect/ProcessRunTreeSelect.vue";
 
 const confirm = useConfirm();
 const datatable = ref();
@@ -228,6 +237,12 @@ watch(filters, async (newa, old) => {
   background-color: #f1646c;
   color: white;
 }
+
+.status_5 {
+  background-color: #f1646c;
+  color: white;
+}
+
 
 .e_activity {
   width: 15px;

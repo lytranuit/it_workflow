@@ -23,6 +23,8 @@
             " />
       </div>
     </div>
+
+    <Loading :waiting="waiting"></Loading>
   </div>
 </template>
 <script setup>
@@ -47,6 +49,7 @@ import AddItemPanel from "../../plugins/addItemPanel";
 import CanvasPanel from "../../plugins/canvasPanel";
 import DataFields from "./DataFields.vue";
 import DataConfig from "./DataConfig.vue";
+import Loading from "../Loading.vue";
 registerShape(G6);
 registerBehavior(G6);
 const router = useRouter();
@@ -62,6 +65,7 @@ const modalVisible = ref(false);
 const lang = ref("vi");
 const height = ref(600);
 const mode = ref("edit");
+const waiting = ref(false);
 const demoData = ref({
   nodes: [
     {
@@ -187,6 +191,8 @@ const props = defineProps({
 });
 const save_data = () => {
   if (vaild()) {
+
+    waiting.value = true;
     var item = data.value.model;
     var nodes = data.value.nodes;
     var edges = data.value.edges;
@@ -218,6 +224,7 @@ const save_data = () => {
       blocks: nodes,
       links: edges,
     });
+
     Api.saveprocess(item).then((res) => {
       router.push("/process");
     });
@@ -242,6 +249,7 @@ const vaild = () => {
   return true;
 };
 const save_config = () => {
+  waiting.value = true;
   let res = $.extendext(true, 'replace', {}, data_temp.value);
   let data_tmp = {};
   data_tmp.edges = res.links;
@@ -261,7 +269,8 @@ const save_config = () => {
   // console.log(data_temp.value);
   graph.value.clear();
   $(canvas.value).empty();
-  init()
+  init();
+  waiting.value = false;
 }
 const init = () => {
   let plugins = [];
@@ -436,6 +445,7 @@ const onItemCfgChange = (key, value) => {
   }
 };
 onMounted(async () => {
+  waiting.value = true;
   if (props.process_id) {
     await store.init(props.process_id);
   } else {
@@ -445,6 +455,8 @@ onMounted(async () => {
   store.fetchUsers();
   store.fetchGroups();
   init();
+
+  waiting.value = false
 });
 // watch(
 //   () => data,

@@ -5,20 +5,11 @@
         <div class="flex-m">
           <span class="title">
             <span v-show="!editTitle" ref="spanTitle">{{ model.title }}</span>
-            <input
-              v-show="editTitle"
-              class="form-control form-control-sm tieu_de"
-              v-model="model.title"
-              ref="inputTitle"
-              placeholder="Tiêu đề"
-            />
+            <input v-show="editTitle" class="form-control form-control-sm tieu_de" v-model="model.title"
+              ref="inputTitle" placeholder="Tiêu đề" />
           </span>
 
-          <span
-            class="edit-title ml-2"
-            @click="toggle_edit()"
-            :class="{ 'btn-success btn btn-sm': editTitle }"
-          >
+          <span class="edit-title ml-2" @click="toggle_edit()" :class="{ 'btn-success btn btn-sm': editTitle }">
             <i class="fas fa-pen" v-if="!edit"></i>
             <i class="fas fa-check" v-else></i>
           </span>
@@ -40,8 +31,7 @@
           </div>
           <span class="mx-2">|</span>
           <div class="">
-            <span class=""> Ngày tạo: </span
-            ><span class="font-weight-bold"> {{ model.created_at }} </span>
+            <span class=""> Ngày tạo: </span><span class="font-weight-bold"> {{ model.created_at }} </span>
           </div>
         </div>
       </div>
@@ -60,34 +50,13 @@
     </div>
     <div class="root">
       <ToolbarPanel ref="toolbar_ref" :mode="mode" />
-      <div
-        ref="canvas"
-        class="canvasPanel"
-        :style="{ height: height + 'px', width: '100%' }"
-      ></div>
-      <Sidebar
-        v-if="selectedModel != null"
-        @save_data="save_data"
-        @execute_transition="execute_transition"
-        @assign_again="assign_again"
-        @require_sign="require_sign"
-        @close="close"
-        @saveDraft="saveDraft"
-      >
+      <div ref="canvas" class="canvasPanel" :style="{ height: height + 'px', width: '100%' }"></div>
+      <Sidebar v-if="selectedModel != null" @save_data="save_data" @execute_transition="execute_transition"
+        @assign_again="assign_again" @require_sign="require_sign" @close="close" @saveDraft="saveDraft">
       </Sidebar>
-      <Assign
-        v-if="custom_block.length > 0"
-        :data_custom_block="custom_block"
-        :required="required"
-        @save_data="save_data"
-        @close="close"
-      ></Assign>
-      <RequireSign
-        v-if="is_require_sign"
-        :activity="activity_require"
-        @save_data="save_data"
-        @close="close"
-      >
+      <Assign v-if="custom_block.length > 0" :data_custom_block="custom_block" :required="required"
+        @save_data="save_data" @close="close"></Assign>
+      <RequireSign v-if="is_require_sign" :activity="activity_require" @save_data="save_data" @close="close">
       </RequireSign>
     </div>
     <div class="row mt-2" v-if="model.id > 0">
@@ -281,11 +250,11 @@ const save_data = async () => {
   }
   router.push(
     "/execution/details/" +
-      props.process_version_id +
-      "?execution_id=" +
-      model.value.id +
-      "&time=" +
-      moment().valueOf()
+    props.process_version_id +
+    "?execution_id=" +
+    model.value.id +
+    "&time=" +
+    moment().valueOf()
   );
 };
 const init = () => {
@@ -739,7 +708,7 @@ const execute_transition = (from_activity_id, edge_id) => {
       clazz: target.get("model").clazz,
       is_new: true,
       executed: !blocking,
-      failed: false,
+      failed: activity.failed,
       blocking: blocking,
       data_setting: data_setting,
       created_at: moment().valueOf(),
@@ -778,6 +747,9 @@ const execute_transition = (from_activity_id, edge_id) => {
       } else if (type_performer == 5) {
         data_setting.type_performer = 4;
         data_setting.listuser = [model.value.user_id];
+      } else if (type_performer == 6) {
+        data_setting.type_performer = 4;
+        data_setting.listuser = [user.value.truongbophan_id];
       }
       if (type_performer != 2) {
         var custom_block = {
@@ -797,6 +769,7 @@ const execute_transition = (from_activity_id, edge_id) => {
   if (neighbors.length) {
     for (var node_source of neighbors) {
       var clazz = node_source.get("model").clazz;
+
       if (clazz == "exclusiveGateway") {
         var targets = graph.value.getNeighbors(node_source, "target");
         for (var t of targets) {
